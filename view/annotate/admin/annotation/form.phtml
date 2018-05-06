@@ -1,0 +1,57 @@
+<?php
+/** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
+
+$t = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'));
+
+$sectionNavs = [
+    'annotation-metadata' => $t('Metadata'),
+    'annotation-bodies' => $t('Bodies'),
+    'annotation-targets' => $t('Targets'),
+];
+
+$form->prepare();
+$formLabel = $this->plugin('formLabel');
+$formElement = $this->plugin('formElement');
+?>
+
+<?php echo $this->form()->openTag($form); ?>
+
+<?php // Currently, the bodies and the targets are on the same tab. ?>
+<?php // echo $this->sectionNav($sectionNavs, $sectionNavEvent); ?>
+
+<?php $this->trigger("view.$action.form.before", ['form' => $form]); ?>
+
+<?php echo $this->partial('common/resource-fields.phtml', [
+    'form' => $form,
+    'resource' => $annotation,
+]); ?>
+
+<div id="page-actions">
+    <?php if ($annotation && $annotation->isPublic() || !isset($annotation) ): ?>
+    <?php echo $this->hyperlink('', '#', [
+        'class' => 'o-icon-public button',
+        'title' => $t('Make private'),
+    ]); ?>
+    <input type="hidden" name="o:is_public" value="1">
+    <?php else: ?>
+    <?php echo $this->hyperlink('', '#', [
+        'class' => 'o-icon-private button',
+        'title' => $t('Make public'),
+    ]); ?>
+    <input type="hidden" name="o:is_public" value="0">
+    <?php endif; ?>
+
+    <?php echo (isset($deleteButton)) ? $deleteButton : ''; ?>
+    <input type="submit" name="add-annotation-submit" value="<?php echo $t('Save'); ?>">
+</div>
+
+<?php $this->trigger("view.$action.form.after", ['form' => $form]); ?>
+
+<?php echo $formElement($form->get('csrf')); ?>
+
+<?php echo $this->form()->closeTag(); ?>
+
+<?php echo $this->partial('common/resource-form-templates.phtml'); ?>

@@ -1,0 +1,41 @@
+{
+    "name": "daniel-km/omeka-s-module-annotate",
+    "type": "library",
+    "description": "Annotate, module for Omeka S, that allows to annotate (comment, highlight, tag...) any resources with the W3C Annotation data model and vocabulary.",
+    "license": "CECILL-2.1",
+    "authors": [
+        {
+            "name": "Daniel Berthereau",
+            "email": "Daniel.packagist@Berthereau.net"
+        }
+    ],
+    "homepage": "https://github.com/Daniel-KM/Omeka-S-module-Annotate",
+    "support": {
+        "issues": "https://github.com/Daniel-KM/Omeka-S-module-Annotate/issues",
+        "forum": "https://forum.omeka.org/"
+    },
+    "keywords": [
+        "Omeka S",
+        "module",
+        "annotate",
+        "W3C Recommandation",
+        "Web Annotation Ontology",
+        "annotating",
+        "tagging",
+        "commenting"
+    ],
+    "require-dev": {
+        "biblibre/omeka-s-test-helper": "dev-master",
+        "friendsofphp/php-cs-fixer": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Annotate\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AnnotateTest\\": "test/AnnotateTest/"
+        }
+    }
+}

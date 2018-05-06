@@ -1,0 +1,10 @@
+{
+    "o:label": "Annotation Target dcterms:format",
+    "o:lang": "",
+    "o:terms": [
+        "application/json",
+        "application/xml",
+        "image/svg+xml",
+        "text/wkt"
+    ]
+}

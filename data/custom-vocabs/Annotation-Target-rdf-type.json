@@ -1,0 +1,24 @@
+{
+    "o:label": "Annotation Target rdf:type",
+    "o:lang": "",
+    "o:terms": [
+        "as:OrderedCollection",
+        "as:OrderedCollectionPage",
+        "dctype:Dataset",
+        "dctype:MovingImage",
+        "dctype:StillImage",
+        "dctype:Sound",
+        "dctype:Text",
+        "oa:Choice",
+        "oa:CssSelector",
+        "oa:DataPositionSelector",
+        "oa:FragmentSelector",
+        "oa:HttpRequestState",
+        "oa:RangeSelector",
+        "oa:SvgSelector",
+        "oa:TextPositionSelector",
+        "oa:TextQuoteSelector",
+        "oa:TimeState",
+        "oa:XPathSelector"
+    ]
+}

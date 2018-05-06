@@ -1,0 +1,18 @@
+<?php
+//$annotationForm->prepare();
+$resourceClass = $resource->resourceClass();
+$isAnnotation = $resourceClass && $resourceClass->localName() === 'Annotation';
+// if ($isAnnotation):
+//     $annotationResource = $this->annotationTargetResource($resource);
+// endif;
+?>
+<div class="property">
+    <h4><?php echo $this->translate('New annotation'); ?></h4>
+    <?php if ($isAnnotation): ?>
+    <p>
+    <?php echo $this->translate('Warning: the resource is already an annotation.'); ?>
+    <?php echo $this->translate('Go to the tab "Metadata" to find and to annotate the original target resource.'); ?>
+    </p>
+    <?php endif; ?>
+    <?php echo $this->form($annotateForm); ?>
+</div>

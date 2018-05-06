@@ -1,0 +1,30 @@
+<?php
+$t = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Log'));
+$this->headScript()->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Log'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
+?>
+
+<?php
+/** @var \Omeka\Api\Representation\AnnotationRepresentation[] $annotations */
+if ($annotations):
+?>
+<div class="meta-group annotations">
+    <h4><?php echo $t('Annotations'); ?></h4>
+    <?php foreach ($annotations as $annotation): ?>
+    <div class="value annotation"><?php echo $annotation->linkPretty(); ?>
+        <?php if (!$annotation->isPublic()): ?>
+        <span class="o-icon-private" aria-label="Private"></span>
+        <?php endif; ?>
+        <?php // TODO Add a display of the annotation in popover. ?>
+        <?php if ($annotation->userIsAllowed('update')): ?>
+        <span class="single-action">
+        <?php echo $annotation->link('', 'edit', ['class' => 'o-icon-edit']); ?>
+        </span>
+        <?php endif; ?>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>

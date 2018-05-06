@@ -1,0 +1,93 @@
+<?php
+/** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
+
+$t = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+// $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
+
+$this->htmlElement('body')->appendAttribute('class', 'annotations show');
+$owner = $annotation->owner();
+
+$sectionNavs = [
+    'annotation-metadata' => $t('Metadata'),
+    'annotation-bodies' => $t('Bodies'),
+    'annotation-targets' => $t('Targets'),
+];
+?>
+<?php echo $this->pageTitle($annotation->displayTitle(), 1, $t('Annotations')); ?>
+<div id="page-actions">
+    <?php if ($annotation->userIsAllowed('update')): ?>
+    <?php echo $annotation->link($t('Edit annotation'), 'edit', ['class' => 'button']); ?>
+    <?php endif; ?>
+</div>
+
+<?php // Currently, the bodies and the targets are on the same tab. ?>
+<?php // echo $this->sectionNav($sectionNavs, 'view.show.section_nav', $annotation); ?>
+
+<div id="annotation-metadata" class="active section">
+    <?php echo $annotation->displayValues(); ?>
+</div>
+
+<div id="annotation-bodies" class="active section">
+    <?php $bodies = $annotation->bodies(); ?>
+    <div class="meta-group">
+        <h4 class="annotation-caption"><?php echo $t('Bodies'); ?></h4>
+        <?php if (count($bodies)): ?>
+            <?php $i = 0; ?>
+            <?php foreach ($bodies as $body): ?>
+                <div class="value annotation-body">#<?php echo ++$i; ?></div>
+                <?php if ( $body->resourceClass()): ?>
+                    <div class="meta-group">
+                        <h4><?php echo $this->translate('Class'); ?></h4>
+                        <div class="value"><?php echo $escape($this->translate($body->resourceClass()->label())); ?></div>
+                    </div>
+                <?php endif; ?>
+                <?php echo $body->displayValues(); ?>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="no-resources"><?php echo $t('This annotation has no bodies.')?></p>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div id="annotation-targets" class="active section">
+    <?php $targets = $annotation->targets(); ?>
+    <div class="meta-group">
+        <h4 class="annotation-caption"><?php echo $t('Targets'); ?></h4>
+        <?php if (count($targets)): ?>
+            <?php $i = 0; ?>
+            <?php foreach ($targets as $target): ?>
+                <div class="value annotation-target">#<?php echo ++$i; ?></div>
+                <?php if ( $target->resourceClass()): ?>
+                    <div class="meta-group">
+                        <h4><?php echo $this->translate('Class'); ?></h4>
+                        <div class="value"><?php echo $escape($this->translate($target->resourceClass()->label())); ?></div>
+                    </div>
+                <?php endif; ?>
+                <?php echo $target->displayValues(); ?>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="no-resources"><?php echo $t('This annotation has no targets.')?></p>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div class="sidebar active">
+    <?php echo $this->thumbnail($annotation, 'square'); ?>
+    <div class="meta-group">
+        <h4><?php echo $t('Visibility'); ?></h4>
+        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($t('Public')) : $escape($t('Private')); ?></div>
+    </div>
+    <div class="meta-group">
+        <h4><?php echo $t('Created'); ?></h4>
+        <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
+    </div>
+    <div class="meta-group">
+        <h4><?php echo $t('Owner'); ?></h4>
+        <div class="value"><?php echo $owner ? $escape($owner->name()) : $t('[no owner]'); ?></div>
+    </div>
+
+    <?php $this->trigger('view.show.sidebar'); ?>
+</div>
+<?php $this->trigger('view.show.after'); ?>

@@ -1,0 +1,66 @@
+<?php
+$t = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$annotation = $resource;
+?>
+<div class="resource-details" data-resource-values="<?php //echo $escape($values); ?>">
+    <h3 class="o-module-annotation"><?php echo $annotation->linkPretty(); ?></h3>
+    <div class="meta-group">
+        <?php $owner = $annotation->owner(); ?>
+        <h4><?php echo $escape($t('Annotater')); ?> <?php if (!$owner): ?><span class="annotation-public"><?php echo $t('(public)'); ?></span><?php endif; ?></h4>
+        <div class="value">
+            <?php if ($owner): ?>
+            <span class="annotation-email"><?php echo $this->hyperlink(
+                $owner->email(),
+                $this->url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()])
+            ); ?></span>
+            <span class="annotation-name"><?php echo $owner->name(); ?></span>
+            <?php else: ?>
+            <span class="annotation-email annotation-public"><?php echo $this->hyperlink($annotation->email(), 'mailto:' . $annotation->email()); ?></span>
+            <span class="annotation-name"><?php echo $annotation->name(); ?></span>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php echo $this->thumbnail($annotation, 'square'); ?>
+    <div class="meta-group">
+        <h4><?php echo $t('Visibility'); ?></h4>
+        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($t('Public')) : $escape($t('Private')); ?></div>
+    </div>
+    <div class="meta-group">
+        <h4><?php echo $t('Created'); ?></h4>
+        <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
+    </div>
+    <div class="meta-group">
+        <h4><?php echo $t('Owner'); ?></h4>
+        <div class="value"><?php echo $owner ? $escape($owner->name()) : $t('[no owner]'); ?></div>
+    </div>
+
+
+    <?php $bodies = $annotation->bodies(); ?>
+    <div class="meta-group">
+        <h4><?php echo $t('Bodies'); ?></h4>
+        <?php if (count($bodies)): ?>
+            <?php foreach ($bodies as $body): ?>
+            <div class="value annotation-body"><?php echo $body->displayTitle(); ?></div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="no-resources><?php echo $t('This annotation has no bodies.')?></p>
+        <?php endif; ?>
+    </div>
+
+    <?php $targets = $annotation->targets(); ?>
+    <div class="meta-group">
+        <h4><?php echo $t('Targets'); ?></h4>
+        <?php if (count($targets)): ?>
+        <?php foreach ($targets as $target): ?>
+        <div class="value">
+            <?php echo $target->displayTitle(); ?>
+        </div>
+        <?php endforeach; ?>
+        <?php else: ?>
+        <p class="no-resources><?php echo $t('This annotation has no targets.')?></p>
+        <?php endif; ?>
+    </div>
+
+</div>
