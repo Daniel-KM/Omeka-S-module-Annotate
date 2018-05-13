@@ -144,7 +144,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             if (!is_array($resources)) {
                 $resources = [$resources];
             }
-            $resources = array_filter(array_map('intval', $resources));
+            $resources = array_filter($resources, 'is_numeric');
 
             if ($resources) {
                 // TODO Make the property id of oa:hasSource static or integrate it to avoid a double query.
