@@ -10,8 +10,10 @@ easily and in a normalized way.
 Installation
 ------------
 
-The module uses an external library, [webui-popover], so use the release zip to
+The module uses an external library, [`webui-popover`], so use the release zip to
 install it, or use and init the source.
+
+See general end user documentation for [installing a module].
 
 * From the zip
 
@@ -110,7 +112,7 @@ conditions as regards security.
 The fact that you are presently reading this means that you have had knowledge
 of the CeCILL license and that you accept its terms.
 
-* The library [webui-popover] is published under the license [MIT].
+* The library [`webui-popover`] is published under the license [MIT].
 
 
 Contact
@@ -136,6 +138,7 @@ Copyright
 [Omeka S]: https://omeka.org/s
 [Web Annotation Ontology]: https://www.w3.org/ns/oa
 [W3C]: https://www.w3.org
+[installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [`Annotate.zip`]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
@@ -145,6 +148,6 @@ Copyright
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
 [MIT]: https://github.com/sandywalker/webui-popover/blob/master/LICENSE.txt
-[webui-popover]: https://github.com/sandywalker/webui-popover
+[`webui-popover`]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
