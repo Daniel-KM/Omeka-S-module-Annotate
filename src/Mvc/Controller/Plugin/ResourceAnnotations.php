@@ -1,7 +1,7 @@
 <?php
 namespace Annotate\Mvc\Controller\Plugin;
 
-use Annotate\Entity\Annotation;
+use Annotate\Api\Representation\AnnotationRepresentation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
@@ -10,13 +10,17 @@ class ResourceAnnotations extends AbstractPlugin
     /**
      * Helper to return the list of annotations of a resource.
      *
+     * @todo Manage properties of targets and bodies.
+     *
      * @param AbstractResourceEntityRepresentation $resource
-     * @return Annotation[]
+     * @param array $query
+     * @return AnnotationRepresentation[]
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    public function __invoke(AbstractResourceEntityRepresentation $resource, array $query = [])
     {
+        $query['resource_id'] = $resource->id();
         return $this->getController()->api()
-            ->search('annotations', ['resource_id' => $resource->id()])
+            ->search('annotations', $query)
             ->getContent();
     }
 }
