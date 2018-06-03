@@ -304,23 +304,39 @@ SQL;
                 $adapterRights = ['search', 'read', 'update'];
                 $controllerRights = ['show', 'flag'];
             }
-            $acl->allow(null, Annotation::class, $entityRights);
-            $acl->allow(null, AnnotationBody::class, $entityRights);
-            $acl->allow(null, AnnotationTarget::class, $entityRights);
-            $acl->allow(null, Api\Adapter\AnnotationAdapter::class, $adapterRights);
-            $acl->allow(null, Api\Adapter\AnnotationBodyAdapter::class, $adapterRights);
-            $acl->allow(null, Api\Adapter\AnnotationTargetAdapter::class, $adapterRights);
+            $acl->allow(
+                null,
+                [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+                $entityRights
+            );
+            $acl->allow(
+                null,
+                [
+                    Api\Adapter\AnnotationAdapter::class,
+                    Api\Adapter\AnnotationBodyAdapter::class,
+                    Api\Adapter\AnnotationTargetAdapter::class,
+                ],
+                $adapterRights
+            );
             // $acl->allow(null, Controller\Site\AnnotationController::class, $controllerRights);
         }
 
         // Identified users can annotate. Reviewer and above can approve.
         $roles = $acl->getRoles();
-        $acl->allow($roles, Annotation::class, ['read', 'create', 'update']);
-        $acl->allow($roles, AnnotationBody::class, ['read', 'create', 'update']);
-        $acl->allow($roles, AnnotationTarget::class, ['read', 'create', 'update']);
-        $acl->allow($roles, Api\Adapter\AnnotationAdapter::class, ['search', 'read', 'create', 'update']);
-        $acl->allow($roles, Api\Adapter\AnnotationBodyAdapter::class, ['search', 'read', 'create', 'update']);
-        $acl->allow($roles, Api\Adapter\AnnotationTargetAdapter::class, ['search', 'read', 'create', 'update']);
+        $acl->allow(
+            $roles,
+            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            ['read', 'create', 'update']
+        );
+        $acl->allow(
+            $roles,
+            [
+                Api\Adapter\AnnotationAdapter::class,
+                Api\Adapter\AnnotationBodyAdapter::class,
+                Api\Adapter\AnnotationTargetAdapter::class,
+            ],
+            ['search', 'read', 'create', 'update']
+        );
         // $acl->allow($roles, Controller\Site\AnnotationController::class, ['show', 'flag', 'add']);
         $acl->allow($roles, Controller\Admin\AnnotationController::class, ['browse', 'flag', 'add', 'show-details']);
 
@@ -330,28 +346,20 @@ SQL;
             \Omeka\Permissions\Acl::ROLE_EDITOR,
             \Omeka\Permissions\Acl::ROLE_REVIEWER,
         ];
-        foreach ([
-            Annotation::class,
-            AnnotationBody::class,
-            AnnotationTarget::class,
-        ] as $class) {
-            $acl->allow(
-                $approbators,
-                $class,
-                ['read', 'create', 'update', 'delete', 'view-all']
-            );
-        }
-        foreach ([
-            Api\Adapter\AnnotationAdapter::class,
-            Api\Adapter\AnnotationBodyAdapter::class,
-            Api\Adapter\AnnotationTargetAdapter::class,
-        ] as $class) {
-            $acl->allow(
-                $approbators,
-                $class,
-                ['search', 'read', 'create', 'update', 'delete', 'batch-create', 'batch-update', 'batch-delete']
-            );
-        }
+        $acl->allow(
+            $approbators,
+            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            ['read', 'create', 'update', 'delete', 'view-all']
+        );
+        $acl->allow(
+            $approbators,
+            [
+                Api\Adapter\AnnotationAdapter::class,
+                Api\Adapter\AnnotationBodyAdapter::class,
+                Api\Adapter\AnnotationTargetAdapter::class,
+            ],
+            ['search', 'read', 'create', 'update', 'delete', 'batch-create', 'batch-update', 'batch-delete']
+        );
         $acl->allow(
             $approbators,
             Controller\Admin\AnnotationController::class,
