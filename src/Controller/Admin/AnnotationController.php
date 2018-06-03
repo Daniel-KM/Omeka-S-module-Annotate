@@ -406,6 +406,7 @@ class AnnotationController extends AbstractActionController
         if (strlen($string) == 0) {
             return;
         }
+        // TODO Json is a format, not a mime-type: may be "application/geo+json.
         if ($string === 'null' || (json_decode($string) !== null)) {
             return 'application/json';
         }

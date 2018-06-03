@@ -29,9 +29,12 @@ class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentatio
 
     public function getResourceJsonLd()
     {
-        return [
-            'oa:Annotation' => $this->annotation()->getReference(),
-        ];
+        return [];
+    }
+
+    public function getJsonLdType()
+    {
+        return $this->getResourceJsonLdType();
     }
 
     // TODO Should bodies and targets keep omeka properties? (see parent).

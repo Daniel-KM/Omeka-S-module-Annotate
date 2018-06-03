@@ -37,17 +37,9 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 
     public function getResourceJsonLd()
     {
-        $bodies = [];
-        foreach ($this->bodies() as $bodyRepresentation) {
-            $bodies[] = $bodyRepresentation->getReference();
-        }
-        $targets = [];
-        foreach ($this->targets() as $targetRepresentation) {
-            $targets[] = $targetRepresentation->getReference();
-        }
         return [
-            'oa:hasBody' => $bodies,
-            'oa:hasTarget' => $targets,
+            'oa:hasBody' => $this->bodies(),
+            'oa:hasTarget' => $this->targets(),
         ];
     }
 
@@ -213,6 +205,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
      *
      * Note: only standard annotation data are managed. Specific properties are
      * kept in the annotation.
+     *
+     * @todo Use a standard rdf process, with no entities for bodies and targets.
      *
      * @param array $data
      * @return array
@@ -415,6 +409,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         if (strlen($string) == 0) {
             return;
         }
+        // TODO Json is a format, not a mime-type: may be "application/geo+json.
         if ($string === 'null' || (json_decode($string) !== null)) {
             return 'application/json';
         }
