@@ -1,11 +1,11 @@
 <?php
 /** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
 
-$t = $this->plugin('translate');
+$trranslate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->htmlElement('body')->appendAttribute('class', 'annotations edit');
 $deleteButton = $annotation->userIsAllowed('delete')
-    ? '<a href="#" class="delete button">' . $t('Delete') . '</a>'
+    ? '<a href="#" class="delete button">' . $translate('Delete') . '</a>'
     : null;
 ?>
 
@@ -18,13 +18,13 @@ $deleteButton = $annotation->userIsAllowed('delete')
 var valuesJson = <?php echo json_encode($annotation->mergedValues()); ?>;
 </script>
 
-<?php echo $this->pageTitle($annotation->displayTitle(), 1, $t('Annotations'), $t('Edit')); ?>
+<?php echo $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations'), $translate('Edit')); ?>
 <?php $this->trigger('view.edit.before'); ?>
 <?php
 echo $this->partial('annotate/admin/annotation/form.phtml', [
     'form' => $form,
     'annotation' => $annotation,
-    'submitLabel' => $t('Save'),
+    'submitLabel' => $translate('Save'),
     'deleteButton' => $deleteButton,
     'sectionNavEvent' => 'view.edit.section_nav',
     'action' => 'edit',

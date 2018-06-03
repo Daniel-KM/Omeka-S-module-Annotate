@@ -1,7 +1,7 @@
 <?php
 /** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
 
-$t = $this->plugin('translate');
+$translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 // $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
@@ -10,15 +10,15 @@ $this->htmlElement('body')->appendAttribute('class', 'annotations show');
 $owner = $annotation->owner();
 
 $sectionNavs = [
-    'annotation-metadata' => $t('Metadata'),
-    'annotation-bodies' => $t('Bodies'),
-    'annotation-targets' => $t('Targets'),
+    'annotation-metadata' => $translate('Metadata'),
+    'annotation-bodies' => $translate('Bodies'),
+    'annotation-targets' => $translate('Targets'),
 ];
 ?>
-<?php echo $this->pageTitle($annotation->displayTitle(), 1, $t('Annotations')); ?>
+<?php echo $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')); ?>
 <div id="page-actions">
     <?php if ($annotation->userIsAllowed('update')): ?>
-    <?php echo $annotation->link($t('Edit annotation'), 'edit', ['class' => 'button']); ?>
+    <?php echo $annotation->link($translate('Edit annotation'), 'edit', ['class' => 'button']); ?>
     <?php endif; ?>
 </div>
 
@@ -32,7 +32,7 @@ $sectionNavs = [
 <div id="annotation-bodies" class="active section">
     <?php $bodies = $annotation->bodies(); ?>
     <div class="meta-group">
-        <h4 class="annotation-caption"><?php echo $t('Bodies'); ?></h4>
+        <h4 class="annotation-caption"><?php echo $translate('Bodies'); ?></h4>
         <?php if (count($bodies)): ?>
             <?php $i = 0; ?>
             <?php foreach ($bodies as $body): ?>
@@ -46,7 +46,7 @@ $sectionNavs = [
                 <?php echo $body->displayValues(); ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="no-resources"><?php echo $t('This annotation has no bodies.')?></p>
+            <p class="no-resources"><?php echo $translate('This annotation has no bodies.')?></p>
         <?php endif; ?>
     </div>
 </div>
@@ -54,7 +54,7 @@ $sectionNavs = [
 <div id="annotation-targets" class="active section">
     <?php $targets = $annotation->targets(); ?>
     <div class="meta-group">
-        <h4 class="annotation-caption"><?php echo $t('Targets'); ?></h4>
+        <h4 class="annotation-caption"><?php echo $translate('Targets'); ?></h4>
         <?php if (count($targets)): ?>
             <?php $i = 0; ?>
             <?php foreach ($targets as $target): ?>
@@ -68,7 +68,7 @@ $sectionNavs = [
                 <?php echo $target->displayValues(); ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="no-resources"><?php echo $t('This annotation has no targets.')?></p>
+            <p class="no-resources"><?php echo $translate('This annotation has no targets.')?></p>
         <?php endif; ?>
     </div>
 </div>
@@ -76,16 +76,16 @@ $sectionNavs = [
 <div class="sidebar active">
     <?php echo $this->thumbnail($annotation, 'square'); ?>
     <div class="meta-group">
-        <h4><?php echo $t('Visibility'); ?></h4>
-        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($t('Public')) : $escape($t('Private')); ?></div>
+        <h4><?php echo $translate('Visibility'); ?></h4>
+        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($translate('Public')) : $escape($translate('Private')); ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $t('Created'); ?></h4>
+        <h4><?php echo $translate('Created'); ?></h4>
         <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $t('Owner'); ?></h4>
-        <div class="value"><?php echo $owner ? $escape($owner->name()) : $t('[no owner]'); ?></div>
+        <h4><?php echo $translate('Owner'); ?></h4>
+        <div class="value"><?php echo $owner ? $escape($owner->name()) : $translate('[no owner]'); ?></div>
     </div>
 
     <?php $this->trigger('view.show.sidebar'); ?>

@@ -1,5 +1,5 @@
 <?php
-$t = $this->plugin('translate');
+$translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $annotation = $resource;
 ?>
@@ -7,7 +7,7 @@ $annotation = $resource;
     <h3 class="o-module-annotation"><?php echo $annotation->linkPretty(); ?></h3>
     <div class="meta-group">
         <?php $owner = $annotation->owner(); ?>
-        <h4><?php echo $escape($t('Annotater')); ?> <?php if (!$owner): ?><span class="annotation-public"><?php echo $t('(public)'); ?></span><?php endif; ?></h4>
+        <h4><?php echo $escape($translate('Annotater')); ?> <?php if (!$owner): ?><span class="annotation-public"><?php echo $translate('(public)'); ?></span><?php endif; ?></h4>
         <div class="value">
             <?php if ($owner): ?>
             <span class="annotation-email"><?php echo $this->hyperlink(
@@ -24,34 +24,34 @@ $annotation = $resource;
 
     <?php echo $this->thumbnail($annotation, 'square'); ?>
     <div class="meta-group">
-        <h4><?php echo $t('Visibility'); ?></h4>
-        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($t('Public')) : $escape($t('Private')); ?></div>
+        <h4><?php echo $translate('Visibility'); ?></h4>
+        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($translate('Public')) : $escape($translate('Private')); ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $t('Created'); ?></h4>
+        <h4><?php echo $translate('Created'); ?></h4>
         <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $t('Owner'); ?></h4>
-        <div class="value"><?php echo $owner ? $escape($owner->name()) : $t('[no owner]'); ?></div>
+        <h4><?php echo $translate('Owner'); ?></h4>
+        <div class="value"><?php echo $owner ? $escape($owner->name()) : $translate('[no owner]'); ?></div>
     </div>
 
 
     <?php $bodies = $annotation->bodies(); ?>
     <div class="meta-group">
-        <h4><?php echo $t('Bodies'); ?></h4>
+        <h4><?php echo $translate('Bodies'); ?></h4>
         <?php if (count($bodies)): ?>
             <?php foreach ($bodies as $body): ?>
             <div class="value annotation-body"><?php echo $body->displayTitle(); ?></div>
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="no-resources"><?php echo $t('This annotation has no bodies.'); ?></p>
+            <p class="no-resources"><?php echo $translate('This annotation has no bodies.'); ?></p>
         <?php endif; ?>
     </div>
 
     <?php $targets = $annotation->targets(); ?>
     <div class="meta-group">
-        <h4><?php echo $t('Targets'); ?></h4>
+        <h4><?php echo $translate('Targets'); ?></h4>
         <?php if (count($targets)): ?>
         <?php foreach ($targets as $target): ?>
         <div class="value">
@@ -59,7 +59,7 @@ $annotation = $resource;
         </div>
         <?php endforeach; ?>
         <?php else: ?>
-        <p class="no-resources"><?php echo $t('This annotation has no targets.'); ?></p>
+        <p class="no-resources"><?php echo $translate('This annotation has no targets.'); ?></p>
         <?php endif; ?>
     </div>
 

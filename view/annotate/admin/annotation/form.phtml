@@ -1,15 +1,15 @@
 <?php
 /** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
 
-$t = $this->plugin('translate');
+$translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'));
 
 $sectionNavs = [
-    'annotation-metadata' => $t('Metadata'),
-    'annotation-bodies' => $t('Bodies'),
-    'annotation-targets' => $t('Targets'),
+    'annotation-metadata' => $translate('Metadata'),
+    'annotation-bodies' => $translate('Bodies'),
+    'annotation-targets' => $translate('Targets'),
 ];
 
 $form->prepare();
@@ -33,19 +33,19 @@ $formElement = $this->plugin('formElement');
     <?php if ($annotation && $annotation->isPublic() || !isset($annotation) ): ?>
     <?php echo $this->hyperlink('', '#', [
         'class' => 'o-icon-public button',
-        'title' => $t('Make private'),
+        'title' => $translate('Make private'),
     ]); ?>
     <input type="hidden" name="o:is_public" value="1">
     <?php else: ?>
     <?php echo $this->hyperlink('', '#', [
         'class' => 'o-icon-private button',
-        'title' => $t('Make public'),
+        'title' => $translate('Make public'),
     ]); ?>
     <input type="hidden" name="o:is_public" value="0">
     <?php endif; ?>
 
     <?php echo (isset($deleteButton)) ? $deleteButton : ''; ?>
-    <input type="submit" name="add-annotation-submit" value="<?php echo $t('Save'); ?>">
+    <input type="submit" name="add-annotation-submit" value="<?php echo $translate('Save'); ?>">
 </div>
 
 <?php $this->trigger("view.$action.form.after", ['form' => $form]); ?>
