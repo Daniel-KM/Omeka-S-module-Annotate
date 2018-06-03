@@ -1,0 +1,111 @@
+<?php
+/** @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$hyperlink = $this->plugin('hyperlink');
+$this->headLink()->appendStylesheet($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'));
+$this->headLink()->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/annotate.js', 'Annotate'));
+?>
+<div id="annotations" class="annotations">
+<h3><?php echo $translate('Annotations'); ?></h3>
+<?php if (empty($annotations)): ?>
+    <div class="no-resources">
+        <p><?php echo $translate('There are no annotations for this resource.'); ?></p>
+    </div>
+<?php else: ?>
+    <?php foreach ($annotations as $annotation): ?>
+<table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
+<caption class="annotation">
+    <?php echo $annotation->displayTitle(); ?>
+    <?php if (!$annotation->isPublic()): ?>
+    <span class="o-icon-private" aria-label="Private"></span>
+    <?php endif; ?>
+    <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true, 'default' => []]); ?>
+    <?php foreach ($motivatedByValues as $value): ?>
+    <span class="oa-motivated-by">
+        <?php echo $escape($value); ?>
+    </span>
+    <?php endforeach; ?>
+</caption>
+<thead>
+    <tr>
+        <th><?php echo $translate('Value'); ?></th>
+        <th><?php echo $translate('Purpose'); ?></th>
+    </tr>
+</thead>
+<tbody>
+    <?php
+    // Manage embedded textual body values (when the annotation and the body are
+    // not separated). Implies a string value only [w3c av 2.2.2], and the same
+    // purposes, if any.
+    /** @var \Omeka\Api\Representation\ValueRepresentation[] $bodyValues */
+    $bodyValues = $annotation->value('oa:bodyValue', ['type' => 'literal', 'all' => true, 'default' => []]);
+    $hasPurposeValues = $annotation->value('oa:hasPurpose', ['all' => true, 'default' => []]);
+    $hasPurposeHtml = '';
+    foreach ($hasPurposeValues as $value):
+        $hasPurposeHtml .= '<span class="oa-has-purpose">' . $escape($value) . '</span>';
+    endforeach;
+    ?>
+    <?php foreach ($bodyValues as $bodyValue): ?>
+    <tr class="annotation-body">
+        <td>
+            <?php echo $bodyValue->asHtml(); ?>
+        </td>
+        <td>
+            <?php echo $hasPurposeHtml; ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+
+    <?php
+    // Manage full bodies. If there are embedded body values, there must not be
+    // body [w3c av 2.2.2].
+    /** @var \Omeka\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
+    $annotationBodies = $annotation->bodies();
+    ?>
+    <?php foreach ($annotationBodies as $annotationBody): ?>
+    <tr class="annotation-body">
+        <td class="webui-popover-parent">
+            <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
+            <?php $value = $annotationBody->value('rdf:value', ['all' => false, 'default' => '']); ?>
+            <?php $text = $value; ?>
+            <div class="rdf-value">
+            <?php $isLong = strlen($text) > 240; ?>
+            <?php if ($isLong): ?>
+            <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+            <?php else: ?>
+            <?php echo nl2br($escape($text)); ?>
+            <?php endif; ?>
+            </div>
+            <ul class="actions">
+                <?php if ($isLong): ?>
+                <li><?php echo $hyperlink('', '#', [
+                    'class' => 'o-icon- fa fa-expand popover',
+                    'title' => $translate('Full value'),
+                ]); ?>
+                <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </td>
+        <td>
+            <?php $hasPurposeValues = $annotationBody->value('oa:hasPurpose', ['all' => true, 'default' => []]); ?>
+            <?php foreach ($hasPurposeValues as $value): ?>
+            <span class="oa-has-purpose">
+            <?php echo $escape($value); ?>
+            </span>
+            <?php endforeach; ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
+</table>
+<?php endforeach; ?>
+
+<?php endif; ?>
+</div>

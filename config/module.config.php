@@ -35,6 +35,7 @@ return [
     'view_helpers' => [
         'factories' => [
             'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
+            'showAnnotations' => Service\ViewHelper\ShowAnnotationsFactory::class,
         ],
     ],
     'form_elements' => [
@@ -134,6 +135,15 @@ return [
                 'pattern' => '%s.mo',
                 'text_domain' => null,
             ],
+        ],
+    ],
+    'annotate' => [
+        'config' => [
+        ],
+        'site_settings' => [
+            'annotate_append_item_set_show' => true,
+            'annotate_append_item_show' => true,
+            'annotate_append_media_show' => true,
         ],
     ],
 ];

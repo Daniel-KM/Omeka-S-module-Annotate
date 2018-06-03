@@ -47,6 +47,8 @@ use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
+use Zend\Form\Element;
+use Zend\Form\Fieldset;
 use Zend\Mvc\MvcEvent;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
@@ -171,6 +173,8 @@ SQL;
         foreach ($resourceTemplatePaths as $resourceTemplatePath) {
             $this->importResourceTemplate($resourceTemplatePath, $serviceLocator);
         }
+
+        $this->manageSiteSettings($serviceLocator, 'install');
     }
 
     public function uninstall(ServiceLocatorInterface $serviceLocator)
@@ -216,6 +220,35 @@ SQL;
         if (!empty($_POST['remove-template'])) {
             $resourceTemplate = 'Annotation';
             $this->removeResourceTemplate($resourceTemplate, $serviceLocator);
+        }
+
+        $this->manageSiteSettings($serviceLocator, 'uninstall');
+    }
+
+    protected function manageSettings($settings, $process, $key = 'config')
+    {
+        $config = require __DIR__ . '/config/module.config.php';
+        $defaultSettings = $config[strtolower(__NAMESPACE__)][$key];
+        foreach ($defaultSettings as $name => $value) {
+            switch ($process) {
+                case 'install':
+                    $settings->set($name, $value);
+                    break;
+                case 'uninstall':
+                    $settings->delete($name);
+                    break;
+            }
+        }
+    }
+
+    protected function manageSiteSettings(ServiceLocatorInterface $serviceLocator, $process)
+    {
+        $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
+        $api = $serviceLocator->get('Omeka\ApiManager');
+        $sites = $api->search('sites')->getContent();
+        foreach ($sites as $site) {
+            $siteSettings->setTargetId($site->id());
+            $this->manageSettings($siteSettings, $process, 'site_settings');
         }
     }
 
@@ -420,6 +453,7 @@ SQL;
             );
         }
 
+        // Events for the admin board.
         $controllers = [
             'Omeka\Controller\Admin\Item',
             'Omeka\Controller\Admin\ItemSet',
@@ -470,12 +504,93 @@ SQL;
             );
         }
 
+        // Events for the public front-end.
+        $controllers = [
+            'Omeka\Controller\Site\Item',
+            'Omeka\Controller\Site\ItemSet',
+            'Omeka\Controller\Site\Media',
+        ];
+        foreach ($controllers as $controller) {
+            // Add the annotations to the resource show public pages.
+            $sharedEventManager->attach(
+                $controller,
+                'view.show.after',
+                [$this, 'displayPublic']
+            );
+        }
+
+        $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_elements',
+            [$this, 'addSiteSettingsFormElements']
+        );
+
         // Display a warn before uninstalling.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Module',
             'view.details',
             [$this, 'warnUninstall']
         );
+    }
+
+    public function addSiteSettingsFormElements(Event $event)
+    {
+        $services = $this->getServiceLocator();
+        $siteSettings = $services->get('Omeka\Settings\Site');
+        $config = $services->get('Config');
+        $form = $event->getTarget();
+
+        $defaultSiteSettings = $config[strtolower(__NAMESPACE__)]['site_settings'];
+
+        $fieldset = new Fieldset('annotate');
+        $fieldset->setLabel('Annotate'); // @translate
+
+        $fieldset->add([
+            'name' => 'annotate_append_item_set_show',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Append annotations automatically to item set page', // @translate
+                'info' => 'If unchecked, the annotations can be added via the helper in the theme or the block in any page.', // @translate
+            ],
+            'attributes' => [
+                'value' => $siteSettings->get(
+                    'annotate_append_item_set_show',
+                    $defaultSiteSettings['annotate_append_item_set_show']
+                ),
+            ],
+        ]);
+
+        $fieldset->add([
+            'name' => 'annotate_append_item_show',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Append annotations automatically to item page', // @translate
+                'info' => 'If unchecked, the annotations can be added via the helper in the theme or the block in any page.', // @translate
+            ],
+            'attributes' => [
+                'value' => $siteSettings->get(
+                    'annotate_append_item_show',
+                    $defaultSiteSettings['annotate_append_item_show']
+                ),
+            ],
+        ]);
+
+        $fieldset->add([
+            'name' => 'annotate_append_media_show',
+            'type' => Element\Checkbox::class,
+            'options' => [
+                'label' => 'Append annotations automatically to media page', // @translate
+                'info' => 'If unchecked, the annotations can be added via the helper in the theme or the block in any page.', // @translate
+            ],
+            'attributes' => [
+                'value' => $siteSettings->get(
+                    'annotate_append_media_show',
+                    $defaultSiteSettings['annotate_append_media_show']
+                ),
+            ],
+        ]);
+
+        $form->add($fieldset);
     }
 
     /**
@@ -623,6 +738,30 @@ SQL;
     }
 
     /**
+     * Display a partial for a resource in public.
+     *
+     * @param Event $event
+     */
+    public function displayPublic(Event $event)
+    {
+        $serviceLocator = $this->getServiceLocator();
+        $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
+        $view = $event->getTarget();
+        $resource = $view->resource;
+        $resourceName = $resource->resourceName();
+        $appendMap = [
+            'item_sets' => 'annotate_append_item_set_show',
+            'items' => 'annotate_append_item_show',
+            'media' => 'annotate_append_media_show',
+        ];
+        if (!$siteSettings->get($appendMap[$resourceName])) {
+            return;
+        }
+
+        echo $view->showAnnotations($resource);
+    }
+
+    /**
      * Helper to display a partial for a resource.
      *
      * @param Event $event
@@ -639,7 +778,9 @@ SQL;
         $resourceAnnotationsPlugin = $controllerPlugins->get('resourceAnnotations');
         $annotations = $resourceAnnotationsPlugin($resource);
         $partial = $listAsDiv
+            // Quick detail view.
             ? 'common/admin/annotation-resource'
+            // Full view in tab.
             : 'common/admin/annotation-resource-list';
         echo $event->getTarget()->partial(
             $partial,
