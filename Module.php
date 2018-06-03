@@ -276,13 +276,15 @@ SQL;
         $html .= '<p>';
         $html .= sprintf(
             $t->translate('All the annotations will be removed..'), // @translate
-            $vocabularyLabels);
+            $vocabularyLabels
+        );
         $html .= '</p>';
 
         $html .= '<p>';
         $html .= sprintf(
             $t->translate('If checked, the values of the vocabularies "%s" will be removed too. The class of the resources that use a class of these vocabularies will be reset.'), // @translate
-            $vocabularyLabels);
+            $vocabularyLabels
+        );
         $html .= '</p>';
         $html .= '<label><input name="remove-vocabulary" type="checkbox" form="confirmform">';
         $html .= sprintf($t->translate('Remove the vocabularies "%s"'), $vocabularyLabels); // @translate
@@ -291,7 +293,8 @@ SQL;
         $html .= '<p>';
         $html .= sprintf(
             $t->translate('If checked, the custom vocabs "%s" will be removed too.'), // @translate
-            $customVocabs);
+            $customVocabs
+        );
         $html .= '</p>';
         $html .= '<label><input name="remove-custom-vocab" type="checkbox" form="confirmform">';
         $html .= sprintf($t->translate('Remove the custom vocabs "%s"'), $customVocabs); // @translate
@@ -300,7 +303,8 @@ SQL;
         $html .= '<p>';
         $html .= sprintf(
             $t->translate('If checked, the resource templates "%s" will be removed too. The resource template of the resources that use it will be reset.'), // @translate
-            $resourceTemplates);
+            $resourceTemplates
+        );
         $html .= '</p>';
         $html .= '<label><input name="remove-template" type="checkbox" form="confirmform">';
         $html .= sprintf($t->translate('Remove the resource templates "%s"'), $resourceTemplates); // @translate
@@ -713,7 +717,8 @@ SQL;
 
         $options = [];
         $attributes = [];
-        $attributes['action'] = $url('admin/annotate/default',
+        $attributes['action'] = $url(
+            'admin/annotate/default',
             ['action' => 'annotate'],
             ['query' => ['redirect' => $resource->adminUrl() . '#annotate']]
         );
@@ -875,7 +880,8 @@ SQL;
         $module = $moduleManager->getModule($requiredModule);
         if (!$module || $module->getState() !== \Omeka\Module\Manager::STATE_ACTIVE) {
             throw new ModuleCannotInstallException(
-                new Message('The module "%s" is required.', $requiredModule)); // @translate
+                new Message('The module "%s" is required.', $requiredModule) // @translate
+            );
         }
         return true;
     }
@@ -898,7 +904,7 @@ SQL;
         try {
             /** @var \Omeka\Api\Representation\VocabularyRepresentation $vocabularyRepresentation */
             $vocabularyRepresentation = $api
-            ->read('vocabularies', ['prefix' => $prefix])->getContent();
+                ->read('vocabularies', ['prefix' => $prefix])->getContent();
         } catch (NotFoundException $e) {
             return false;
         }
@@ -913,7 +919,8 @@ SQL;
             sprintf(
                 'An error occured when adding the prefix "%s": another vocabulary exists. Resolve the conflict before installing this module.', // @translate
                 $vocabulary['vocabulary']['o:prefix']
-        ));
+            )
+        );
     }
 
     /**
@@ -941,7 +948,8 @@ SQL;
                 sprintf(
                     'An error occured when adding the prefix "%s" and the associated properties. Resolve the conflict before installing this module.', // @translate
                     $vocabulary['vocabulary']['o:prefix']
-            ));
+                )
+            );
         }
     }
 
@@ -987,16 +995,20 @@ SQL;
             throw new ModuleCannotInstallException(
                 sprintf(
                     'A custom vocab named "%s" exists and has not the needed terms: rename it or remove it before installing this module.', // @translate
-                    $label, $data['o:terms']
-            ));
+                    $label,
+                    $data['o:terms']
+                )
+            );
         }
 
         if ($data['o:lang'] != $customVocab->lang()) {
             throw new ModuleCannotInstallException(
                 sprintf(
                     'A custom vocab named "%s" exists and has not the needed language ("%s"): check it or remove it before installing this module.', // @translate
-                    $label, $data['o:lang']
-            ));
+                    $label,
+                    $data['o:lang']
+                )
+            );
         }
 
         return true;
@@ -1063,7 +1075,8 @@ SQL;
             sprintf(
                 'A resource template named "%s" exists: rename it or remove it before installing this module.', // @translate
                 $label
-        ));
+        )
+        );
 
         // return true;
     }

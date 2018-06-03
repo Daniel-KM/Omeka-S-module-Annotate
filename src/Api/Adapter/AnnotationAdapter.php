@@ -40,7 +40,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         return \Annotate\Entity\Annotation::class;
     }
 
-    public function hydrate(Request $request, EntityInterface $entity,
+    public function hydrate(
+        Request $request,
+        EntityInterface $entity,
         ErrorStore $errorStore
     ) {
         parent::hydrate($request, $entity, $errorStore);

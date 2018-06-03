@@ -32,7 +32,9 @@ class AnnotationBodyAdapter extends AbstractResourceEntityAdapter
         return \Annotate\Entity\AnnotationBody::class;
     }
 
-    public function hydrate(Request $request, EntityInterface $entity,
+    public function hydrate(
+        Request $request,
+        EntityInterface $entity,
         ErrorStore $errorStore
     ) {
         parent::hydrate($request, $entity, $errorStore);
@@ -62,7 +64,8 @@ class AnnotationBodyAdapter extends AbstractResourceEntityAdapter
         }
     }
 
-    public function validateEntity(EntityInterface $entity,
+    public function validateEntity(
+        EntityInterface $entity,
         ErrorStore $errorStore
     ) {
         if (!($entity->getAnnotation() instanceof Annotation)) {
