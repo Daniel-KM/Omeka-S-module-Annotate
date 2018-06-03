@@ -404,6 +404,7 @@ SQL;
             }
         );
 
+        // TODO Remove annotation as part of resources: they are independant.
         // Add the annotation part to the representation.
         $representations = [
             'user' => UserRepresentation::class,

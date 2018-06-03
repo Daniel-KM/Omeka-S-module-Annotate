@@ -18,6 +18,8 @@ return [
     'api_adapters' => [
         'invokables' => [
             'annotations' => Api\Adapter\AnnotationAdapter::class,
+            // TODO Don't make bodies and targets available through api, since
+            // they are not classes. See ValueHydrator.
             'annotation_bodies' => Api\Adapter\AnnotationBodyAdapter::class,
             'annotation_targets' => Api\Adapter\AnnotationTargetAdapter::class,
         ],

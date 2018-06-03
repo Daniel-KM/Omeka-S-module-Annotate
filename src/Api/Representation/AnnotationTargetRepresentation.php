@@ -4,6 +4,12 @@ namespace Annotate\Api\Representation;
 use Annotate\Entity\AnnotationTarget;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
+/**
+ * The representation of an Annotation target.
+ *
+ * Note: Internally, a target is an Omeka resource, but it is not a rdf class.
+ * An intermediate class below or beside may be used for target and body.
+ */
 class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentation
 {
     /**
@@ -27,6 +33,9 @@ class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentatio
             'oa:Annotation' => $this->annotation()->getReference(),
         ];
     }
+
+    // TODO Should bodies and targets keep omeka properties? (see parent).
+    // public function getJsonLd()
 
     /**
      * Get the annotation.
@@ -73,6 +82,12 @@ class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentatio
         }, $this->value('oa:hasSource', ['type' => 'resource', 'all' => true, 'default' => []]));
     }
 
+    /**
+     * @todo Remove the annotation target controller.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Representation\AbstractResourceRepresentation::siteUrl()
+     */
     public function siteUrl($siteSlug = null, $canonical = false)
     {
         if (!$siteSlug) {

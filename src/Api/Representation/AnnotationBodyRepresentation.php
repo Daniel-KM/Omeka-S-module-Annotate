@@ -4,6 +4,12 @@ namespace Annotate\Api\Representation;
 use Annotate\Entity\AnnotationBody;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
+/**
+ * The representation of an Annotation body.
+ *
+ * Note: Internally, a body is an Omeka resource, but it is not a rdf class.
+ * An intermediate class below or beside may be used for target and body.
+ */
 class AnnotationBodyRepresentation extends AbstractResourceEntityRepresentation
 {
     /**
@@ -27,6 +33,9 @@ class AnnotationBodyRepresentation extends AbstractResourceEntityRepresentation
             'oa:Annotation' => $this->annotation()->getReference(),
         ];
     }
+
+    // TODO Should bodies and targets keep omeka properties? (see parent).
+    // public function getJsonLd()
 
     /**
      * Get the annotation.
@@ -59,6 +68,12 @@ class AnnotationBodyRepresentation extends AbstractResourceEntityRepresentation
         return $default;
     }
 
+    /**
+     * @todo Remove the annotation body controller.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Representation\AbstractResourceRepresentation::siteUrl()
+     */
     public function siteUrl($siteSlug = null, $canonical = false)
     {
         if (!$siteSlug) {

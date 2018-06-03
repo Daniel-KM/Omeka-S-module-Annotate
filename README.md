@@ -61,11 +61,24 @@ not standard to annotations.
   should know them currently.
 
 
+Development
+-----------
+
+Internally, targets and bodies are managed like Omeka resources, but they aren’t
+rdf classes.
+
+
 TODO
 ----
 
-- TODO Improve the core or the custom vocab module to keep "literal" as value
-  type (new column in value table or new one to one table?).
+- Improve the core or the custom vocab module to keep "literal" as value type
+  (new column in value table or new one to one table?) (cf https://github.com/omeka/omeka-s/pull/1262).
+- Does the annotation need to be in the same json of the item? An item doesn't
+  know annotations about itself, they are independant, so to be removed.
+- Check the validity of multiple contexts omeka + annotation inside jsonld of
+  annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
+- Targets and bodies should not have rest api access (they are created with the
+  annotation). Upgrade them like value hydrator.
 
 
 Warning

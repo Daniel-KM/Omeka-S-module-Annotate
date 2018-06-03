@@ -51,6 +51,16 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         ];
     }
 
+    public function jsonSerialize()
+    {
+        $jsonLd = parent::jsonSerialize();
+        $jsonLd['@context'] = [
+            $jsonLd['@context'],
+            ['anno' => 'http://www.w3.org/ns/anno.jsonld'],
+        ];
+        return $jsonLd;
+    }
+
     /**
      * Get the bodies assigned to this annotation.
      *
@@ -61,7 +71,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $bodies = [];
         $bodyAdapter = $this->getAdapter('annotation_bodies');
         foreach ($this->resource->getBodies() as $bodyEntity) {
-            $bodies[$bodyEntity->getId()] =
+            $bodies[] =
                 $bodyAdapter->getRepresentation($bodyEntity);
         }
         return $bodies;
@@ -88,7 +98,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $targets = [];
         $targetAdapter = $this->getAdapter('annotation_targets');
         foreach ($this->resource->getTargets() as $targetEntity) {
-            $targets[$targetEntity->getId()] =
+            $targets[] =
                 $targetAdapter->getRepresentation($targetEntity);
         }
         return $targets;
