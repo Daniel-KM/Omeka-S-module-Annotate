@@ -471,7 +471,7 @@ class AnnotationController extends AbstractActionController
         // Get first word to check wkt.
         $firstWord = strtoupper(strtok($string, " (\n\r"));
         if (strpos($string, '(') && in_array($firstWord, $wktTags)) {
-            return 'text/wkt';
+            return 'application/wkt';
         }
     }
 }
