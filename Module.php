@@ -535,6 +535,13 @@ SQL;
             'view.details',
             [$this, 'warnUninstall']
         );
+
+        // Module Csv Import.
+        $sharedEventManager->attach(
+            \CSVImport\Form\MappingForm::class,
+            'form.add_elements',
+            [$this, 'addCsvImportFormElements']
+        );
     }
 
     public function addSiteSettingsFormElements(Event $event)
@@ -595,6 +602,21 @@ SQL;
         ]);
 
         $form->add($fieldset);
+    }
+
+    public function addCsvImportFormElements(Event $event)
+    {
+        $services = $this->getServiceLocator();
+        $acl = $services->get('Omeka\Acl');
+
+        /** @var \CSVImport\Form\MappingForm $form */
+        $form = $event->getTarget();
+        $form->addResourceElements();
+        if ($acl->userIsAllowed(\Annotate\Entity\Annotation::class, 'change-owner')) {
+            $form->addOwnerElement();
+        }
+        $form->addProcessElements();
+        $form->addAdvancedElements();
     }
 
     /**

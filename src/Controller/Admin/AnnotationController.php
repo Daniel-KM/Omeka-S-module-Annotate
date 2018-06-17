@@ -164,9 +164,9 @@ class AnnotationController extends AbstractActionController
                         'term' => 'dcterms:format',
                     ], [], ['responseContent' => 'reference'])->getContent();
                 $data['o-module-annotate:body'][0]['dcterms:format'][] = [
-                    '@value' => $format,
                     'property_id' => $property->id(),
                     'type' => 'customvocab:' . $customVocab->id(),
+                    '@value' => $format,
                 ];
             }
         }
@@ -182,9 +182,9 @@ class AnnotationController extends AbstractActionController
                     'term' => 'dcterms:format',
                 ], [], ['responseContent' => 'reference'])->getContent();
                 $data['o-module-annotate:target'][0]['dcterms:format'][] = [
-                    '@value' => $format,
                     'property_id' => $property->id(),
                     'type' => 'customvocab:' . $customVocab->id(),
+                    '@value' => $format,
                 ];
             }
         }
@@ -360,6 +360,8 @@ class AnnotationController extends AbstractActionController
             'message' => $message,
         ]);
     }
+
+    /** TODO Move all the checks in adapter or in form. */
 
     /**
      * Detect if a string is html or not.
