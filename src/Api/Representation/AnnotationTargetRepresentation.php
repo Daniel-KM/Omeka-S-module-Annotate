@@ -2,15 +2,11 @@
 namespace Annotate\Api\Representation;
 
 use Annotate\Entity\AnnotationTarget;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * The representation of an Annotation target.
- *
- * Note: Internally, a target is an Omeka resource, but it is not a rdf class.
- * An intermediate class below or beside may be used for target and body.
  */
-class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentation
+class AnnotationTargetRepresentation extends AbstractAnnotationResourceRepresentation
 {
     /**
      * @var AnnotationTarget
@@ -27,28 +23,22 @@ class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentatio
         return 'o-module-annotate:Target';
     }
 
-    public function getResourceJsonLd()
+    public function getJsonLd()
     {
-        return [];
-    }
+        $jsonLd = parent::getJsonLd();
 
-    public function getJsonLdType()
-    {
-        return $this->getResourceJsonLdType();
-    }
+        // TODO If no source, keep id of  the annotation target? This is not the way the module works currently.
 
-    // TODO Should bodies and targets keep omeka properties? (see parent).
-    // public function getJsonLd()
+        if (isset($jsonLd['type']) && $jsonLd['type'] === 'oa:Selector') {
+            $jsonLd['selector']['type'] = $jsonLd['type'];
+            $jsonLd['selector']['format'] = $jsonLd['format'];
+            $jsonLd['selector']['value'] = $jsonLd['value'];
+            unset($jsonLd['type']);
+            unset($jsonLd['format']);
+            unset($jsonLd['value']);
+        }
 
-    /**
-     * Get the annotation.
-     *
-     * @return AnnotationRepresentation[]
-     */
-    public function annotation()
-    {
-        return $this->getAdapter('annotations')
-            ->getRepresentation($this->resource->getAnnotation());
+        return $jsonLd;
     }
 
     public function displayTitle($default = null)
@@ -76,7 +66,7 @@ class AnnotationTargetRepresentation extends AbstractResourceEntityRepresentatio
      *
      * @todo Add a filter "annotation_id" to query resources of a annotation.
      *
-     * @return AbstractResourceEntityRepresentation[]
+     * @return \Omeka\Api\Representation\AbstractResourceEntityRepresentation;[]
      */
     public function sources()
     {

@@ -47,9 +47,43 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     {
         $jsonLd = parent::jsonSerialize();
         $jsonLd['@context'] = [
-            $jsonLd['@context'],
-            ['anno' => 'http://www.w3.org/ns/anno.jsonld'],
+            'http://www.w3.org/ns/anno.jsonld',
+            ['o' => 'http://localhost/OmekaS/api-context'],
         ];
+
+        // TODO Manage multiple motivations.
+        if (isset($jsonLd['oa:motivatedBy'])) {
+            $value = reset($jsonLd['oa:motivatedBy']);
+            unset($jsonLd['oa:motivatedBy']);
+            $jsonLd['motivation'] = $value->value();
+        }
+
+        if (isset($jsonLd['oa:styledBy'])) {
+            $value = reset($jsonLd['oa:styledBy']);
+            unset($jsonLd['oa:styledBy']);
+            // TODO Should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet).
+            $jsonLd['stylesheet']['type'] = 'oa:Style';
+            $jsonLd['stylesheet']['value'] = $value->value();
+        }
+
+        if (isset($jsonLd['oa:hasBody'])) {
+            $value = $jsonLd['oa:hasBody'];
+            unset($jsonLd['oa:hasBody']);
+            if (count($value) === 1) {
+                $value = reset($value);
+            }
+            $jsonLd['body'] = $value;
+        }
+
+        if (isset($jsonLd['oa:hasTarget'])) {
+            $value = $jsonLd['oa:hasTarget'];
+            unset($jsonLd['oa:hasTarget']);
+            if (count($value) === 1) {
+                $value = reset($value);
+            }
+            $jsonLd['target'] = $value;
+        }
+
         return $jsonLd;
     }
 

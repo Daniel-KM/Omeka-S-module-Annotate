@@ -2,15 +2,11 @@
 namespace Annotate\Api\Representation;
 
 use Annotate\Entity\AnnotationBody;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 /**
  * The representation of an Annotation body.
- *
- * Note: Internally, a body is an Omeka resource, but it is not a rdf class.
- * An intermediate class below or beside may be used for target and body.
  */
-class AnnotationBodyRepresentation extends AbstractResourceEntityRepresentation
+class AnnotationBodyRepresentation extends AbstractAnnotationResourceRepresentation
 {
     /**
      * @var AnnotationBody
@@ -27,28 +23,20 @@ class AnnotationBodyRepresentation extends AbstractResourceEntityRepresentation
         return 'o-module-annotate:Body';
     }
 
-    public function getResourceJsonLd()
+    public function getJsonLd()
     {
-        return [];
-    }
+        // TODO Don't manage the type with a resource class, but with rdf:type.
+        $result = [];
+        $resourceClass = $this->resourceClass();
+        if ($resourceClass) {
+            $result['type'] = $resourceClass->localName();
+        }
 
-    public function getJsonLdType()
-    {
-        return $this->getResourceJsonLdType();
-    }
-
-    // TODO Should bodies and targets keep omeka properties? (see parent).
-    // public function getJsonLd()
-
-    /**
-     * Get the annotation.
-     *
-     * @return AnnotationRepresentation[]
-     */
-    public function annotation()
-    {
-        return $this->getAdapter('annotations')
-            ->getRepresentation($this->resource->getAnnotation());
+        $jsonLd = parent::getJsonLd();
+        return array_merge(
+            $result,
+            $jsonLd
+        );
     }
 
     public function displayTitle($default = null)
