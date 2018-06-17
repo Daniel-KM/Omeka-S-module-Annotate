@@ -48,22 +48,22 @@ $sortHeadings = [
 <form method="post" id="batch-form" class="disable-unsaved-warning">
     <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
     <div class="batch-inputs">
-        <select class="batch-actions-select">
+        <select class="batch-actions-select" name="batch_action" aria-label="<?php echo $this->translate('Batch actions'); ?>">
             <option value="default"><?php echo $translate('Batch actions'); ?></option>
             <?php if ($userIsAllowedBatchUpdate): ?>
-            <option value="update-selected" disabled="disabled"><?php echo $translate('Edit selected'); ?></option>
+            <option value="update-selected" class="batch-selected" disabled="disabled"><?php echo $translate('Edit selected'); ?></option>
             <option value="update-all"><?php echo $translate('Edit all'); ?></option>
             <?php endif; ?>
             <?php if ($userIsAllowedBatchDelete): ?>
-            <option value="delete-selected" disabled="disabled"><?php echo $translate('Delete selected'); ?></option>
+            <option value="delete-selected" class="batch-selected" disabled="disabled"><?php echo $translate('Delete selected'); ?></option>
             <option value="delete-all"><?php echo $translate('Delete all'); ?></option>
             <?php endif; ?>
         </select>
         <div class="batch-actions">
             <button type="button" class="default active" disabled="disabled"><?php echo $translate('Go'); ?></button>
             <?php if ($userIsAllowedBatchUpdate): ?>
-            <input type="submit" class="update-selected" name="update_selected" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit'], true)); ?>">
-            <input type="submit" class="update-all" name="update_all" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit-all'], true)); ?>">
+            <input type="submit" class="update-selected" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit'], true)); ?>">
+            <input type="submit" class="update-all" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit-all'], true)); ?>">
             <?php endif; ?>
             <input type="hidden" name="query" class="batch-query" value="<?php echo $escape(json_encode($this->params()->fromQuery())); ?>">
             <?php if ($userIsAllowedBatchDelete): ?>
@@ -79,7 +79,7 @@ $sortHeadings = [
         <tr>
             <th>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" class="select-all">
+                <input type="checkbox" class="select-all" aria-label="<?php echo $this->translate('Select all'); ?>">
                 <?php endif; ?>
                 <?php echo $translate('Annotation'); ?>
             </th>
@@ -88,7 +88,6 @@ $sortHeadings = [
             <th><?php echo $translate('Date annotated'); ?></th>
         </tr>
     </thead>
-
     <tbody>
         <?php foreach ($annotations as $annotation): ?>
         <?php
@@ -100,7 +99,7 @@ $sortHeadings = [
         <tr class="annotation">
             <td>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" name="resource_ids[]" value="<?php echo $annotation->id(); ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
+                <input type="checkbox" name="resource_ids[]" value="<?php echo $annotation->id(); ?>" aria-label="<?php echo $this->translate('Select item'); ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
                 <?php endif; ?>
                 <?php echo $annotation->linkPretty(); ?>
                 <?php if (!$annotation->isPublic()): ?>
