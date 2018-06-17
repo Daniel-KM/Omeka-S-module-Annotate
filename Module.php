@@ -763,7 +763,7 @@ SQL;
             return;
         }
 
-        echo $view->showAnnotations($resource);
+        echo $view->annotations($resource);
     }
 
     /**

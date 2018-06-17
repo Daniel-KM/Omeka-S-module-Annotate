@@ -35,7 +35,7 @@ return [
     'view_helpers' => [
         'factories' => [
             'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
-            'showAnnotations' => Service\ViewHelper\ShowAnnotationsFactory::class,
+            'annotations' => Service\ViewHelper\AnnotationsFactory::class,
         ],
     ],
     'form_elements' => [

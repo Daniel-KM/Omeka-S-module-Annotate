@@ -5,7 +5,7 @@ use Annotate\Mvc\Controller\Plugin\ResourceAnnotations;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Zend\View\Helper\AbstractHelper;
 
-class ShowAnnotations extends AbstractHelper
+class Annotations extends AbstractHelper
 {
     /**
      * @var ResourceAnnotations
