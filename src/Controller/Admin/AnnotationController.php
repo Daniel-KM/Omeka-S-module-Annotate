@@ -69,7 +69,7 @@ class AnnotationController extends AbstractActionController
     /**
      * Annotate a resource.
      *
-     * Equivalent to action "add", but without specific page.
+     * Equivalent to action "add", but without specific page (so via ajax).
      */
     public function annotateAction()
     {
@@ -85,7 +85,7 @@ class AnnotationController extends AbstractActionController
         $isPost = $this->getRequest()->isPost();
         if (!$isPost) {
             if ($isAjax) {
-                return $this->jsonErrorUnauthorized();
+                return $this->jsonError('Unauthorized access.', Response::STATUS_CODE_403); // @translate
             }
             $this->messenger()->addError('Unauthorized access.'); // @translate
             return $this->redirect()->toUrl($redirect);
@@ -98,7 +98,7 @@ class AnnotationController extends AbstractActionController
         $resourceId = $data['o-module-annotate:target'][0]['oa:hasSource'][0]['value_resource_id'];
         if (empty($resourceId)) {
             if ($isAjax) {
-                return $this->jsonErrorNotFound();
+                return $this->jsonError('Resource not found.', Response::STATUS_CODE_404); // @translate
             } else {
                 $this->messenger()->addError('Resource not found.'); // @translate
                 return $this->redirect()->toUrl($redirect);
@@ -110,7 +110,7 @@ class AnnotationController extends AbstractActionController
             ->getContent();
         if (!$resource) {
             if ($isAjax) {
-                return $this->jsonErrorNotFound();
+                return $this->jsonError('Resource not found.', Response::STATUS_CODE_404); // @translate
             } else {
                 $this->messenger()->addError('Resource not found'); // @translate
                 return $this->redirect()->toUrl($redirect);
@@ -120,9 +120,7 @@ class AnnotationController extends AbstractActionController
         $form->setData($data);
         if (!$form->isValid()) {
             if ($isAjax) {
-                return new JsonModel([
-                    'error' => $form->getMessages(),
-                ]);
+                return $this->jsonError($form->getMessages());
             } else {
                 $this->messenger()->addFormErrors($form);
                 return $this->redirect()->toUrl($redirect);
@@ -142,9 +140,7 @@ class AnnotationController extends AbstractActionController
         if (is_null($bodyValue) && is_null($targetValue)) {
             $message = 'The annotation is empty.'; // @translate
             if ($isAjax) {
-                return new JsonModel([
-                    'error' => $message,
-                ]);
+                return $this->jsonError($message);
             } else {
                 $this->messenger()->addError($message);
                 return $this->redirect()->toUrl($redirect);
@@ -355,25 +351,14 @@ class AnnotationController extends AbstractActionController
         return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
     }
 
-    protected function jsonErrorUnauthorized()
+    protected function jsonError($message, $statusCode = Response::STATUS_CODE_500)
     {
         $response = $this->getResponse();
-        $response->setStatusCode(Response::STATUS_CODE_403);
-        return new JsonModel(['error' => 'Unauthorized access.']); // @translate
-    }
-
-    protected function jsonErrorNotFound()
-    {
-        $response = $this->getResponse();
-        $response->setStatusCode(Response::STATUS_CODE_404);
-        return new JsonModel(['error' => 'Resource not found.']); // @translate
-    }
-
-    protected function jsonErrorUpdate()
-    {
-        $response = $this->getResponse();
-        $response->setStatusCode(Response::STATUS_CODE_500);
-        return new JsonModel(['error' => 'An internal error occurred.']); // @translate
+        $response->setStatusCode($statusCode);
+        return new JsonModel([
+            'status' => 'error',
+            'message' => $message,
+        ]);
     }
 
     /**
