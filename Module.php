@@ -526,7 +526,7 @@ SQL;
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
             'form.add_elements',
-            [$this, 'addSiteSettingsFormElements']
+            [$this, 'addFormElementsSiteSettings']
         );
 
         // Display a warn before uninstalling.
@@ -544,7 +544,7 @@ SQL;
         );
     }
 
-    public function addSiteSettingsFormElements(Event $event)
+    public function addFormElementsSiteSettings(Event $event)
     {
         $services = $this->getServiceLocator();
         $siteSettings = $services->get('Omeka\Settings\Site');
