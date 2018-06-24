@@ -137,15 +137,18 @@ return [
             ],
         ],
     ],
-    'csv_import' => [
+    'csvimport' => [
         'mappings' => [
             'annotations' => [
-                Mapping\AnnotationMapping::class,
-                \CSVImport\Mapping\PropertyMapping::class,
+                'label' => 'Annotations', // @translate
+                'mappings' => [
+                    Mapping\AnnotationMapping::class,
+                    \CSVImport\Mapping\PropertyMapping::class,
+                ],
             ],
         ],
         'user_settings' => [
-            'csv_import_automap_user_list' => [
+            'csvimport_automap_user_list' => [
                 'motivation' => 'annotation {oa:motivatedBy}',
                 'purpose' => 'annotation_target {oa:hasPurpose}',
             ],
