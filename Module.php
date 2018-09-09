@@ -225,6 +225,12 @@ SQL;
         $this->manageSiteSettings($serviceLocator, 'uninstall');
     }
 
+    public function upgrade($oldVersion, $newVersion,
+        ServiceLocatorInterface $serviceLocator)
+    {
+        require_once 'data/scripts/upgrade.php';
+    }
+
     protected function manageSettings($settings, $process, $key = 'config')
     {
         $config = require __DIR__ . '/config/module.config.php';

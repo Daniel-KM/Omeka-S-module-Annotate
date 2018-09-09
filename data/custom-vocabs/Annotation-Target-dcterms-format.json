@@ -5,6 +5,6 @@
         "application/json",
         "application/xml",
         "image/svg+xml",
-        "text/wkt"
+        "application/wkt"
     ]
 }
