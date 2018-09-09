@@ -1,5 +1,8 @@
+<?php
+$translate = $this->plugin('translate');
+?>
 <div id="sidebar-confirm">
-    <h3><?php echo $this->translate('Delete comments'); ?></h3>
-    <p><?php echo $this->translate('Are you sure you would like to delete the selected comments?'); ?></p>
+    <h3><?php echo $translate('Delete comments'); ?></h3>
+    <p><?php echo $translate('Are you sure you would like to delete the selected comments?'); ?></p>
     <?php echo $this->form($this->form); ?>
 </div>

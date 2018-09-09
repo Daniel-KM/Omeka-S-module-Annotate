@@ -48,7 +48,7 @@ $sortHeadings = [
 <form method="post" id="batch-form" class="disable-unsaved-warning">
     <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
     <div class="batch-inputs">
-        <select class="batch-actions-select" name="batch_action" aria-label="<?php echo $this->translate('Batch actions'); ?>">
+        <select class="batch-actions-select" name="batch_action" aria-label="<?php echo $translate('Batch actions'); ?>">
             <option value="default"><?php echo $translate('Batch actions'); ?></option>
             <?php if ($userIsAllowedBatchUpdate): ?>
             <option value="update-selected" class="batch-selected" disabled="disabled"><?php echo $translate('Edit selected'); ?></option>
@@ -79,7 +79,7 @@ $sortHeadings = [
         <tr>
             <th>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" class="select-all" aria-label="<?php echo $this->translate('Select all'); ?>">
+                <input type="checkbox" class="select-all" aria-label="<?php echo $translate('Select all'); ?>">
                 <?php endif; ?>
                 <?php echo $translate('Annotation'); ?>
             </th>
@@ -99,7 +99,7 @@ $sortHeadings = [
         <tr class="annotation">
             <td>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" name="resource_ids[]" value="<?php echo $annotation->id(); ?>" aria-label="<?php echo $this->translate('Select item'); ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
+                <input type="checkbox" name="resource_ids[]" value="<?php echo $annotation->id(); ?>" aria-label="<?php echo $translate('Select item'); ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
                 <?php endif; ?>
                 <?php echo $annotation->linkPretty(); ?>
                 <?php if (!$annotation->isPublic()): ?>
