@@ -606,11 +606,20 @@ SQL;
 
     public function addCsvImportFormElements(Event $event)
     {
+        /** @var \CSVImport\Form\MappingForm $form */
+        $form = $event->getTarget();
+        $resourceType = $form->getOption('resource_type');
+        if ($resourceType !== 'annotations') {
+            return;
+        }
+
         $services = $this->getServiceLocator();
         $acl = $services->get('Omeka\Acl');
 
-        /** @var \CSVImport\Form\MappingForm $form */
-        $form = $event->getTarget();
+        if (!$acl->userIsAllowed(Annotation::class, 'create')) {
+            return;
+        }
+
         $form->addResourceElements();
         if ($acl->userIsAllowed(\Annotate\Entity\Annotation::class, 'change-owner')) {
             $form->addOwnerElement();
