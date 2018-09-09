@@ -54,8 +54,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         $isUpdate = Request::UPDATE === $request->getOperation();
         $isPartial = $isUpdate && $request->getOption('isPartial');
-        $append = $isPartial && 'append' === $request->getOption('collectionAction');
-        $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
+        // $append = $isPartial && 'append' === $request->getOption('collectionAction');
+        // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
 
         $childEntities = [
             'o-module-annotate:body' => 'annotation_bodies',

@@ -3,13 +3,16 @@
 const del = require('del');
 const gulp = require('gulp');
 
+const sourceDir = 'node_modules/webui-popover/dist/**';
+const destinationDir = 'asset/vendor/webui-popover';
+
 gulp.task('clean', function(done) {
-    return del('asset/vendor/webui-popover');
+    return del(destinationDir);
 });
 
 gulp.task('sync', function (done) {
-        gulp.src(['node_modules/webui-popover/dist/**'])
-        .pipe(gulp.dest('asset/vendor/webui-popover/'))
+        gulp.src([sourceDir])
+        .pipe(gulp.dest(destinationDir))
         .on('end', done);
     }
 );

@@ -37,6 +37,7 @@ class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
         EntityInterface $entity,
         ErrorStore $errorStore
     ) {
+        // Hydrate most of the metadata.
         parent::hydrate($request, $entity, $errorStore);
 
         $data = $request->getContent();
