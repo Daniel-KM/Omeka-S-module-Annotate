@@ -1,7 +1,7 @@
 <?php
 /** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
 
-$trranslate = $this->plugin('translate');
+$translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->htmlElement('body')->appendAttribute('class', 'annotations edit');
 $deleteButton = $annotation->userIsAllowed('delete')
