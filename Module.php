@@ -32,6 +32,7 @@ namespace Annotate;
 use Annotate\Entity\Annotation;
 use Annotate\Entity\AnnotationBody;
 use Annotate\Entity\AnnotationTarget;
+use Annotate\Permissions\Acl;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Exception\ValidationException;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
@@ -50,6 +51,7 @@ use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Form\Element;
 use Zend\Form\Fieldset;
 use Zend\Mvc\MvcEvent;
+use Zend\Permissions\Acl\Acl as ZendAcl;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 class Module extends AbstractModule
@@ -65,7 +67,7 @@ class Module extends AbstractModule
         // TODO Add filters (don't display when resource is private, like media?).
         // TODO Set Acl public rights to false when the visibility filter will be ready.
         // $this->addEntityManagerFilters();
-        $this->addAclRules();
+        $this->addAclRoleAndRules();
     }
 
     public function install(ServiceLocatorInterface $serviceLocator)
@@ -320,50 +322,91 @@ SQL;
     }
 
     /**
-     * Add ACL rules for this module.
+     * Add ACL role and rules for this module.
      */
-    protected function addAclRules()
+    protected function addAclRoleAndRules()
     {
         /** @var \Omeka\Permissions\Acl $acl */
         $services = $this->getServiceLocator();
         $acl = $services->get('Omeka\Acl');
+
+        $acl->addRole(Acl::ROLE_ANNOTATOR);
+        $acl->addRoleLabel(Acl::ROLE_ANNOTATOR, 'Annotator'); // @translate
+
         $settings = $services->get('Omeka\Settings');
-
         // TODO Set rights to false when the visibility filter will be ready.
+        // TODO Check if public can annotate and flag, and read annotations and own ones.
         $publicViewAnnotate = $settings->get('annotate_public_allow_view', true);
-        $publicAllowAnnotate = $settings->get('annotate_public_allow_annotate', true);
-
-        $services = $this->getServiceLocator();
-        $acl = $services->get('Omeka\Acl');
-
-        // Check if public can annotate and flag, and read annotations and own ones.
         if ($publicViewAnnotate) {
+            $publicAllowAnnotate = $settings->get('annotate_public_allow_annotate', true);
             if ($publicAllowAnnotate) {
-                $entityRights = ['read', 'create', 'update'];
-                $adapterRights = ['search', 'read', 'create', 'update'];
-                $controllerRights = ['show', 'flag', 'add'];
+                $this->addRulesForAnnotatorVisitors($acl);
             } else {
-                $entityRights = ['read', 'update'];
-                $adapterRights = ['search', 'read', 'update'];
-                $controllerRights = ['show', 'flag'];
+                $this->addRulesForVisitors($acl);
             }
-            $acl->allow(
-                null,
-                [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
-                $entityRights
-            );
-            $acl->allow(
-                null,
-                [
-                    Api\Adapter\AnnotationAdapter::class,
-                    Api\Adapter\AnnotationBodyAdapter::class,
-                    Api\Adapter\AnnotationTargetAdapter::class,
-                ],
-                $adapterRights
-            );
-            // $acl->allow(null, Controller\Site\AnnotationController::class, $controllerRights);
         }
 
+        $this->addRulesForAllRoles($acl);
+        $this->addRulesForAnnotator($acl);
+        $this->addRulesForApprobators($acl);
+    }
+
+    /**
+     * Add ACL rules for visitors.
+     *
+     * @param ZendAcl $acl
+     */
+    protected function addRulesForVisitors(ZendAcl $acl)
+    {
+        $acl->allow(
+            null,
+            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            // TODO Remove right to update (flag only).
+            ['read', 'update']
+        );
+        $acl->allow(
+            null,
+            [
+                Api\Adapter\AnnotationAdapter::class,
+                Api\Adapter\AnnotationBodyAdapter::class,
+                Api\Adapter\AnnotationTargetAdapter::class,
+            ],
+            ['search', 'read', 'update']
+        );
+        // $acl->allow(null, Controller\Site\AnnotationController::class, ['show', 'flag']);
+    }
+
+    /**
+     * Add ACL rules for annotator visitors.
+     *
+     * @param ZendAcl $acl
+     */
+    protected function addRulesForAnnotatorVisitors(ZendAcl $acl)
+    {
+        $acl->allow(
+            null,
+            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            ['read', 'create', 'update']
+        );
+        $acl->allow(
+            null,
+            [
+                Api\Adapter\AnnotationAdapter::class,
+                Api\Adapter\AnnotationBodyAdapter::class,
+                Api\Adapter\AnnotationTargetAdapter::class,
+            ],
+            ['search', 'read', 'create', 'update']
+        );
+        // $acl->allow(null, Controller\Site\AnnotationController::class, ['show', 'flag', 'add']);
+    }
+
+    /**
+     * Add ACL rules for all roles.
+     *
+     * @param ZendAcl $acl
+     */
+    protected function addRulesForAllRoles(ZendAcl $acl)
+    {
         // Identified users can annotate. Reviewer and above can approve.
         $roles = $acl->getRoles();
         $acl->allow(
@@ -382,7 +425,84 @@ SQL;
         );
         // $acl->allow($roles, Controller\Site\AnnotationController::class, ['show', 'flag', 'add']);
         $acl->allow($roles, Controller\Admin\AnnotationController::class, ['browse', 'flag', 'add', 'show-details']);
+    }
 
+    /**
+     * Add ACL rules for annotator.
+     *
+     * @param ZendAcl $acl
+     */
+    protected function addRulesForAnnotator(ZendAcl $acl)
+    {
+        // Less rights than Researcher.
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            [
+                'Omeka\Controller\Admin\Index',
+                'Omeka\Controller\Admin\Item',
+                'Omeka\Controller\Admin\ItemSet',
+                'Omeka\Controller\Admin\Media',
+            ],
+            [
+                'index',
+                'browse',
+                'show',
+                'show-details',
+            ]
+        );
+
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            [
+                'Omeka\Controller\Admin\Item',
+                'Omeka\Controller\Admin\ItemSet',
+                'Omeka\Controller\Admin\Media',
+            ],
+            [
+                'sidebar-select',
+                'search'
+            ]
+        );
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Controller\Admin\User'
+        );
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Api\Adapter\UserAdapter',
+            ['read', 'update']
+        );
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Entity\User',
+            'read'
+        );
+        $acl->allow(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Entity\User',
+            ['update', 'change-password', 'edit-keys'],
+            new \Omeka\Permissions\Assertion\IsSelfAssertion
+        );
+
+        // These rules should not be set.
+        $acl->deny(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Controller\SiteAdmin\Index'
+        );
+        $acl->deny(
+            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
+            'Omeka\Controller\Admin\User',
+            ['browse']
+        );
+    }
+
+    /**
+     * Add ACL rules for approbators.
+     *
+     * @param ZendAcl $acl
+     */
+    protected function addRulesForApprobators(ZendAcl $acl)
+    {
         $approbators = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,

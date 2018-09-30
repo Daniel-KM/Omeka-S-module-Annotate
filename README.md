@@ -6,6 +6,9 @@ of the World Wide Web consortium [W3C] and creates a resource template to allow
 users to annotate, tag, comment, rate, highlight, draw, etc. any target resource
 easily and in a normalized way.
 
+The module adds a role "Annotator" too, who has less rights than a Researcher
+and who can only annotate.
+
 
 Installation
 ------------
@@ -79,6 +82,7 @@ TODO
   annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
 - Targets and bodies should not have rest api access (they are created with the
   annotation). Upgrade them like value hydrator.
+- Make compatible with module Group (user page).
 
 
 Warning
