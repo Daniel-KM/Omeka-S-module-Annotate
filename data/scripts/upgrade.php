@@ -30,3 +30,13 @@ SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
 SQL;
     $connection->exec($sql);
 }
+
+if (version_compare($oldVersion, '3.0.3', '<')) {
+    // Change the name of a custom vocab.
+    $sql = <<<'SQL'
+UPDATE `custom_vocab`
+SET `label` = 'Annotation oa:motivatedBy'
+WHERE `label` = 'Annotation oa:Motivation';
+SQL;
+    $connection->exec($sql);
+}

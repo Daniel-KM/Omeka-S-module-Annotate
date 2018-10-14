@@ -112,7 +112,7 @@ class Module extends AbstractModule
         }
 
         $customVocabPaths = [
-            __DIR__ . '/data/custom-vocabs/Annotation-oa-Motivation.json',
+            __DIR__ . '/data/custom-vocabs/Annotation-oa-motivatedBy.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Body-dcterms-format.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-dcterms-format.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-rdf-type.json',
@@ -209,7 +209,7 @@ SQL;
         }
 
         if (!empty($_POST['remove-custom-vocab'])) {
-            $customVocab = 'Annotation oa:Motivation';
+            $customVocab = 'Annotation oa:motivatedBy';
             $this->removeCustomVocab($customVocab, $serviceLocator);
             $customVocab = 'Annotation Body dcterms:format';
             $this->removeCustomVocab($customVocab, $serviceLocator);
@@ -272,7 +272,7 @@ SQL;
         $t = $serviceLocator->get('MvcTranslator');
 
         $vocabularyLabels = 'RDF Concepts" / "Web Annotation Ontology';
-        $customVocabs = 'Annotation oa:Motivation" / "dcterms:format" / "rdf:type';
+        $customVocabs = 'Annotation oa:motivatedBy" / "dcterms:format" / "rdf:type';
         $resourceTemplates = 'Annotation';
 
         $html = '<p>';

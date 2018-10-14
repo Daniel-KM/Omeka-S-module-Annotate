@@ -24,7 +24,7 @@ class AnnotateForm extends Form
         $resourceClassId = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Annotation'])->getContent()->id();
 
         // Motivated by.
-        $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:Motivation'])->getContent();
+        $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
         $terms = explode(PHP_EOL, $customVocab->terms());
         $terms = array_combine($terms, $terms);
         $this->add([
@@ -154,7 +154,7 @@ class AnnotateForm extends Form
         ]);
 
         // Has purpose (only for the body, so different of motivated by).
-        $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:Motivation'])->getContent();
+        $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
         $terms = explode(PHP_EOL, $customVocab->terms());
         $terms = array_combine($terms, $terms);
         $this->add([
