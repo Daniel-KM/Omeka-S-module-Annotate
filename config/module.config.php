@@ -53,6 +53,7 @@ return [
         'invokables' => [
             'isAnnotable' => Mvc\Controller\Plugin\IsAnnotable::class,
             'resourceAnnotations' => Mvc\Controller\Plugin\ResourceAnnotations::class,
+            'totalResourceAnnotations' => Mvc\Controller\Plugin\TotalResourceAnnotations::class,
         ],
     ],
     'navigation' => [

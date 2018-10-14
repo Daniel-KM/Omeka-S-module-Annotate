@@ -853,7 +853,8 @@ SQL;
     public function viewDetails(Event $event)
     {
         $representation = $event->getParam('entity');
-        $this->displayResourceAnnotations($event, $representation, true);
+        // TODO Use a paginator to limit and display all annotations dynamically in the details view (using api).
+        $this->displayResourceAnnotations($event, $representation, true, ['limit' => 10]);
     }
 
     /**
@@ -933,12 +934,15 @@ SQL;
     protected function displayResourceAnnotations(
         Event $event,
         AbstractResourceEntityRepresentation $resource,
-        $listAsDiv = false
+        $listAsDiv = false,
+        array $query = []
     ) {
         $services = $this->getServiceLocator();
         $controllerPlugins = $services->get('ControllerPluginManager');
         $resourceAnnotationsPlugin = $controllerPlugins->get('resourceAnnotations');
-        $annotations = $resourceAnnotationsPlugin($resource);
+        $annotations = $resourceAnnotationsPlugin($resource, $query);
+        $totalResourceAnnotationsPlugin = $controllerPlugins->get('totalResourceAnnotations');
+        $totalAnnotations = $totalResourceAnnotationsPlugin($resource, $query);
         $partial = $listAsDiv
             // Quick detail view.
             ? 'common/admin/annotation-resource'
@@ -949,6 +953,7 @@ SQL;
             [
                 'resource' => $resource,
                 'annotations' => $annotations,
+                'totalAnnotations' => $totalAnnotations,
             ]
         );
     }

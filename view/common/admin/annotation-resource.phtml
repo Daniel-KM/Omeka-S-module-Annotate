@@ -1,9 +1,13 @@
 <?php
-/** @var \Omeka\Api\Representation\AnnotationRepresentation[] $annotations */
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations
+ * @var int $totalAnnotations
+ */
+
 if ($annotations):
 
 $translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'));
 $this->headScript()->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'));
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
@@ -11,7 +15,7 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
 ?>
 
 <div class="meta-group annotations">
-    <h4><?php echo $translate('Annotations'); ?></h4>
+    <h4><?php echo sprintf($translate('Annotations (%d)'), $totalAnnotations); ?></h4>
     <?php foreach ($annotations as $annotation): ?>
     <div class="value annotation"><?php echo $annotation->linkPretty(); ?>
         <?php if (!$annotation->isPublic()): ?>
