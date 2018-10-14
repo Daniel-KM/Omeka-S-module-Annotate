@@ -58,13 +58,16 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'rdf:value' => 'value',
             // Annotation.
             'oa:styledBy' => 'styledBy',
+            // Manage a specific value for catography.
+            // TODO Use the trigger to manage the values.
+            'cartography:uncertainty' => 'cartography:uncertainty',
         ];
 
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $vv */
         foreach ($values as $key => $vv) {
             switch ($key) {
                 case $jsonLdType === 'o-module-annotate:Target'
-                    && in_array($key, ['rdf:type', 'dcterms:format', 'rdf:value']):
+                    && in_array($key, ['rdf:type', 'dcterms:format', 'rdf:value', 'cartography:uncertainty']):
                     $values['selector'][$mapping[$key]] = $this->valuesOnly($vv);
                     unset($values[$key]);
                     break;
