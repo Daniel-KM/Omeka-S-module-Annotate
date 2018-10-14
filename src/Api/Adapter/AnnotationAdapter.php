@@ -11,7 +11,7 @@ use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
 /**
- * @todo Make Annotation more independant from Omeka tools, and allow to import rdf annotation directly (avoid any normalization, etc.).
+ * @todo Make Annotation more independant from Omeka tools, and allow to import rdf annotation directly (avoid any normalization, etc.). Use easyrdf or create Selector class?
  */
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
@@ -52,8 +52,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         parent::hydrate($request, $entity, $errorStore);
 
-        $isUpdate = Request::UPDATE === $request->getOperation();
-        $isPartial = $isUpdate && $request->getOption('isPartial');
+        // $isUpdate = Request::UPDATE === $request->getOperation();
+        // $isPartial = $isUpdate && $request->getOption('isPartial');
         // $append = $isPartial && 'append' === $request->getOption('collectionAction');
         // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
 
@@ -187,7 +187,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      *
      * This process is required as long as the standard Omeka resource methods
      * are used. Anyway, this is not a full implementation, but a quick tool for
-     * common tasks (folksonomy, comment, rating, highlighting, quiz…).
+     * common tasks (cartography, folksonomy, commenting, rating, quiz…).
+     * Some heuristic is needed for the value "rdf:value", according to
+     * motivation/purpose, type and format.
      *
      * @param Request $request
      * @param EntityInterface $entity
@@ -200,7 +202,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     ) {
         $data = $request->getContent();
 
-        // TODO Remove any language.
+        // TODO Remove any language, since data model require to use a property.
 
         // Check if the data are already normalized.
         if (isset($data['o-module-annotate:body'])
@@ -219,7 +221,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             return;
         }
 
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
         $mainValue = null;
         $mainValueIsTarget = false;
 
@@ -242,11 +243,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             unset($data['oa:hasSource']);
         }
 
-        $cartographicFormats = [
-            // 'application/vnd.ogc.gml',
-            // 'application/vnd.google-earth.kml+xml',
-            'application/wkt',
-        ];
         if (isset($data['dcterms:format'])) {
             $value = reset($data['dcterms:format']);
             $value = $value['@value'];

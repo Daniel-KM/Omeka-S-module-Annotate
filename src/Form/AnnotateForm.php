@@ -39,7 +39,7 @@ class AnnotateForm extends Form
                 'rows' => 15,
                 'id' => 'oa:motivatedBy[0][@value]',
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select the purpose of this annotation…', // @translate
+                'data-placeholder' => 'Select the motivation of this annotation…', // @translate
             ],
         ]);
         $this->add([
@@ -153,7 +153,7 @@ class AnnotateForm extends Form
             'attributes' => ['value' => 'literal'],
         ]);
 
-        // Has purpose.
+        // Has purpose (only for the body, so different of motivated by).
         $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:Motivation'])->getContent();
         $terms = explode(PHP_EOL, $customVocab->terms());
         $terms = array_combine($terms, $terms);
@@ -161,15 +161,15 @@ class AnnotateForm extends Form
             'type' => Element\Select::class,
             'name' => 'o-module-annotate:body[0][oa:hasPurpose][0][@value]',
             'options' => [
-                'label' => 'Has purpose', // @translate
+                'label' => 'Purpose of this content', // @translate
                 'value_options' => $terms,
-                'empty_option' => 'Select the purpose of this annotation…', // @translate
+                'empty_option' => 'Select the purpose of this body content, if needed…', // @translate
             ],
             'attributes' => [
                 'rows' => 15,
                 'id' => 'o-module-annotate:body[0][oa:hasPurpose][0][@value]',
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select the purpose of this annotation…', // @translate
+                'data-placeholder' => 'Select the purpose of this body content, if needed…', // @translate
             ],
         ]);
         $this->add([
@@ -270,13 +270,13 @@ class AnnotateForm extends Form
             'options' => [
                 'label' => 'Type of the target selector', // @translate
                 'value_options' => $terms,
-                'empty_option' => 'Select the type of the selector, if any…', // @translate
+                'empty_option' => 'Select the selector type to specify a subpart of the resource, if needed…', // @translate
             ],
             'attributes' => [
                 'rows' => 15,
                 'id' => 'oa:motivatedBy[0][@value]',
                 'class' => 'chosen-select',
-                'data-placeholder' => 'Select the purpose of this annotation…', // @translate
+                'data-placeholder' => 'Select the selector type to specify a subpart of the resource, if needed…', // @translate
             ],
         ]);
         $this->add([
@@ -294,14 +294,14 @@ class AnnotateForm extends Form
             'type' => Element\Textarea::class,
             'name' => 'o-module-annotate:target[0][rdf:value][0][@value]',
             'options' => [
-                'label' => 'Selector of the target', // @translate
-                'info' => 'Allows to delimit a portion of the target (part of a text or an image…).', // @translate
+                'label' => 'Target selector', // @translate
+                'info' => 'Allows to delimit a portion of the resource (part of a text, an image or an item…).', // @translate
             ],
             'attributes' => [
                 'rows' => 15,
                 'id' => 'o-module-annotate:target[0][rdf:value][0][@value]',
                 'class' => 'media-text',
-                'placeholder' => 'Any xml, json, svg, etc. according to the type of selector.', // @translate'
+                'placeholder' => 'Any xml, json, svg, media api url, media id, etc. according to the type of selector.', // @translate'
             ],
         ]);
         $this->add([

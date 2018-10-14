@@ -1,7 +1,8 @@
 <?php
 namespace Annotate\Media\Ingester;
 
-use Annotate\Form\AnnotationBodyForm;
+// use Annotate\Form\AnnotationBodyForm;
+use Annotate\Form\AnnotateForm as AnnotationBodyForm;
 use Omeka\Api\Request;
 use Omeka\Entity\Media;
 use Omeka\Entity\User;

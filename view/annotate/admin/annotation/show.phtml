@@ -65,6 +65,7 @@ $sectionNavs = [
                         <div class="value"><?php echo $escape($translate($target->resourceClass()->label())); ?></div>
                     </div>
                 <?php endif; ?>
+                <?php // Note: when type + value, it is a selector. ?>
                 <?php echo $target->displayValues(); ?>
             <?php endforeach; ?>
         <?php else: ?>

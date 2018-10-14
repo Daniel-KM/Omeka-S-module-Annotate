@@ -27,7 +27,7 @@ class AnnotationTargetRepresentation extends AbstractAnnotationResourceRepresent
     {
         $jsonLd = parent::getJsonLd();
 
-        // TODO If no source, keep id of  the annotation target? This is not the way the module works currently.
+        // TODO If no source, keep id of the annotation target? This is not the way the module works currently.
 
         if (isset($jsonLd['type']) && $jsonLd['type'] === 'oa:Selector') {
             $jsonLd['selector']['type'] = $jsonLd['type'];

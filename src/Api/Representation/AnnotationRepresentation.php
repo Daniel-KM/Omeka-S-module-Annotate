@@ -97,8 +97,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $bodies = [];
         $bodyAdapter = $this->getAdapter('annotation_bodies');
         foreach ($this->resource->getBodies() as $bodyEntity) {
-            $bodies[] =
-                $bodyAdapter->getRepresentation($bodyEntity);
+            $bodies[] = $bodyAdapter->getRepresentation($bodyEntity);
         }
         return $bodies;
     }
@@ -124,8 +123,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $targets = [];
         $targetAdapter = $this->getAdapter('annotation_targets');
         foreach ($this->resource->getTargets() as $targetEntity) {
-            $targets[] =
-                $targetAdapter->getRepresentation($targetEntity);
+            $targets[] = $targetAdapter->getRepresentation($targetEntity);
         }
         return $targets;
     }
@@ -142,7 +140,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
-     * Return the first target if one exists.
+     * Return the target resources if any.
      *
      * @return AbstractResourceEntityRepresentation[]
      */

@@ -84,8 +84,8 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
     public function jsonSerialize()
     {
         $childJsonLd = $this->getJsonLd();
-        $type = $this->getJsonLdType();
-        $url = $this->getViewHelper('Url');
+        // $type = $this->getJsonLdType();
+        // $url = $this->getViewHelper('Url');
 
         $jsonLd = array_merge(
             [
