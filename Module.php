@@ -282,10 +282,7 @@ SQL;
         $html .= '</p>';
 
         $html .= '<p>';
-        $html .= sprintf(
-            $t->translate('All the annotations will be removed.'), // @translate
-            $vocabularyLabels
-        );
+        $html .= $t->translate('All the annotations will be removed.'); // @translate
         $html .= '</p>';
 
         $html .= '<p>';
