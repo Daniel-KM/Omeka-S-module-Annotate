@@ -19,6 +19,9 @@
         "oa:TextPositionSelector",
         "oa:TextQuoteSelector",
         "oa:TimeState",
-        "oa:XPathSelector"
+        "oa:XPathSelector",
+        "o:Item",
+        "o:ItemSet",
+        "o:Media"
     ]
 }

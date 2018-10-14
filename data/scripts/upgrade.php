@@ -39,4 +39,27 @@ SET `label` = 'Annotation oa:motivatedBy'
 WHERE `label` = 'Annotation oa:Motivation';
 SQL;
     $connection->exec($sql);
+
+    // Complete the annotation custom vocabularies with Omeka resource types.
+    $label = 'Annotation Target rdf:type';
+    try {
+        $customVocab = $api
+            ->read('custom_vocabs', ['label' => $label])->getContent();
+    } catch (\Omeka\Api\Exception\NotFoundException $e) {
+        throw new \Omeka\Module\Exception\ModuleCannotInstallException(
+            sprintf(
+                'The custom vocab named "%s" is not available.', // @translate
+                $label
+            ));
+    }
+    $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
+    $terms = array_unique(array_merge($terms, [
+        'o:Item',
+        'o:ItemSet',
+        'o:Media',
+    ]));
+    $api->update('custom_vocabs', $customVocab->id(), [
+        'o:label' => $label,
+        'o:terms' => implode(PHP_EOL, $terms),
+    ], [], ['isPartial' => true]);
 }
