@@ -16,8 +16,11 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
     </div>
 <?php else: ?>
     <?php foreach ($annotations as $annotation): ?>
-<table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
-<caption class="annotation">
+    <?php // A table can have one thead only, but there need to distinct bodies and targets, so there may be three tables instead of nested tables. ?>
+<div class="annotation">
+
+<table>
+<caption class="annotation-caption">
     <?php echo $annotation->linkPretty(); ?>
     <?php if (!$annotation->isPublic()): ?>
     <span class="o-icon-private" aria-label="Private"></span>
@@ -31,13 +34,13 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
     <ul class="actions">
         <li>
             <span>
-            <?php echo $annotation->link('', 'show', ['class' => 'o-icon-annotation']); ?>
+            <?php echo $annotation->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation')]); ?>
             </span>
         </li>
         <?php if ($annotation->userIsAllowed('update')): ?>
         <li>
             <span>
-            <?php echo $annotation->link('', 'edit', ['class' => 'o-icon-edit']); ?>
+            <?php echo $annotation->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation')]); ?>
             </span>
         </li>
         <?php endif; ?>
@@ -49,12 +52,22 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
                 'data-sidebar-selector' => '#sidebar',
                 'data-sidebar-content-url' => $annotation->url('delete-confirm') . '?' . http_build_query(['redirect' => $redirect]),
                 'class' => 'o-icon-delete sidebar-content',
-                'title' => $translate('Delete'),
+                'title' => $translate('Delete annotation'),
             ]); ?>
         </li>
         <?php endif; ?>
     </ul>
 </caption>
+</table>
+
+<?php
+// Manage full bodies. If there are embedded body values, there must not be a
+// body [w3c av 2.2.2].
+/** @var \Omeka\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
+$annotationBodies = $annotation->bodies();
+?>
+<?php if (count($annotationBodies)): ?>
+<table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
         <th><?php echo $translate('Value'); ?></th>
@@ -85,12 +98,6 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
     </tr>
     <?php endforeach; ?>
 
-    <?php
-    // Manage full bodies. If there are embedded body values, there must not be
-    // body [w3c av 2.2.2].
-    /** @var \Omeka\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
-    $annotationBodies = $annotation->bodies();
-    ?>
     <?php foreach ($annotationBodies as $annotationBody): ?>
     <tr class="annotation-body">
         <td class="webui-popover-parent">
@@ -100,9 +107,9 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
             <div class="rdf-value">
             <?php $isLong = strlen($text) > 240; ?>
             <?php if ($isLong): ?>
-            <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+                <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
             <?php else: ?>
-            <?php echo nl2br($escape($text)); ?>
+                <?php echo nl2br($escape($text)); ?>
             <?php endif; ?>
             </div>
             <ul class="actions">
@@ -111,29 +118,29 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
                     'class' => 'o-icon- fa fa-expand popover',
                     'title' => $translate('Full value'),
                 ]); ?>
-                <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
+                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
                 </li>
                 <?php endif; ?>
             </ul>
         </td>
         <td>
-            <?php $hasPurposeValues = $annotationBody->value('oa:hasPurpose', ['all' => true, 'default' => []]); ?>
-            <?php foreach ($hasPurposeValues as $value): ?>
+            <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true, 'default' => []]); ?>
+            <?php foreach ($values as $value): ?>
             <span class="oa-has-purpose">
             <?php echo $escape($value); ?>
             </span>
             <?php endforeach; ?>
-            <ul class="actions">
             <?php /*
+            <ul class="actions">
                 <li>
                     <span>
-                    <?php echo $annotationBody->link('', 'show', ['class' => 'o-icon-annotation']); ?>
+                    <?php echo $annotationBody->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation body')]); ?>
                     </span>
                 </li>
                 <?php if ($annotationBody->userIsAllowed('update')): ?>
                 <li>
                     <span>
-                    <?php echo $annotationBody->link('', 'edit', ['class' => 'o-icon-edit']); ?>
+                    <?php echo $annotationBody->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation body')]); ?>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -142,17 +149,96 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
                 <?php if ($annotationBody->userIsAllowed('delete')): ?>
                 <li>
                     <span class="single-action">
-                    <?php echo $annotationBody->link('', 'confirm-delete', ['class' => 'o-icon-delete']); ?>
+                    <?php echo $annotationBody->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation body')]); ?>
                     </span>
                 </li>
                 <?php endif; ?>
-                */ ?>
             </ul>
+            */ ?>
         </td>
     </tr>
     <?php endforeach; ?>
 </tbody>
 </table>
+<?php endif; ?>
+
+<?php
+/** @var \Omeka\Api\Representation\AnnotationTargetRepresentation[] $annotationTargets */
+$annotationTargets = $annotation->targets();
+?>
+<?php if (count($annotationTargets)): ?>
+<table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
+<thead>
+    <tr>
+        <th><?php echo $translate('Target selector'); ?></th>
+        <th><?php echo $translate('Selector type'); ?></th>
+    </tr>
+</thead>
+<tbody>
+    <?php foreach ($annotationTargets as $annotationTarget): ?>
+    <tr class="annotation-target">
+        <td class="webui-popover-parent">
+            <?php $value = $annotationTarget->value('rdf:value', ['all' => false, 'default' => '']); ?>
+            <?php $text = $value; ?>
+            <div class="rdf-value">
+            <?php $isLong = strlen($text) > 240; ?>
+            <?php if ($isLong): ?>
+                <div class="annotation-target-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+            <?php else: ?>
+                <?php echo nl2br($escape($text)); ?>
+            <?php endif; ?>
+            </div>
+            <ul class="actions">
+                <?php if ($isLong): ?>
+                <li><?php echo $hyperlink('', '#', [
+                    'class' => 'o-icon- fa fa-expand popover',
+                    'title' => $translate('Full value'),
+                ]); ?>
+                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
+                </li>
+                <?php endif; ?>
+            </ul>
+        </td>
+        <td>
+            <?php $values = $annotationTarget->value('rdf:type', ['all' => true, 'default' => []]); ?>
+            <?php foreach ($values as $value): ?>
+            <span class="rdf-type">
+                <?php echo $escape($value); ?>
+            </span>
+            <?php endforeach; ?>
+            <?php /*
+            <ul class="actions">
+                <li>
+                    <span>
+                    <?php echo $annotationTarget->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation target')]); ?>
+                    </span>
+                </li>
+                <?php if ($annotationTarget->userIsAllowed('update')): ?>
+                <li>
+                    <span>
+                        <?php echo $annotationTarget->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation target')]); ?>
+                    </span>
+                </li>
+                <?php endif; ?>
+                <?php // TODO Confirm delete annotation from item show. ?>
+                <?php /*
+                <?php if ($annotationTarget->userIsAllowed('delete')): ?>
+                <li>
+                    <span class="single-action">
+                    <?php echo $annotationTarget->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation target')]); ?>
+                    </span>
+                </li>
+                <?php endif; ?>
+            </ul>
+            */ ?>
+        </td>
+    </tr>
+    <?php endforeach; ?>
+</tbody>
+</table>
+<?php endif; ?>
+
+</div>
 <?php endforeach; ?>
 
 <?php endif; ?>

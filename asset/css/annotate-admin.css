@@ -49,6 +49,9 @@
 
     /* Adapted from core _screen.scss #linked-resources and .linked-resource */
     #annotations table {
+        margin-bottom: 0;
+    }
+    #annotations .annotation {
         margin-bottom: 24px;
     }
     #annotations caption {

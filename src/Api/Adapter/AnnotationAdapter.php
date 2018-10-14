@@ -205,8 +205,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Remove any language, since data model require to use a property.
 
         // Check if the data are already normalized.
-        if (isset($data['o-module-annotate:body'])
-            || isset($data['o-module-annotate:target'])
+        if (isset($data['o-module-annotate:target'])
+            || isset($data['o-module-annotate:body'])
             // For direct annotation (directly from rdf or standard annotation).
             || isset($data['oa:hasTarget'])
             || isset($data['oa:hasBody'])
