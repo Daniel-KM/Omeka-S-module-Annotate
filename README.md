@@ -34,8 +34,8 @@ the module to `Annotate`, go to the root module, and run:
 ```
 
 
-Usage
------
+Quick start
+-----------
 
 Annotations can be created via the tab "Annotations" of each resource (item
 sets, items and media). They can be browsed and managed via the main admin menu
@@ -51,6 +51,12 @@ The module follows the rules of the [Annotation data model] and the [Annotation 
 Even if it is not forbidden, it is not recommended to add properties that are
 not standard to annotations.
 
+- The Annotation data model is not fully implemented, only the most frequent
+  properties are managed. Only one motivation, one body and one target are
+  generally managed.
+- According to the Annotation data model, only textual bodies can have a
+  purpose. So when the body is not a text, for example a link, the purpose is
+  cleared. Nevertheless, another body can contains a description and a purpose.
 - The name of the four custom vocabs `Annotation oa:Motivation`, `Annotation Body dcterms:format`,
   `Annotation Target dcterms:format`, and `Annotation Target rdf:type` are used
   internally and must not be changed for now.
@@ -60,8 +66,6 @@ not standard to annotations.
   model directly (`oa:ResourceSelection`, `oa:Selector`, `oa:State` and `oa:Style`)
   are not available by default (see the [Annotation vocabulary]). They can be
   added if really wanted.
-- The incompatibilities between motivation and purpose are not checked: the user
-  should know them currently.
 
 
 Development
