@@ -7,7 +7,7 @@ $annotation = $resource;
     <h3 class="o-module-annotation"><?php echo $annotation->linkPretty(); ?></h3>
     <div class="meta-group">
         <?php $owner = $annotation->owner(); ?>
-        <h4><?php echo $escape($translate('Annotater')); ?> <?php if (!$owner): ?><span class="annotation-public"><?php echo $translate('(public)'); ?></span><?php endif; ?></h4>
+        <h4><?php echo $escape($translate('Annotator')); ?> <?php if (!$owner): ?><span class="annotation-public"><?php echo $translate('(public)'); ?></span><?php endif; ?></h4>
         <div class="value">
             <?php if ($owner): ?>
             <span class="annotation-email"><?php echo $this->hyperlink(
