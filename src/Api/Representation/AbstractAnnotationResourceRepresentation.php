@@ -63,6 +63,9 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'cartography:uncertainty' => 'cartography:uncertainty',
         ];
 
+        // Force the omeka type for the source.
+        $omekaType = null;
+
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $vv */
         foreach ($values as $key => $vv) {
             switch ($key) {
@@ -72,13 +75,28 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
                     unset($values[$key]);
                     break;
                 case isset($mapping[$key]):
+                    $vonly = $this->valuesOnly($vv);
+                    if ($key === 'oa:hasSource' && !is_array($vonly)) {
+                        $vvv = reset($vv);
+                        if ($vvv->type() === 'resource') {
+                            $omekaType = $vvv->valueResource()->getJsonLdType();
+                        }
+                    }
                     $values[$mapping[$key]] = $this->valuesOnly($vv);
                     unset($values[$key]);
                     break;
             }
         }
 
-        // TODO If no source, keep id of  the annotation target? This is not the way the module works currently.
+        // TODO If no source, keep id of the annotation target? This is not the way the module works currently.
+
+        // Reorder target keys according to spec examples (useless, but pretty).
+        if ($jsonLdType === 'o-module-annotate:Target') {
+            if ($omekaType) {
+                $values['type'] = $omekaType;
+            }
+            $values = array_filter(array_merge(['type' => null, 'source' => null], $values));
+        }
 
         return array_merge(
             $values
@@ -126,7 +144,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
      * @see https://www.w3.org/TR/annotation-model/
      *
      * @param array $values
-     * @return array
+     * @return array|string
      */
     protected function valuesOnly(array $values)
     {
