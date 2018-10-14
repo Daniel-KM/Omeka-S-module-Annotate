@@ -287,7 +287,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $data['o-module-annotate:body'][0]['rdf:value'] = $data['rdf:value'];
             unset($data['rdf:value']);
 
-            $format = $this->isHtml($bodyValue) ? 'text/html' : null;
+            $format = $this->isHtml($data['o-module-annotate:body'][0]['rdf:value']) ? 'text/html' : null;
             if ($format) {
                 $data['o-module-annotate:body'][0]['dcterms:format'][] = [
                     'property_id' => $this->propertyId('dcterms:format'),
