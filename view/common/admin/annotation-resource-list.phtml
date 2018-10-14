@@ -165,8 +165,17 @@ $annotationBodies = $annotation->bodies();
 <?php
 /** @var \Omeka\Api\Representation\AnnotationTargetRepresentation[] $annotationTargets */
 $annotationTargets = $annotation->targets();
+// Check if there are data to display too (there is at least one target, but may be just the source).
+$hasTargetData = false;
+foreach ($annotationTargets as $annotationTarget) {
+    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => '']) || $annotationTarget->value('rdf:type', ['all' => true, 'default' => []])) {
+        $hasTargetData = true;
+        break;
+    }
+}
+
 ?>
-<?php if (count($annotationTargets)): ?>
+<?php if ($hasTargetData): ?>
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
@@ -180,7 +189,7 @@ $annotationTargets = $annotation->targets();
         <td class="webui-popover-parent">
             <?php $value = $annotationTarget->value('rdf:value', ['all' => false, 'default' => '']); ?>
             <div class="rdf-value">
-            <?php if ($value->type() === 'resource'): ?>
+            <?php if ($value && $value->type() === 'resource'): ?>
             <?php echo $value->valueResource()->linkPretty(); ?>
             <?php else: ?>
             <?php $text = $value; ?>
