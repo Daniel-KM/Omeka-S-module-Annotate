@@ -1,10 +1,11 @@
+/asset/vendor
 /build
 /language/debug.po
 /language/debug.mo
 /language/chef.po
 /language/chef.mo
 node_modules
-vendor
+/vendor
 .DS_Store
 .php_cs.cache
 composer.phar
