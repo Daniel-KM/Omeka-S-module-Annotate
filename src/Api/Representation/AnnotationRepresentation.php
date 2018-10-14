@@ -379,6 +379,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         // Manage the exception for rdf:value, that can be in body or target.
         // Only some media type are managed, exclusively.
         // TODO Check when there are multiple bodies and targets.
+        // TODO Replace rdf:value by oa:hasSelector in the form?
         if (!empty($data['o-module-annotate:body'][0]['rdf:value'])) {
             $customVocab = $api
                 ->read('custom_vocabs', ['label' => 'Annotation Target dcterms:format'])->getContent();
@@ -388,18 +389,24 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             ], [], ['responseContent' => 'reference'])->getContent();
             foreach ($data['o-module-annotate:body'] as $key => $body) {
                 foreach ($body['rdf:value'] as $keyB => $valueB) {
-                    $mediaType = $this->determineMediaType($valueB['@value']);
-                    // Note: the process cannot distinct text/html when xml.
-                    if (in_array($mediaType, $targetFormats)) {
-                        // TODO Set the media type to the right target (only one currently).
+                    // TODO Manage the case where the resource is in the body (no form currently, except the main one).
+                    if ($valueB['type'] === 'resource') {
                         $data['o-module-annotate:target'][0]['rdf:value'][] = $valueB;
-                        // Save the media type (forced).
-                        $data['o-module-annotate:target'][0]['dcterms:format'][0] = [
-                            '@value' => $mediaType,
-                            'property_id' => $property->id(),
-                            'type' => 'customvocab:' . $customVocab->id(),
-                        ];
                         unset($data['o-module-annotate:body'][$key]['rdf:value'][$keyB]);
+                    } else {
+                        $mediaType = $this->determineMediaType($valueB['@value']);
+                        // Note: the process cannot distinct text/html when xml.
+                        if (in_array($mediaType, $targetFormats)) {
+                            // TODO Set the media type to the right target (only one currently).
+                            $data['o-module-annotate:target'][0]['rdf:value'][] = $valueB;
+                            // Save the media type (forced).
+                            $data['o-module-annotate:target'][0]['dcterms:format'][0] = [
+                                '@value' => $mediaType,
+                                'property_id' => $property->id(),
+                                'type' => 'customvocab:' . $customVocab->id(),
+                            ];
+                            unset($data['o-module-annotate:body'][$key]['rdf:value'][$keyB]);
+                        }
                     }
                     // Else, this is a plain text or an html snippet (TextualBody).
                 }
