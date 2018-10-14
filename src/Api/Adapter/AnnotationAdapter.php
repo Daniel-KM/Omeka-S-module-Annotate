@@ -397,6 +397,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             'TIN',
             'TRIANGLE',
             'CIRCLE',
+            'CIRCLEMARKER',
             'GEODESICSTRING',
             'ELLIPTICALCURVE',
             'NURBSCURVE',

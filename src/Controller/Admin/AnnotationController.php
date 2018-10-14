@@ -446,6 +446,7 @@ class AnnotationController extends AbstractActionController
             'TIN',
             'TRIANGLE',
             'CIRCLE',
+            'CIRCLEMARKER',
             'GEODESICSTRING',
             'ELLIPTICALCURVE',
             'NURBSCURVE',

@@ -494,6 +494,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             'TIN',
             'TRIANGLE',
             'CIRCLE',
+            'CIRCLEMARKER',
             'GEODESICSTRING',
             'ELLIPTICALCURVE',
             'NURBSCURVE',
