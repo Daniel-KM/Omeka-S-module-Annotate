@@ -34,19 +34,13 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
      */
     public function getJsonLd()
     {
-        // Set the values as JSON-LD value objects.
-        $values = [];
-        foreach ($this->values() as $term => $property) {
-            foreach ($property['values'] as $value) {
-                $values[$term][] = $value;
-            }
-        }
-
-        $jsonLdType = $this->getJsonLdType();
+        $values = $this->flatJsonLd();
 
         // @see https://www.w3.org/ns/anno.jsonld.
         // TODO Manage all properties (currently only the current ones used in the module).
         $mapping = [
+            // Annotation.
+            'oa:styledBy' => 'styledBy',
             // Body.
             'oa:hasPurpose' => 'purpose',
             // Target.
@@ -56,51 +50,71 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'rdf:type' => 'type',
             'dcterms:format' => 'format',
             'rdf:value' => 'value',
-            // Annotation.
-            'oa:styledBy' => 'styledBy',
-            // Manage a specific value for catography.
-            // TODO Use the trigger to manage the values.
+            // Manage a specific value for cartography.
+            // TODO Use a trigger to manage the values.
             'cartography:uncertainty' => 'cartography:uncertainty',
         ];
 
-        // Force the omeka type for the source.
-        $omekaType = null;
-
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $vv */
         foreach ($values as $key => $vv) {
-            switch ($key) {
-                case $jsonLdType === 'o-module-annotate:Target'
-                    && in_array($key, ['rdf:type', 'dcterms:format', 'rdf:value', 'cartography:uncertainty']):
-                    $values['selector'][$mapping[$key]] = $this->valuesOnly($vv);
-                    unset($values[$key]);
-                    break;
-                case isset($mapping[$key]):
-                    $vonly = $this->valuesOnly($vv);
-                    if ($key === 'oa:hasSource' && !is_array($vonly)) {
-                        $vvv = reset($vv);
-                        if ($vvv->type() === 'resource') {
-                            $omekaType = $vvv->valueResource()->getJsonLdType();
-                        }
-                    }
-                    $values[$mapping[$key]] = $this->valuesOnly($vv);
-                    unset($values[$key]);
-                    break;
+            if (isset($mapping[$key])) {
+                $values[$mapping[$key]] = $this->valuesOnly($vv);
+                unset($values[$key]);
             }
         }
 
         // TODO If no source, keep id of the annotation target? This is not the way the module works currently.
 
-        // Reorder target keys according to spec examples (useless, but pretty).
-        if ($jsonLdType === 'o-module-annotate:Target') {
-            if ($omekaType) {
-                $values['type'] = $omekaType;
+        return $values;
+    }
+
+    /**
+     * Set the values as JSON-LD value objects.
+     *
+     * @return array
+     */
+    protected function flatJsonLd()
+    {
+        $values = [];
+        foreach ($this->values() as $term => $property) {
+            foreach ($property['values'] as $value) {
+                $values[$term][] = $value;
             }
-            $values = array_filter(array_merge(['type' => null, 'source' => null], $values));
+        }
+        return $values;
+    }
+
+    /**
+     * Get the resource json-ld type from an api url.
+     *
+     * @todo Remove extractJsonLdTypeFromApiUrl(), too hacky.
+     *
+     * @param string $url
+     * @return string|null
+     */
+    protected function extractJsonLdTypeFromApiUrl($url)
+    {
+        static $baseApiUrl;
+
+        if (empty($baseApiUrl)) {
+            $urlHelper = $this->getServiceLocator()->get('ViewHelperManager')->get('url');
+            $baseApiUrl = $urlHelper('api', [], ['force_canonical' =>  true]) . '/';
         }
 
-        return array_merge(
-            $values
-        );
+        $pos = strpos($url, $baseApiUrl);
+        if ($pos !== 0) {
+            return null;
+        }
+        $type = strtok(substr($url, strlen($baseApiUrl)), '/');
+
+        $mapResourceTypes = [
+            'items' => 'o:Item',
+            'item_sets' => 'o:ItemSet',
+            'media' => 'o:Media',
+        ];
+        return isset($mapResourceTypes[$type])
+            ? $mapResourceTypes[$type]
+            : null;
     }
 
     /**

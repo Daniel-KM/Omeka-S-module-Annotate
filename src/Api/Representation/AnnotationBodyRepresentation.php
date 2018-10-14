@@ -33,10 +33,22 @@ class AnnotationBodyRepresentation extends AbstractAnnotationResourceRepresentat
         }
 
         $jsonLd = parent::getJsonLd();
-        return array_merge(
+        $values = array_merge(
             $result,
             $jsonLd
         );
+
+        if (empty($values['type'])) {
+            if (!empty($values['value']) && !is_array($values['value'])) {
+                $type = $this->extractJsonLdTypeFromApiUrl($values['value']);
+                if ($type) {
+                    $values['type'] = $type;
+                    $values = array_merge(['type' => null, 'value' => null], $values);
+                }
+            }
+        }
+
+        return $values;
     }
 
     public function displayTitle($default = null)
