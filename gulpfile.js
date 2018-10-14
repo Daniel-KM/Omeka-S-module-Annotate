@@ -3,19 +3,27 @@
 const del = require('del');
 const gulp = require('gulp');
 
-const sourceDir = 'node_modules/webui-popover/dist/**';
-const destinationDir = 'asset/vendor/webui-popover';
+const bundles = [
+    {
+        'source': 'node_modules/webui-popover/dist/**',
+        'dest': 'asset/vendor/webui-popover',
+    },
+];
 
 gulp.task('clean', function(done) {
-    return del(destinationDir);
+    bundles.map(function (bundle) {
+        return del(bundle.dest);
+    });
+    done();
 });
 
 gulp.task('sync', function (done) {
-        gulp.src([sourceDir])
-        .pipe(gulp.dest(destinationDir))
-        .on('end', done);
-    }
-);
+    bundles.map(function (bundle) {
+        return gulp.src(bundle.source)
+            .pipe(gulp.dest(bundle.dest));
+    });
+    done();
+});
 
 gulp.task('default', gulp.series('clean', 'sync'));
 
