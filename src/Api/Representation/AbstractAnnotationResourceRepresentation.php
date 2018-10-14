@@ -9,6 +9,8 @@ use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
  * Internally, a body or a target is an Omeka resource but it's not a rdf class.
  * So this intermediate class is used for Annotation resources body or target.
  *
+ * @todo Convert into a full object representation (selector, etc.).
+ *
  * @øee https://www.w3.org/TR/annotation-model/#web-annotation-principles
  */
 abstract class AbstractAnnotationResourceRepresentation extends AbstractResourceEntityRepresentation
@@ -40,6 +42,8 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             }
         }
 
+        $jsonLdType = $this->getJsonLdType();
+
         // @see https://www.w3.org/ns/anno.jsonld.
         // TODO Manage all properties (currently only the current ones used in the module).
         $mapping = [
@@ -59,6 +63,11 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
         /** @var \Omeka\Api\Representation\ValueRepresentation[] $vv */
         foreach ($values as $key => $vv) {
             switch ($key) {
+                case $jsonLdType === 'o-module-annotate:Target'
+                    && in_array($key, ['rdf:type', 'dcterms:format', 'rdf:value']):
+                    $values['selector'][$mapping[$key]] = $this->valuesOnly($vv);
+                    unset($values[$key]);
+                    break;
                 case isset($mapping[$key]):
                     $values[$mapping[$key]] = $this->valuesOnly($vv);
                     unset($values[$key]);
