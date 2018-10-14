@@ -105,9 +105,9 @@ class AnnotationController extends AbstractActionController
             }
         }
 
-        $resource = $this->api()
-            ->read('resources', $resourceId, [], ['responseContent' => 'resource'])
-            ->getContent();
+        $api = $this->api();
+
+        $resource = $api->read('resources', ['id' => $resourceId])->getContent();
         if (!$resource) {
             if ($isAjax) {
                 return $this->jsonError('Resource not found.', Response::STATUS_CODE_404); // @translate
@@ -147,12 +147,12 @@ class AnnotationController extends AbstractActionController
             }
         }
 
-        $api = $this->viewHelpers()->get('api');
-
         // Add the format of the body.
         if (is_null($bodyValue)) {
             // TODO Remove the full body when there is no body.
             // $data['o:resource_class']['o:id'] = null;
+            // Has purpose is used to add information about body text only.
+            unset($data['oa:hasPurpose']);
         } else {
             // "text/plain" is useless with TextualBody.
             $format = $this->isHtml($bodyValue) ? 'text/html' : null;
@@ -185,6 +185,113 @@ class AnnotationController extends AbstractActionController
                     'property_id' => $property->id(),
                     'type' => 'customvocab:' . $customVocab->id(),
                     '@value' => $format,
+                ];
+            }
+
+            $targetSelectorType = $data['o-module-annotate:target'][0]['rdf:type'][0]['@value'];
+            if (in_array($targetSelectorType, ['o:Item', 'o:ItemSet', 'o:Media'])) {
+                $resourceType = $resource->getResourceJsonLdType();
+                if ($targetSelectorType === $resourceType) {
+                    $message = 'A resource can‘t have the same resource as selector.'; // @translate
+                    if ($isAjax) {
+                        return $this->jsonError($message);
+                    } else {
+                        $this->messenger()->addError($message);
+                        return $this->redirect()->toUrl($redirect);
+                    }
+                }
+                if ($resourceType === 'o:Media') {
+                    $message = 'A media can‘t have a resource selector.'; // @translate
+                    if ($isAjax) {
+                        return $this->jsonError($message);
+                    } else {
+                        $this->messenger()->addError($message);
+                        return $this->redirect()->toUrl($redirect);
+                    }
+                }
+                if ($resourceType === 'o:Item' && $targetSelectorType === 'o:ItemSet') {
+                    $message = 'An item can‘t have an item set selector.'; // @translate
+                    if ($isAjax) {
+                        return $this->jsonError($message);
+                    } else {
+                        $this->messenger()->addError($message);
+                        return $this->redirect()->toUrl($redirect);
+                    }
+                }
+
+                $targetSelectorResourceType = $targetSelectorType === 'o:Item' ? 'items' : 'media';
+
+                // Check if the target value is a resource url.
+                if (!((int) $targetValue)) {
+                    $url = $this->viewHelpers()->get('url');
+                    $testTargetValue = null;
+                    $apiUrl = $url('api/default', ['resource' => $targetSelectorResourceType], ['force_canonical' => true]) . '/';
+                    if (strpos($targetValue, $apiUrl) === 0) {
+                        $testTargetValue = (int) substr($targetValue, strlen($apiUrl));
+                    } else {
+                        $apiUrl = $url('api/default', ['resource' => $targetSelectorResourceType]) . '/';
+                        if (strpos($targetValue, $apiUrl) === 0) {
+                            $testTargetValue = (int) substr($targetValue, strlen($apiUrl));
+                        }
+                    }
+                    if (empty($testTargetValue)) {
+                        $message = new Message('The target selector "%s" cannot be identified: it should be a resource id or a resource api url.', // @translate
+                            $targetValue);
+                        if ($isAjax) {
+                            return $this->jsonError($message);
+                        } else {
+                            $this->messenger()->addError($message);
+                            return $this->redirect()->toUrl($redirect);
+                        }
+                    }
+                    $targetValue = $testTargetValue;
+                }
+
+                $selectorResource = $api->searchOne($targetSelectorResourceType, ['id' => (int) $targetValue])->getContent();
+                if (empty($selectorResource)) {
+                    $message = new Message('There is no %s with id #%s.', $targetSelectorType, $targetValue); // @translate
+                    if ($isAjax) {
+                        return $this->jsonError($message);
+                    } else {
+                        $this->messenger()->addError($message);
+                        return $this->redirect()->toUrl($redirect);
+                    }
+                }
+
+                $targetValue = (int) $targetValue;
+                $test = false;
+                switch ($resource->getResourceJsonLdType()) {
+                    case 'o:ItemSet':
+                        // TODO Check if the item is in the item set.
+                        // TODO Check if the media is in the item set.
+                        $test = true;
+                        break;
+                    case 'o:Item':
+                        // Check if the media is in the item.
+                        foreach ($resource->media() as $media) {
+                            if ($media->id() === $targetValue) {
+                                $test = true;
+                                break;
+                            }
+                        }
+                        break;
+                }
+                if (!$test) {
+                    $message = new Message('There is no %s with id #%s that belongs to resource #%s.', // @translate
+                        $targetSelectorType, $targetValue, $resourceId);
+                    if ($isAjax) {
+                        return $this->jsonError($message);
+                    } else {
+                        $this->messenger()->addError($message);
+                        return $this->redirect()->toUrl($redirect);
+                    }
+                }
+
+                // Convert the text selector into a resource selector.
+                $data['o-module-annotate:target'][0]['rdf:value'][0] = [
+                    'property_id' => $data['o-module-annotate:target'][0]['rdf:value'][0]['property_id'],
+                    'type' => 'resource',
+                    'value_resource_id' => $targetValue,
                 ];
             }
         }

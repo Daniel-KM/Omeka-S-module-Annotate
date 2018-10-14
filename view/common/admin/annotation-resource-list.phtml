@@ -179,13 +179,17 @@ $annotationTargets = $annotation->targets();
     <tr class="annotation-target">
         <td class="webui-popover-parent">
             <?php $value = $annotationTarget->value('rdf:value', ['all' => false, 'default' => '']); ?>
-            <?php $text = $value; ?>
             <div class="rdf-value">
+            <?php if ($value->type() === 'resource'): ?>
+            <?php echo $value->valueResource()->linkPretty(); ?>
+            <?php else: ?>
+            <?php $text = $value; ?>
             <?php $isLong = strlen($text) > 240; ?>
             <?php if ($isLong): ?>
                 <div class="annotation-target-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
             <?php else: ?>
                 <?php echo nl2br($escape($text)); ?>
+            <?php endif; ?>
             <?php endif; ?>
             </div>
             <ul class="actions">
