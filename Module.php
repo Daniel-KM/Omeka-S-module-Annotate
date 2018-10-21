@@ -1224,8 +1224,7 @@ SQL;
 
         $api = $serviceLocator->get('Omeka\ApiManager');
         try {
-            $api
-               ->read('resource_templates', ['label' => $label])->getContent();
+            $api->read('resource_templates', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
             return false;
         }
