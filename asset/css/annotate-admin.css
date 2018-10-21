@@ -65,6 +65,9 @@
     #annotations caption span:not(.resource-name) {
         font-weight: normal;
     }
+    #annotations caption span.creation-date {
+        font-size: smaller;
+    }
     #annotations th {
        border-bottom: 3px solid #dfdfdf;
     }

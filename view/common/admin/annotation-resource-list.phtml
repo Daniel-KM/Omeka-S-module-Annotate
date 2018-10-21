@@ -27,6 +27,7 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotat
 <table>
 <caption class="annotation-caption">
     <?php echo $annotation->linkPretty(); ?>
+    <span class="creation-date"><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></span>
     <?php if (!$annotation->isPublic()): ?>
     <span class="o-icon-private" aria-label="Private"></span>
     <?php endif; ?>
