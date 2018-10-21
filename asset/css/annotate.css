@@ -49,8 +49,25 @@
 
     /* Adapted from core _screen.scss #linked-resources and .linked-resource */
     #annotations table {
+        margin-bottom: 0;
+    }
+    #annotations .annotation {
         margin-bottom: 24px;
     }
+
+    #annotations table {
+        width: 100%;
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+    #annotations table,
+    #annotations table.tablesaw {
+        margin-bottom: 12px;
+        border: 1px solid #dfdfdf;
+        border-radius: 3px;
+        border-collapse: separate;
+    }
+
     #annotations caption {
         background-color: rgba(0,0,0,0.04);
         font-family: bold;
@@ -61,6 +78,9 @@
     }
     #annotations caption span:not(.resource-name) {
         font-weight: normal;
+    }
+    #annotations caption span.creation-date {
+        font-size: smaller;
     }
     #annotations th {
        border-bottom: 3px solid #dfdfdf;
@@ -74,6 +94,9 @@
 
     #annotations .actions {
         float: right;
+    }
+    #annotations .actions li {
+        list-style-type: none;
     }
     #annotations .o-icon-annotation::before {
         content: "";
@@ -135,9 +158,5 @@
 
     #annotate form label[for=submit] {
         display: none;
-    }
-
-    .actions li {
-        list-style-type: none;
     }
 }
