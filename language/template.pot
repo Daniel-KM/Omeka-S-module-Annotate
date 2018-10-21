@@ -1,0 +1,539 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-10-22 00:00+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: Module.php:280
+msgid "WARNING"
+msgstr ""
+
+#: Module.php:285
+msgid "All the annotations will be removed."
+msgstr ""
+
+#: Module.php:290
+#, php-format
+msgid ""
+"If checked, the values of the vocabularies \"%s\" will be removed too. The "
+"class of the resources that use a class of these vocabularies will be reset."
+msgstr ""
+
+#: Module.php:295
+#, php-format
+msgid "Remove the vocabularies \"%s\""
+msgstr ""
+
+#: Module.php:300
+#, php-format
+msgid "If checked, the custom vocabs \"%s\" will be removed too."
+msgstr ""
+
+#: Module.php:305
+#, php-format
+msgid "Remove the custom vocabs \"%s\""
+msgstr ""
+
+#: Module.php:310
+#, php-format
+msgid ""
+"If checked, the resource templates \"%s\" will be removed too. The resource "
+"template of the resources that use it will be reset."
+msgstr ""
+
+#: Module.php:315
+#, php-format
+msgid "Remove the resource templates \"%s\""
+msgstr ""
+
+#: src/Api/Representation/AnnotationBodyRepresentation.php:68
+#, php-format
+msgid "[Annotation body #%d]"
+msgstr ""
+
+#: src/Api/Representation/AnnotationRepresentation.php:187
+#, php-format
+msgid "[Annotation #%d]"
+msgstr ""
+
+#: src/Api/Representation/AnnotationTargetRepresentation.php:119
+#, php-format
+msgid "[Annotation target #%d]"
+msgstr ""
+
+#: view/annotate/admin/annotation/batch-delete-confirm.phtml:5
+msgid "Delete comments"
+msgstr ""
+
+#: view/annotate/admin/annotation/batch-delete-confirm.phtml:6
+msgid "Are you sure you would like to delete the selected comments?"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:18
+#: view/annotate/admin/annotation/browse.phtml:87
+#: view/annotate/admin/annotation/show-details.phtml:10
+msgid "Annotator"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:22
+msgid "Annotator email"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:30
+#: view/annotate/admin/annotation/browse.phtml:88
+msgid "Date annotated"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:36
+#: view/annotate/admin/annotation/edit.phtml:21
+#: view/annotate/admin/annotation/show.phtml:18
+#: view/common/site/annotation-resource.phtml:15
+msgid "Annotations"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:84
+msgid "Annotation"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:86
+#: view/annotate/admin/annotation/form.phtml:12
+#: view/annotate/admin/annotation/show-details.phtml:53
+#: view/annotate/admin/annotation/show.phtml:15
+#: view/annotate/admin/annotation/show.phtml:57
+msgid "Targets"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:138
+msgid "Removed"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:185
+#: view/annotate/admin/annotation/browse.phtml:203
+msgid "Delete annotations"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:186
+msgid "Are you sure you would like to delete the selected annotations?"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:188
+#: view/annotate/admin/annotation/browse.phtml:206
+#, php-format
+msgid ""
+"%s: this action will permanently delete %s annotations and cannot be undone."
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:204
+msgid ""
+"Are you sure you would like to delete all annotations on all pages of this "
+"result?"
+msgstr ""
+
+#: view/annotate/admin/annotation/browse.phtml:245
+msgid "Your query returned no annotations."
+msgstr ""
+
+#: view/annotate/admin/annotation/form.phtml:11
+#: view/annotate/admin/annotation/show-details.phtml:41
+#: view/annotate/admin/annotation/show.phtml:14
+#: view/annotate/admin/annotation/show.phtml:35
+msgid "Bodies"
+msgstr ""
+
+#: view/annotate/admin/annotation/show-details.phtml:10
+msgid "(public)"
+msgstr ""
+
+#: view/annotate/admin/annotation/show-details.phtml:47
+#: view/annotate/admin/annotation/show.phtml:49
+msgid "This annotation has no bodies."
+msgstr ""
+
+#: view/annotate/admin/annotation/show-details.phtml:61
+#: view/annotate/admin/annotation/show.phtml:72
+msgid "This annotation has no targets."
+msgstr ""
+
+#: view/annotate/admin/annotation/show.phtml:21
+#: view/common/admin/annotation-resource-list.phtml:49
+msgid "Edit annotation"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:20
+#: view/common/site/annotation-resource.phtml:18
+msgid "There are no annotations for this resource."
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:43
+msgid "Show annotation"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:61
+msgid "Delete annotation"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:79
+#: view/common/site/annotation-resource.phtml:37
+msgid "Value"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:80
+#: view/common/site/annotation-resource.phtml:38
+msgid "Purpose"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:130
+#: view/common/admin/annotation-resource-list.phtml:221
+#: view/common/site/annotation-resource.phtml:89
+msgid "Full value"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:194
+msgid "Target selector"
+msgstr ""
+
+#: view/common/admin/annotation-resource-list.phtml:195
+msgid "Selector type"
+msgstr ""
+
+#: view/common/admin/annotation-resource.phtml:18
+#, php-format
+msgid "Annotations (%d)"
+msgstr ""
+
+#: view/common/annotate-form.phtml:12
+msgid "New annotation"
+msgstr ""
+
+#: view/common/annotate-form.phtml:15
+msgid "Warning: the resource is already an annotation."
+msgstr ""
+
+#: view/common/annotate-form.phtml:16
+msgid ""
+"Go to the tab \"Metadata\" to find and to annotate the original target "
+"resource."
+msgstr ""
+
+#: view/csv-import/mapping.phtml:5
+msgid "Close Me"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:6
+msgid "Mapping Info"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:9
+msgid "Latitude"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:12
+msgid "Longitude"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:15
+msgid "Latitude/Longitude"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:19
+msgid "Default View Settings"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:22
+msgid "Default Latitude"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:25
+msgid "Default Longitude"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:28
+msgid "Default Zoom"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:34
+msgid "Use multivalue separator"
+msgstr ""
+
+#: view/csv-import/mapping.phtml:35
+msgid "(Only applies to Latitude/Longitude)"
+msgstr ""
+
+#: data/scripts/upgrade.php:51
+#, php-format
+msgid "The custom vocab named \"%s\" is not available."
+msgstr ""
+
+#: Module.php:83
+msgid "The RDF Concepts Vocabulary (RDF)"
+msgstr ""
+
+#: Module.php:84
+msgid ""
+"This is the RDF Schema for the RDF vocabulary terms in the RDF Namespace, "
+"defined in RDF 1.1 Concepts."
+msgstr ""
+
+#: Module.php:94
+msgid "Web Annotation Ontology"
+msgstr ""
+
+#: Module.php:95
+msgid ""
+"The Web Annotation Vocabulary specifies the set of RDF classes, predicates "
+"and named entities that are used by the Web Annotation Data Model (http://"
+"www.w3.org/TR/annotation-model/)."
+msgstr ""
+
+#: Module.php:105
+#, php-format
+msgid "The vocabulary \"%s\" was already installed and was kept."
+msgstr ""
+
+#: Module.php:680
+msgid "Annotate"
+msgstr ""
+
+#: Module.php:686
+msgid "Append annotations automatically to item set page"
+msgstr ""
+
+#: Module.php:687 Module.php:702 Module.php:717
+msgid ""
+"If unchecked, the annotations can be added via the helper in the theme or "
+"the block in any page."
+msgstr ""
+
+#: Module.php:701
+msgid "Append annotations automatically to item page"
+msgstr ""
+
+#: Module.php:716
+msgid "Append annotations automatically to media page"
+msgstr ""
+
+#: Module.php:1042
+#, php-format
+msgid "The module \"%s\" is required."
+msgstr ""
+
+#: Module.php:1079
+#, php-format
+msgid ""
+"An error occured when adding the prefix \"%s\": another vocabulary exists. "
+"Resolve the conflict before installing this module."
+msgstr ""
+
+#: Module.php:1108
+#, php-format
+msgid ""
+"An error occured when adding the prefix \"%s\" and the associated "
+"properties. Resolve the conflict before installing this module."
+msgstr ""
+
+#: Module.php:1156
+#, php-format
+msgid ""
+"A custom vocab named \"%s\" exists and has not the needed terms: rename it "
+"or remove it before installing this module."
+msgstr ""
+
+#: Module.php:1166
+#, php-format
+msgid ""
+"A custom vocab named \"%s\" exists and has not the needed language (\"%s\"): "
+"check it or remove it before installing this module."
+msgstr ""
+
+#: Module.php:1235
+#, php-format
+msgid ""
+"A resource template named \"%s\" exists: rename it or remove it before "
+"installing this module."
+msgstr ""
+
+#: src/Form/AnnotateForm.php:34
+msgid "Motivated by"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:36 src/Form/AnnotateForm.php:42
+msgid "Select the motivation of this annotation…"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:81
+msgid "Is public"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:93
+msgid "Annotate it!"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:133
+msgid "Content of the annotation"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:134
+msgid ""
+"The value of the body is generally the textual content of the annotation."
+msgstr ""
+
+#: src/Form/AnnotateForm.php:140
+msgid "Any plain text or html…"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:164
+msgid "Purpose of this content"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:166 src/Form/AnnotateForm.php:172
+msgid "Select the purpose of this body content, if needed…"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:183
+msgid "customvocab:"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:271
+msgid "Type of the target selector"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:273 src/Form/AnnotateForm.php:279
+msgid ""
+"Select the selector type to specify a subpart of the resource, if needed…"
+msgstr ""
+
+#: src/Form/AnnotateForm.php:298
+msgid ""
+"Allows to delimit a portion of the resource (part of a text, an image or an "
+"item…)."
+msgstr ""
+
+#: src/Form/AnnotateForm.php:304
+msgid ""
+"Any xml, json, svg, media api url, media id, etc. according to the type of "
+"selector."
+msgstr ""
+
+#: src/Mapping/AnnotationMapping.php:9
+msgid "Annotation data"
+msgstr ""
+
+#: src/Mapping/AnnotationMapping.php:47
+#, php-format
+msgid "\"%s\" is not a valid resource type."
+msgstr ""
+
+#: src/Mapping/AnnotationMapping.php:66
+#, php-format
+msgid "\"%s\" (%s) is not a valid annotation."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:80
+msgid "Only a resource can be annotated."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:88
+#: src/Controller/Admin/AnnotationController.php:90
+msgid "Unauthorized access."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:101
+#: src/Controller/Admin/AnnotationController.php:103
+#: src/Controller/Admin/AnnotationController.php:113
+msgid "Resource not found."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:115
+msgid "Resource not found"
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:141
+msgid "The annotation is empty."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:195
+msgid "A resource can‘t have the same resource as selector."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:204
+msgid "A media can‘t have a resource selector."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:213
+msgid "An item can‘t have an item set selector."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:238
+#, php-format
+msgid ""
+"The target selector \"%s\" cannot be identified: it should be a resource id "
+"or a resource api url."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:252
+#, php-format
+msgid "There is no %s with id #%s."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:280
+#, php-format
+msgid "There is no %s with id #%s that belongs to resource #%s."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:324
+#, php-format
+msgid "Resource #%d successfully annotated."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:361
+msgid "Annotation successfully updated"
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:402
+msgid "Annotation successfully deleted."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:438
+msgid "You must select at least one annotation to batch delete."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:447
+msgid "Annotations successfully deleted."
+msgstr ""
+
+#: src/Controller/Admin/AnnotationController.php:457
+msgid "Delete of all annotations is not supported currently."
+msgstr ""
+
+#: src/Api/Adapter/AnnotationAdapter.php:131
+msgid "Body must be an array"
+msgstr ""
+
+#: src/Api/Adapter/AnnotationAdapter.php:137
+msgid "Targets must be an array"
+msgstr ""
+
+#: src/Api/Adapter/AnnotationBodyAdapter.php:73
+msgid "An annotation body must be attached to an Annotation."
+msgstr ""
+
+#: src/Api/Adapter/AnnotationTargetAdapter.php:73
+msgid "An annotation target must be attached to an Annotation."
+msgstr ""
+
+#: src/Media/Ingester/AnnotationBody.php:62
+msgid "Annotation body"
+msgstr ""
