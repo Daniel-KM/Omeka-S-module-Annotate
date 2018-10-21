@@ -56,7 +56,7 @@ not standard to annotations.
   generally managed.
 - According to the Annotation data model, only textual bodies can have a
   purpose. So when the body is not a text, for example a link, the purpose is
-  cleared. Nevertheless, another body can contains a description and a purpose.
+  cleared. Nevertheless, another body can contain a description and a purpose.
 - The name of the four custom vocabs `Annotation oa:Motivation`, `Annotation Body dcterms:format`,
   `Annotation Target dcterms:format`, and `Annotation Target rdf:type` are used
   internally and must not be changed for now.
@@ -65,7 +65,7 @@ not standard to annotations.
 - For `rdf:type`, the four classes that should not be used in the Web Annotation
   model directly (`oa:ResourceSelection`, `oa:Selector`, `oa:State` and `oa:Style`)
   are not available by default (see the [Annotation vocabulary]). They can be
-  added if really wanted.
+  added if really wanted, but it's better to extend the data model.
 
 
 Development
