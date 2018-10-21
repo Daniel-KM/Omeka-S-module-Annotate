@@ -26,7 +26,7 @@ does not contain the dependency), and uncompress it in the `modules` directory.
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
-the module to `Annotate`, go to the root module, and run:
+the module to `Annotate`, go to the root of the module, and run:
 
 ```
     npm install

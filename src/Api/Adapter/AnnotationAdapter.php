@@ -180,6 +180,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         // TODO Build queries to find annotations by query on targets and bodies here?
+        // TODO Query has_body / linked resource id.
     }
 
     /**

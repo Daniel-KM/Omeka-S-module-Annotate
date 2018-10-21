@@ -1094,7 +1094,7 @@ SQL;
         $rdfImporter = $serviceLocator->get('Omeka\RdfImporter');
 
         try {
-            $response = $rdfImporter->import(
+            $rdfImporter->import(
                 $vocabulary['strategy'],
                 $vocabulary['vocabulary'],
                 [
@@ -1123,7 +1123,7 @@ SQL;
         $api = $serviceLocator->get('Omeka\ApiManager');
         // The vocabulary may have been removed manually before.
         try {
-            $vocabulary = $api->delete('vocabularies', ['prefix' => $prefix])->getContent();
+            $api->delete('vocabularies', ['prefix' => $prefix])->getContent();
         } catch (NotFoundException $e) {
         }
     }
@@ -1202,7 +1202,7 @@ SQL;
         $api = $serviceLocator->get('Omeka\ApiManager');
         // The custom vocab may be renamed or removed manually before.
         try {
-            $customVocab = $api->delete('custom_vocabs', ['label' => $label])->getContent();
+            $api->delete('custom_vocabs', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
         }
     }
@@ -1224,7 +1224,7 @@ SQL;
 
         $api = $serviceLocator->get('Omeka\ApiManager');
         try {
-            $resourceTemplate = $api
+            $api
                ->read('resource_templates', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
             return false;
@@ -1234,7 +1234,7 @@ SQL;
             sprintf(
                 'A resource template named "%s" exists: rename it or remove it before installing this module.', // @translate
                 $label
-        )
+            )
         );
 
         // return true;
@@ -1261,7 +1261,7 @@ SQL;
 
         $label = $data['o:label'];
         try {
-            $resourceTemplate = $api
+            $api
                 ->read('resource_templates', ['label' => $label])->getContent();
             return false;
         } catch (NotFoundException $e) {
@@ -1307,7 +1307,7 @@ SQL;
         $api = $serviceLocator->get('Omeka\ApiManager');
         // The resource template may be renamed or removed manually before.
         try {
-            $resourceTemplate = $api->delete('resource_templates', ['label' => $label])->getContent();
+            $api->delete('resource_templates', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
         }
     }
