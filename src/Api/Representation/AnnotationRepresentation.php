@@ -43,45 +43,45 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         ];
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * Two rdf contexts are used: Annotation (main) and Omeka (secondary).
+     * @todo Display the full terms for Annotation? An option to let admin choose?
+     * @todo oa:styledBy should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet). But GeoJson allows to manage css.
+     *
+     * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
+     */
     public function jsonSerialize()
     {
         $jsonLd = parent::jsonSerialize();
+
         $jsonLd['@context'] = [
             'http://www.w3.org/ns/anno.jsonld',
             ['o' => 'http://localhost/OmekaS/api-context'],
         ];
 
-        // TODO Manage multiple motivations.
         if (isset($jsonLd['oa:motivatedBy'])) {
-            $value = reset($jsonLd['oa:motivatedBy']);
+            $jsonLd['motivation'] = $this->valuesOnly($jsonLd['oa:motivatedBy']);
             unset($jsonLd['oa:motivatedBy']);
-            $jsonLd['motivation'] = $value->value();
         }
 
         if (isset($jsonLd['oa:styledBy'])) {
-            $value = reset($jsonLd['oa:styledBy']);
-            unset($jsonLd['oa:styledBy']);
-            // TODO Should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet).
             $jsonLd['stylesheet']['type'] = 'oa:Style';
-            $jsonLd['stylesheet']['value'] = $value->value();
+            $jsonLd['stylesheet']['value'] = $this->valuesOnly($jsonLd['oa:styledBy']);
+            unset($jsonLd['oa:styledBy']);
         }
 
         if (isset($jsonLd['oa:hasBody'])) {
             $value = $jsonLd['oa:hasBody'];
             unset($jsonLd['oa:hasBody']);
-            if (count($value) === 1) {
-                $value = reset($value);
-            }
-            $jsonLd['body'] = $value;
+            $jsonLd['body'] = count($value) === 1 ? reset($value) : $value;
         }
 
         if (isset($jsonLd['oa:hasTarget'])) {
             $value = $jsonLd['oa:hasTarget'];
             unset($jsonLd['oa:hasTarget']);
-            if (count($value) === 1) {
-                $value = reset($value);
-            }
-            $jsonLd['target'] = $value;
+            $jsonLd['target'] = count($value) === 1 ? reset($value) : $value;;
         }
 
         return $jsonLd;
@@ -516,5 +516,36 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         if (strpos($string, '(') && in_array($firstWord, $wktTags)) {
             return 'application/wkt';
         }
+    }
+
+    /**
+     * Renormalize values as json-ld rdf Annotation resource.
+     *
+     * @see https://www.w3.org/TR/annotation-model/
+     * @todo Factorize with AbstractAnnotationResourceRepresentation::valuesOnly().
+     *
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+     * @return array|string
+     */
+    protected function valuesOnly(array $values)
+    {
+        $result = [];
+
+        foreach ($values as $value) {
+            switch ($value->type()) {
+                case 'resource':
+                    $result[] = $value->valueResource()->apiUrl();
+                    break;
+                case 'uri':
+                    $result[] = $value->uri();
+                    break;
+                case 'literal':
+                default:
+                    $result[] = $value->value();
+                    break;
+            }
+        }
+
+        return count($result) > 1 ? $result : reset($result);
     }
 }

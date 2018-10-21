@@ -38,6 +38,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
 
         // @see https://www.w3.org/ns/anno.jsonld.
         // TODO Manage all properties (currently only the current ones used in the module).
+        // Note: this abstract class is a upper class only for body an target.
         $mapping = [
             // Annotation.
             'oa:styledBy' => 'styledBy',
@@ -156,8 +157,9 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
      * Renormalize values as json-ld rdf Annotation resource.
      *
      * @see https://www.w3.org/TR/annotation-model/
+     * @todo Factorize with AnnotationRepresentation::valuesOnly().
      *
-     * @param array $values
+     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
      * @return array|string
      */
     protected function valuesOnly(array $values)
