@@ -30,6 +30,8 @@ $this->headScript()->appendFile($this->assetUrl('js/annotate.js', 'Annotate'));
 <table>
 <caption class="annotation-caption">
     <?php echo sprintf($translate('[Annotation #%d]'), $annotation->id()); ?>
+    <span class="annotation-created"><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></span>
+    <span class="annotation-owner"><?php echo $annotation->owner()->name(); ?></span>
     <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true, 'default' => []]); ?>
     <?php foreach ($motivatedByValues as $value): ?>
     <span class="oa-motivated-by">

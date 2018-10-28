@@ -65,8 +65,14 @@
     #annotations caption span:not(.resource-name) {
         font-weight: normal;
     }
-    #annotations caption span.creation-date {
+    #annotations caption span.annotation-created {
         font-size: smaller;
+    }
+    #annotations caption span.annotation-owner {
+        font-size: smaller;
+        border-left: #888888 1px solid;
+        margin-left: 0;
+        padding-left: 6px;
     }
     #annotations th {
        border-bottom: 3px solid #dfdfdf;
