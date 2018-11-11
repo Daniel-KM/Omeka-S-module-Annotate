@@ -247,12 +247,24 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 
         $status = $services->get('Omeka\Status');
         $url = $this->getViewHelper('Url');
-        if ($status->isAdminRequest()) {
-            $url = $url('admin/annotate/default', [], ['query' => $query]);
-        } elseif ($status->isSiteRequest()) {
-            $url = $url('site/annotate/default', [], ['query' => $query], true);
+        // Make compatible with Omeka < 1.2.1.
+        if (method_exists($status, 'isAdminRequest')) {
+            if ($status->isSiteRequest()) {
+                $url = $url('site/annotate/default', [], ['query' => $query], true);
+            } elseif ($status->isAdminRequest()) {
+                $url = $url('admin/annotate/default', [], ['query' => $query]);
+            } else {
+                return;
+            }
         } else {
-            return;
+            $routeMatch = $services->get('Application')->getMvcEvent()->getRouteMatch();
+            if ($routeMatch->getParam('__SITE__')) {
+                $url = $url('site/annotate/default', [], ['query' => $query], true);
+            } elseif ($routeMatch->getParam('__ADMIN__')) {
+                $url = $url('admin/annotate/default', [], ['query' => $query]);
+            } else {
+                return;
+            }
         }
 
         $hyperlink = $this->getViewHelper('hyperlink');
