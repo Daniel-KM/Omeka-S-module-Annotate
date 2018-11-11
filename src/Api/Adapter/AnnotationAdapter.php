@@ -12,6 +12,7 @@ use Omeka\Stdlib\ErrorStore;
 
 /**
  * @todo Make Annotation more independant from Omeka tools, and allow to import rdf annotation directly (avoid any normalization, etc.). Use easyrdf or create Selector class?
+ * @todo Make annotation_bodies and annotation_targets unavailable by the api, but keep them as resource entities. Set them hydrator.
  */
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
@@ -19,6 +20,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         \Omeka\Entity\Item::class,
         \Omeka\Entity\Media::class,
         \Omeka\Entity\ItemSet::class,
+        // \Annotate\Entity\Annotation::class,
     ];
 
     protected $sortFields = [
