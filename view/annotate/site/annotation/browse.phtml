@@ -1,0 +1,118 @@
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\SiteRepresentation $site
+ * @var \Annotate\Api\Representation\AnnotationRepresentation[] $resources
+ * @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+
+$this->headLink()->appendStylesheet($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'));
+$this->headLink()->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'));
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/annotate.js', 'Annotate'));
+
+$this->htmlElement('body')->appendAttribute('class', 'annotations browse');
+
+$sortHeadings = [
+    [
+        'label' => $translate('Annotator'),
+        'value' => 'name'
+    ],
+    [
+        'label' => $translate('Annotator email'),
+        'value' => 'email'
+    ],
+    [
+        'label' => $translate('Resource'),
+        'value' => 'resource_id'
+    ],
+    [
+        'label' => $translate('Date annotated'),
+        'value' => 'created'
+    ],
+];
+?>
+
+<?php echo $this->pageTitle('', 1, $translate('Annotations')); ?>
+
+<?php echo $this->searchFilters(); ?>
+
+ <div class="browse-controls">
+    <?php echo $this->pagination(); ?>
+    <?php // echo $this->hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
+    <?php echo $this->sortSelector($sortHeadings); ?>
+</div>
+
+<?php $this->trigger('view.browse.before'); ?>
+<?php if ($annotations): ?>
+<table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
+    <thead>
+        <tr>
+            <th>
+                <?php echo $translate('Annotation'); ?>
+            </th>
+            <th><?php echo $translate('Targets'); ?></th>
+            <th><?php echo $translate('Annotator'); ?></th>
+            <th><?php echo $translate('Date annotated'); ?></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($annotations as $annotation): ?>
+        <?php
+        $resources = $annotation->targetSources();
+        $owner = $annotation->owner();
+        ?>
+        <tr class="annotation">
+            <td>
+                <?php echo $annotation->linkPretty(); ?>
+            </td>
+            <td>
+                <?php if ($resources): ?>
+                    <?php foreach ($resources as $resource): ?>
+                    <?php echo $resource->linkPretty(); ?>
+                    <span class="resource-name <?php echo $resource->getControllerName(); ?>" aria-label="<?php echo $translate($resource->getControllerName()); ?>"></span>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    [<?php echo $translate('Removed'); ?>]
+                <span class="resource-name no-resource"></span>
+                <?php endif; ?>
+            </td>
+            <td>
+                <?php if ($owner): ?>
+                    <span class="annotation-email"><?php echo $this->hyperlink(
+                        $owner->name(),
+                        $this->url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
+                    ?></span>
+                <?php else: ?>
+                    <span class="annotation-email annotation-public"><?php echo $this->hyperlink(
+                        $annotation->name(),
+                        'mailto:' . $annotation->email());
+                    ?></span>
+                    <span class="o-icon-users" aria-label="<?php echo $translate('Public'); ?>"></span>
+                <?php endif; ?>
+            </td>
+            <td><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+</form>
+
+<?php $this->trigger('view.browse.after'); ?>
+<div class="browse-controls">
+    <?php echo $this->pagination(); ?>
+</div>
+
+<?php else: ?>
+
+<div class="no-resources">
+    <p><?php echo $translate('Your query returned no annotations.'); ?></p>
+</div>
+
+<?php endif; ?>

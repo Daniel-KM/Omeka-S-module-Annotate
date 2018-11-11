@@ -47,6 +47,7 @@ return [
     'controllers' => [
         'invokables' => [
             Controller\Admin\AnnotationController::class => Controller\Admin\AnnotationController::class,
+            Controller\Site\AnnotationController::class => Controller\Site\AnnotationController::class,
         ],
     ],
     'controller_plugins' => [
@@ -81,6 +82,50 @@ return [
     ],
     'router' => [
         'routes' => [
+            'site' => [
+                'child_routes' => [
+                    'annotate' => [
+                        'type' => \Zend\Router\Http\Literal::class,
+                        'options' => [
+                            'route' => '/annotation',
+                            'defaults' => [
+                                '__NAMESPACE__' => 'Annotate\Controller\Site',
+                                '__SITE__' => true,
+                                'controller' => Controller\Site\AnnotationController::class,
+                                'action' => 'browse',
+                            ],
+                        ],
+                        'may_terminate' => true,
+                        'child_routes' => [
+                            'default' => [
+                                'type' => \Zend\Router\Http\Segment::class,
+                                'options' => [
+                                    'route' => '/:action',
+                                    'constraints' => [
+                                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                    ],
+                                    'defaults' => [
+                                        'action' => 'browse',
+                                    ],
+                                ],
+                            ],
+                            'id' => [
+                                'type' => \Zend\Router\Http\Segment::class,
+                                'options' => [
+                                    'route' => '/:id[/:action]',
+                                    'constraints' => [
+                                        'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                                        'id' => '\d+',
+                                    ],
+                                    'defaults' => [
+                                        'action' => 'show',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             'admin' => [
                 'child_routes' => [
                     'annotate' => [
@@ -137,6 +182,17 @@ return [
             ],
         ],
     ],
+    'annotate' => [
+        'config' => [
+            'annotate_public_allow_view' => true,
+            'annotate_public_allow_annotate', false,
+        ],
+        'site_settings' => [
+            'annotate_append_item_set_show' => false,
+            'annotate_append_item_show' => true,
+            'annotate_append_media_show' => false,
+        ],
+    ],
     'csvimport' => [
         'mappings' => [
             'annotations' => [
@@ -152,15 +208,6 @@ return [
                 'motivation' => 'annotation {oa:motivatedBy}',
                 'purpose' => 'annotation_target {oa:hasPurpose}',
             ],
-        ],
-    ],
-    'annotate' => [
-        'config' => [
-        ],
-        'site_settings' => [
-            'annotate_append_item_set_show' => true,
-            'annotate_append_item_show' => true,
-            'annotate_append_media_show' => true,
         ],
     ],
 ];

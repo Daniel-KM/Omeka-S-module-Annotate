@@ -165,7 +165,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             'site/resource-id',
             [
                 'site-slug' => $siteSlug,
-                'controller' => 'AnnotationController',
+                'controller' => 'annotation',
                 'id' => $this->id(),
             ],
             ['force_canonical' => $canonical]

@@ -179,6 +179,59 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
+        // TODO Make the limit to a site working for item sets and media too.
+        if (!empty($query['site_id'])) {
+            try {
+                // See \Omeka\Api\Adapter\ItemAdapter::buildQuery().
+                $siteAdapter = $this->getAdapter('sites');
+                $site = $siteAdapter->findEntity($query['site_id']);
+                $params = $site->getItemPool();
+                if (!is_array($params)) {
+                    $params = [];
+                }
+                // Avoid potential infinite recursion.
+                unset($params['site_id']);
+
+                // The site pool is a list of items, so a sub-query of target.
+                // The sub-query is the same than above for resource_id, but
+                // it's a sub-query.
+
+                // TODO Add a sub-event on the sub query to limit annotations to the site? There is none for items (but it's the same).
+                $subEntityClass = \Omeka\Entity\Item::class;
+                $subQb = $this->getEntityManager()
+                    ->createQueryBuilder()
+                    ->select($subEntityClass . '.id')
+                    ->from($subEntityClass, $subEntityClass);
+                $this->getAdapter('items')
+                    ->buildQuery($subQb, $query);
+                $subQb->groupBy("$subEntityClass.id");
+
+                $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
+                // The resource is attached via the property oa:hasSource of the
+                // AnnotationTargets, that are attached to annotations.
+                $targetAlias = $this->createAlias();
+                $qb->innerJoin(
+                    AnnotationTarget::class,
+                    $targetAlias,
+                    'WITH',
+                    $qb->expr()->eq($targetAlias . '.annotation', Annotation::class)
+                );
+                $valuesAlias = $this->createAlias();
+                $qb->innerJoin(
+                    $targetAlias . '.values',
+                    $valuesAlias,
+                    'WITH',
+                    $qb->expr()->andX(
+                        $qb->expr()->eq($valuesAlias . '.property', $propertyId),
+                        $qb->expr()->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
+                        $qb->expr()->in($valuesAlias . '.valueResource', $subQb)
+                    )
+                );
+
+            } catch (Exception\NotFoundException $e) {
+            }
+        }
+
         // TODO Build queries to find annotations by query on targets and bodies here?
         // TODO Query has_body / linked resource id.
     }
