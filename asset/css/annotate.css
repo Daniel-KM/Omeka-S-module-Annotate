@@ -1,12 +1,4 @@
 @media screen {
-    header nav .annotations::before,
-    .annotations .subhead::before {
-        content:"";
-    }
-    .annotations .no-resources:before {
-        content:"";
-    }
-
     /* Annotation show */
     .annotations .annotation-caption {
         background-color: rgba(0,0,0,0.04);

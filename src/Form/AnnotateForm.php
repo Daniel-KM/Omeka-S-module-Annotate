@@ -91,8 +91,7 @@ class AnnotateForm extends Form
             'name' => 'submit',
             'attributes' => [
                 'value' => 'Annotate it!', // @translate
-                // FIXME Add icon to input; for compatibility with Omeka 1.1 and 1.0.
-                'class' => 'far fa-point-up fa fa-hand-o-up',
+                'class' => 'far fa-hand-o-up',
             ],
         ]);
 
@@ -334,9 +333,9 @@ class AnnotateForm extends Form
 
     protected function propertyId($term)
     {
-        return $this->api
-            ->searchOne('properties', ['term' => $term])
-            ->getContent()->id();
+        $property = $this->api
+            ->searchOne('properties', ['term' => $term])->getContent();
+        return $property ? $property->id() : null;
     }
 
     /**

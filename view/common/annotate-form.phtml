@@ -1,7 +1,13 @@
 <?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceRepresentation $resource
+ * @var \Annotate\Form\AnnotateForm $annotateForm
+ */
+
 $translate = $this->plugin('translate');
 
-//$annotationForm->prepare();
+// $annotationForm->prepare();
 $resourceClass = $resource->resourceClass();
 $isAnnotation = $resourceClass && $resourceClass->localName() === 'Annotation';
 // if ($isAnnotation):

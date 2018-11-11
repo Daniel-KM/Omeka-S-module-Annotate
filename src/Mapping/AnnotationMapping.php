@@ -13,6 +13,7 @@ class AnnotationMapping extends AbstractResourceMapping
     {
         parent::processGlobalArgs();
 
+        /** @var array $data */
         $data = &$this->data;
 
         // Set the default resource type as "annotations".
@@ -27,6 +28,7 @@ class AnnotationMapping extends AbstractResourceMapping
         parent::processCell($index, $values);
         $this->processCellAnnotation($index, $values);
 
+        /** @var array $data */
         $data = &$this->data;
 
         if (isset($this->map['resourceType'][$index])) {

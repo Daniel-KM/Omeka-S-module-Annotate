@@ -60,8 +60,7 @@ return [
         'AdminResource' => [
             [
                 'label' => 'Annotations', // @translate
-                // FIXME For compatibility with Omeka 1.1 and 1.0.
-                'class' => 'annotations far fa-point-up fa-hand-o-up',
+                'class' => 'annotations far fa-hand-o-up',
                 'route' => 'admin/annotate/default',
                 'resource' => Controller\Admin\AnnotationController::class,
                 'privilege' => 'browse',
