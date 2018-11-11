@@ -154,6 +154,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $resources = array_filter($resources, 'is_numeric');
 
             if ($resources) {
+                $expr = $qb->expr();
                 // TODO Make the property id of oa:hasSource static or integrate it to avoid a double query.
                 $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
                 // The resource is attached via the property oa:hasSource of the
@@ -162,18 +163,21 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $qb->innerJoin(
                     AnnotationTarget::class,
                     $targetAlias,
-                    'WITH',
-                    $qb->expr()->eq($targetAlias . '.annotation', Annotation::class)
+                    \Doctrine\ORM\Query\Expr\Join::WITH,
+                    $expr->eq($targetAlias . '.annotation', Annotation::class)
                 );
                 $valuesAlias = $this->createAlias();
                 $qb->innerJoin(
                     $targetAlias . '.values',
                     $valuesAlias,
-                    'WITH',
-                    $qb->expr()->andX(
-                        $qb->expr()->eq($valuesAlias . '.property', $propertyId),
-                        $qb->expr()->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
-                        $qb->expr()->in($valuesAlias . '.valueResource', $this->createNamedParameter($qb, $resources))
+                    \Doctrine\ORM\Query\Expr\Join::WITH,
+                    $expr->andX(
+                        $expr->eq($valuesAlias . '.property', $propertyId),
+                        $expr->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
+                        $expr->in(
+                            $valuesAlias . '.valueResource',
+                            $this->createNamedParameter($qb, $resources)
+                        )
                     )
                 );
             }
@@ -182,6 +186,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Make the limit to a site working for item sets and media too.
         if (!empty($query['site_id'])) {
             try {
+                $expr = $qb->expr();
                 // See \Omeka\Api\Adapter\ItemAdapter::buildQuery().
                 $siteAdapter = $this->getAdapter('sites');
                 $site = $siteAdapter->findEntity($query['site_id']);
@@ -195,16 +200,35 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // The site pool is a list of items, so a sub-query of target.
                 // The sub-query is the same than above for resource_id, but
                 // it's a sub-query.
+                // TODO Manage annotation of item sets.
 
                 // TODO Add a sub-event on the sub query to limit annotations to the site? There is none for items (but it's the same).
+                $subAdapter = $this->getAdapter('items');
                 $subEntityClass = \Omeka\Entity\Item::class;
                 $subQb = $this->getEntityManager()
                     ->createQueryBuilder()
                     ->select($subEntityClass . '.id')
                     ->from($subEntityClass, $subEntityClass);
-                $this->getAdapter('items')
-                    ->buildQuery($subQb, $query);
-                $subQb->groupBy("$subEntityClass.id");
+                $subAdapter
+                    ->buildQuery($subQb, $params);
+                $subQb->groupBy($subEntityClass . '.id');
+
+                // The subquery cannot manage the parameters, since there are
+                // two independant queries, but they use the same aliases. Since
+                // number of ids may be great, it will be possible to create a
+                // temporary table. Currently, a simple string replacement of
+                // aliases is used.
+                // TODO Fix Omeka core for aliases in sub queries.
+                $subDql = str_replace('omeka_', 'akemo_',  $subQb->getDQL());
+                /** @var \Doctrine\ORM\Query\Parameter $parameter */
+                $subParams = $subQb->getParameters();
+                foreach ($subParams as $parameter) {
+                    $qb->setParameter(
+                        str_replace('omeka_', 'akemo_', $parameter->getName()),
+                        $parameter->getValue(),
+                        $parameter->getType()
+                    );
+                }
 
                 $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
                 // The resource is attached via the property oa:hasSource of the
@@ -213,18 +237,21 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $qb->innerJoin(
                     AnnotationTarget::class,
                     $targetAlias,
-                    'WITH',
-                    $qb->expr()->eq($targetAlias . '.annotation', Annotation::class)
+                    \Doctrine\ORM\Query\Expr\Join::WITH,
+                    $expr->eq($targetAlias . '.annotation', Annotation::class)
                 );
                 $valuesAlias = $this->createAlias();
                 $qb->innerJoin(
                     $targetAlias . '.values',
                     $valuesAlias,
-                    'WITH',
-                    $qb->expr()->andX(
-                        $qb->expr()->eq($valuesAlias . '.property', $propertyId),
-                        $qb->expr()->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
-                        $qb->expr()->in($valuesAlias . '.valueResource', $subQb)
+                    \Doctrine\ORM\Query\Expr\Join::WITH,
+                    $expr->andX(
+                        $expr->eq($valuesAlias . '.property', $propertyId),
+                        $expr->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
+                        $expr->in(
+                            $valuesAlias . '.valueResource',
+                            $subDql
+                        )
                     )
                 );
 
