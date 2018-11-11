@@ -90,7 +90,7 @@ $sectionNavs = [
     </div>
     <div class="meta-group">
         <h4><?php echo $translate('Owner'); ?></h4>
-        <div class="value"><?php echo $owner ? $escape($owner->name()) : $translate('[no owner]'); ?></div>
+        <div class="value"><?php echo $annotation->linkAnnotator(); ?></div>
     </div>
 
     <?php $this->trigger('view.show.sidebar'); ?>

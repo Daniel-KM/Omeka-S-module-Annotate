@@ -16,6 +16,15 @@ $this->htmlElement('body')->appendAttribute('class', 'annotations show');
 <?php $this->trigger('view.show.before'); ?>
 
 <div id="annotation-metadata" class="active section">
+    <div class="meta-group">
+        <h4><?php echo $translate('Owner'); ?></h4>
+        <div class="value"><?php echo $annotation->linkAnnotator(); ?></div>
+    </div>
+    <div class="meta-group">
+        <h4><?php echo $translate('Created'); ?></h4>
+        <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
+    </div>
+    <h4><?php echo $translate('Metadata'); ?></h4>
     <?php echo $annotation->displayValues(); ?>
 </div>
 

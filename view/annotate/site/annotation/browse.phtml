@@ -83,18 +83,9 @@ $sortHeadings = [
                 <?php endif; ?>
             </td>
             <td>
-                <?php if ($owner): ?>
-                    <span class="annotation-email"><?php echo $this->hyperlink(
-                        $owner->name(),
-                        $this->url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()]));
-                    ?></span>
-                <?php else: ?>
-                    <span class="annotation-email annotation-public"><?php echo $this->hyperlink(
-                        $annotation->name(),
-                        'mailto:' . $annotation->email());
-                    ?></span>
-                    <span class="o-icon-users" aria-label="<?php echo $translate('Public'); ?>"></span>
-                <?php endif; ?>
+                <span class="<?php if ($owner): ?>annotation-user<?php else: ?>annotation-public<?php endif; ?>"><?php
+                    echo $annotation->linkAnnotator();
+                ?></span>
             </td>
             <td><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></td>
         </tr>

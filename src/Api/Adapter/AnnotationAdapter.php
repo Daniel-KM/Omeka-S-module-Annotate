@@ -142,6 +142,30 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
     public function buildQuery(QueryBuilder $qb, array $query)
     {
+        if (isset($query['annotator'])) {
+            if ($query['annotator'] === '0') {
+                $query['property'][] = [
+                    'joiner' => 'and',
+                    'property' => 'dcterms:creator',
+                    'type' => 'nex',
+                ];
+                // Manage a null owner.
+                $userAlias = $this->createAlias();
+                $qb->innerJoin(
+                    $this->getEntityClass() . '.owner',
+                    $userAlias
+                );
+                $qb->andWhere($qb->expr()->isNull($userAlias . '.id'));
+            } else {
+                $query['property'][] = [
+                    'joiner' => 'and',
+                    'property' => 'dcterms:creator',
+                    'type' => 'eq',
+                    'text' => $query['annotator'],
+                ];
+            }
+        }
+
         parent::buildQuery($qb, $query);
 
         if (isset($query['id'])) {

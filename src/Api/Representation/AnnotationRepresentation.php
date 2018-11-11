@@ -191,6 +191,76 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
+     * Get the annotator of this annotation.
+     *
+     * @param string $default
+     * @return \Omeka\Api\Representation\UserRepresentation|array
+     */
+    public function annotator($default = null)
+    {
+        $owner = $this->owner();
+        if ($owner) {
+           return $owner;
+        }
+
+        // TODO The annotator may be a public or a deleted owner.
+        $public = [];
+        $creator = $this->value('dcterms:creator');
+        if ($creator) {
+            $public['id'] = true;
+            $public['name'] = (string) $creator;
+        } else {
+            $public['id'] = false;
+            if (is_null($default)) {
+                $translator = $this->getServiceLocator()->get('MvcTranslator');
+                $public['name'] = $translator->translate('[Unknown]');
+            } else {
+                $public['name'] = $default;
+            }
+        }
+
+        $public['email'] = (string) $this->value('foaf:mbox');
+
+        return $public;
+    }
+
+    /**
+     * Get the link to all annotations of the annotator of this annotation.
+     *
+     * @param string $default
+     * @return string
+     */
+    public function linkAnnotator($default = null)
+    {
+        $services = $this->getServiceLocator();
+
+        $annotator = $this->annotator();
+        $query = [];
+        if (is_object($annotator)) {
+            $text = $annotator->name();
+            $query['owner_id'] = $annotator->id();
+        } else {
+            // TODO Manage anonymous user deleted user.
+            $text = $annotator['name'];
+            $query['annotator'] = $annotator['id'] ? $text : '0';
+        }
+
+        $status = $services->get('Omeka\Status');
+        $url = $this->getViewHelper('Url');
+        if ($status->isAdminRequest()) {
+            $url = $url('admin/annotate/default', [], ['query' => $query]);
+        } elseif ($status->isSiteRequest()) {
+            $url = $url('site/annotate/default', [], ['query' => $query], true);
+        } else {
+            return;
+        }
+
+        $hyperlink = $this->getViewHelper('hyperlink');
+        $escapeHtml = $this->getViewHelper('escapeHtml');
+        return $hyperlink->raw($escapeHtml($text), $url);
+    }
+
+    /**
      * Merge values of the annotation, bodies and the targets.
      *
      *  Most of the time, there is only one body and one target, and each entity
