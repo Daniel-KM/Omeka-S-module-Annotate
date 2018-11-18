@@ -2,8 +2,11 @@
 
 const del = require('del');
 const gulp = require('gulp');
+const gulpif = require('gulp-if');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
 
-const bundles = [
+const bundle = [
     {
         'source': 'node_modules/webui-popover/dist/**',
         'dest': 'asset/vendor/webui-popover',
@@ -11,16 +14,18 @@ const bundles = [
 ];
 
 gulp.task('clean', function(done) {
-    bundles.map(function (bundle) {
-        return del(bundle.dest);
+    bundle.forEach(function (module) {
+        return del.sync(module.dest);
     });
     done();
 });
 
 gulp.task('sync', function (done) {
-    bundles.map(function (bundle) {
-        return gulp.src(bundle.source)
-            .pipe(gulp.dest(bundle.dest));
+    bundle.forEach(function (module) {
+        gulp.src(module.source)
+            .pipe(gulpif(module.rename, rename({suffix:'.min'})))
+            .pipe(gulpif(module.uglify, uglify()))
+            .pipe(gulp.dest(module.dest));
     });
     done();
 });
