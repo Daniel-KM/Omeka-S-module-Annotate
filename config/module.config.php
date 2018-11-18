@@ -185,7 +185,7 @@ return [
     'annotate' => [
         'config' => [
             'annotate_public_allow_view' => true,
-            'annotate_public_allow_annotate', false,
+            'annotate_public_allow_annotate' => false,
         ],
         'site_settings' => [
             'annotate_append_item_set_show' => false,
