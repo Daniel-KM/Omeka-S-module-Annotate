@@ -136,23 +136,15 @@ of the CeCILL license and that you accept its terms.
 * The library [`webui-popover`] is published under the license [MIT].
 
 
-Contact
--------
-
-Current maintainers:
-
-* Daniel Berthereau (see [Daniel-KM] on GitHub)
-
-This module was built first for the French École des hautes études en sciences
-sociales [EHESS].
-
-
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2017-2018
+* Copyright Daniel Berthereau, 2017-2018 (see [Daniel-KM] on GitHub)
 
 * Library [webui-popover]: Sandy Walker
+
+This module was built first for the French École des hautes études en sciences
+sociales [EHESS].
 
 
 [Annotate]: https://github.com/Daniel-KM/Omeka-S-module-Annotate
