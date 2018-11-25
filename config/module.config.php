@@ -56,6 +56,9 @@ return [
             'resourceAnnotations' => Mvc\Controller\Plugin\ResourceAnnotations::class,
             'totalResourceAnnotations' => Mvc\Controller\Plugin\TotalResourceAnnotations::class,
         ],
+        'factories' => [
+            'divideMergedValues' => Service\ControllerPlugin\DivideMergedValuesFactory::class,
+        ],
     ],
     'navigation' => [
         'AdminResource' => [

@@ -489,7 +489,7 @@ class AnnotationController extends AbstractActionController
      * Only annotation target media-types are managed.
      *
      * @todo Simplify and improve the determination of the media-type (via stream).
-     * @see \Annotate\Api\Representation\AnnotationRepresentation::determineMediaType()
+     * @see \Annotate\Mvc\Controller\Plugin\DivideMergedValues::determineMediaType()
      *
      * @param string $string
      * @return string|null
@@ -531,6 +531,10 @@ class AnnotationController extends AbstractActionController
             }
 
             return 'application/xml';
+        }
+        // TODO Partial xml/html.
+        if ($this->isHtml($string)) {
+            return 'text/html';
         }
         // TODO Find a better way to check if a string is a wkt.
         $wktTags = [
