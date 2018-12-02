@@ -632,6 +632,21 @@ SQL;
             );
         }
 
+        // Events for the public front-end.
+        $controllers = [
+            'Omeka\Controller\Site\Item',
+            'Omeka\Controller\Site\ItemSet',
+            'Omeka\Controller\Site\Media',
+        ];
+        foreach ($controllers as $controller) {
+            // Add the annotations to the resource show public pages.
+            $sharedEventManager->attach(
+                $controller,
+                'view.show.after',
+                [$this, 'displayPublic']
+            );
+        }
+
         // Events for the admin board.
         $controllers = [
             'Omeka\Controller\Admin\Item',
@@ -683,20 +698,33 @@ SQL;
             );
         }
 
-        // Events for the public front-end.
-        $controllers = [
-            'Omeka\Controller\Site\Item',
-            'Omeka\Controller\Site\ItemSet',
-            'Omeka\Controller\Site\Media',
-        ];
-        foreach ($controllers as $controller) {
-            // Add the annotations to the resource show public pages.
-            $sharedEventManager->attach(
-                $controller,
-                'view.show.after',
-                [$this, 'displayPublic']
-            );
-        }
+        // Add a tab to the resource template admin pages.
+        // Can be added to the view of the form too.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ResourceTemplate',
+            'view.add.after',
+            [$this, 'addHeadersAdmin']
+        );
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\ResourceTemplate',
+            'view.edit.after',
+            [$this, 'addHeadersAdmin']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.create.post',
+            [$this, 'handleResourceTemplateCreateOrUpdatePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.update.post',
+            [$this, 'handleResourceTemplateCreateOrUpdatePost']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.delete.post',
+            [$this, 'handleResourceTemplateDeletePost']
+        );
 
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
@@ -717,6 +745,40 @@ SQL;
             'form.add_elements',
             [$this, 'addCsvImportFormElements']
         );
+    }
+
+    public function handleResourceTemplateCreateOrUpdatePost(Event $event)
+    {
+        // The acl are already checked via the api.
+        $services = $this->getServiceLocator();
+        $request = $event->getParam('request');
+        $response = $event->getParam('response');
+
+        $result = [];
+        $requestContent = $request->getContent();
+        $requestResourceProperties = isset($requestContent['o:resource_template_property']) ? $requestContent['o:resource_template_property'] : [];
+        foreach ($requestResourceProperties as $propertyId => $requestResourceProperty) {
+            if (isset($requestResourceProperty['data']['annotation_part'])) {
+                $result[$propertyId] = $requestResourceProperty['data']['annotation_part'];
+            }
+        }
+
+        $resourceTemplateId = $response->getContent()->getId();
+        $settings = $services->get('Omeka\Settings');
+        $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
+        $resourceTemplateData[$resourceTemplateId] = $result;
+        $settings->set('annotate_resource_template_data', $resourceTemplateData);
+    }
+
+    public function handleResourceTemplateDeletePost(Event $event)
+    {
+        // The acl are already checked via the api.
+        $id = $event->getParam('request')->getId();
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
+        unset($resourceTemplateData[$id]);
+        $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
     public function addFormElementsSiteSettings(Event $event)

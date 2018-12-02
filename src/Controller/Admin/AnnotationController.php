@@ -5,6 +5,7 @@ use Annotate\Entity\Annotation;
 use Annotate\Form\AnnotateForm;
 use Annotate\Form\ResourceForm;
 use Omeka\Form\ConfirmForm;
+use Omeka\Mvc\Exception\NotFoundException;
 use Omeka\Stdlib\Message;
 use Zend\Http\Response;
 use Zend\Mvc\Controller\AbstractActionController;
@@ -456,6 +457,22 @@ class AnnotationController extends AbstractActionController
     {
         $this->messenger()->addError('Delete of all annotations is not supported currently.'); // @translate
         return $this->redirect()->toRoute(null, ['action' => 'browse'], true);
+    }
+
+    /**
+     * Return the annotation settings for a specific resource template (ajax only).
+     */
+    public function resourceTemplateDataAction()
+    {
+        if (!$this->getRequest()->isXmlHttpRequest()) {
+            throw new NotFoundException;
+        }
+        $resourceTemplateSettings = $this->settings()->get('annotate_resource_template_data', []);
+        $resourceTemplateId = $this->params()->fromQuery('resource_template_id');
+        $resourceTemplateSetting = isset($resourceTemplateSettings[$resourceTemplateId])
+            ? $resourceTemplateSettings[$resourceTemplateId]
+            : [];
+        return new JsonModel($resourceTemplateSetting);
     }
 
     protected function jsonError($message, $statusCode = Response::STATUS_CODE_500)
