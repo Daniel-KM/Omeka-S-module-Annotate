@@ -753,13 +753,20 @@ SQL;
         $services = $this->getServiceLocator();
         $request = $event->getParam('request');
         $response = $event->getParam('response');
+        $api = $services->get('Omeka\ApiManager');
 
         $result = [];
         $requestContent = $request->getContent();
         $requestResourceProperties = isset($requestContent['o:resource_template_property']) ? $requestContent['o:resource_template_property'] : [];
         foreach ($requestResourceProperties as $propertyId => $requestResourceProperty) {
             if (isset($requestResourceProperty['data']['annotation_part'])) {
-                $result[$propertyId] = $requestResourceProperty['data']['annotation_part'];
+                try {
+                    /** @var \Omeka\Api\Representation\PropertyRepresentation $property */
+                    $property = $api->read('properties', $propertyId)->getContent();
+                } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                    continue;
+                }
+                $result[$property->term()] = $requestResourceProperty['data']['annotation_part'];
             }
         }
 

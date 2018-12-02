@@ -472,7 +472,15 @@ class AnnotationController extends AbstractActionController
         $resourceTemplateSetting = isset($resourceTemplateSettings[$resourceTemplateId])
             ? $resourceTemplateSettings[$resourceTemplateId]
             : [];
-        return new JsonModel($resourceTemplateSetting);
+        $result = [];
+        $api = $this->api();
+        foreach ($resourceTemplateSetting as $term => $value) {
+            $property = $api->searchOne('properties', ['term' => $term])->getContent();
+            if ($property) {
+                $result[$property->id()] = $value;
+            }
+        }
+        return new JsonModel($result);
     }
 
     protected function jsonError($message, $statusCode = Response::STATUS_CODE_500)

@@ -309,8 +309,19 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
      */
     public function divideMergedValues(array $data)
     {
-        $divideMergedValues = $this->getServiceLocator()->get('ControllerPluginManager')->get('divideMergedValues');
-        return $divideMergedValues($data);
+        $services = $this->getServiceLocator();
+        $divideMergedValues = $services->get('ControllerPluginManager')->get('divideMergedValues');
+        $resourceTemplate = $this->resourceTemplate();
+        if ($resourceTemplate) {
+            $settings = $services->get('Omeka\Settings');
+            $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
+            $resourceTemplateData = isset($resourceTemplateData[$resourceTemplate->id()])
+                ? $resourceTemplateData[$resourceTemplate->id()]
+                : [];
+        } else {
+            $resourceTemplateData = [];
+        }
+        return $divideMergedValues($data, $resourceTemplateData);
     }
 
 //     /**
