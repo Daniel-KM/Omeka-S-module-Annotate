@@ -2,6 +2,7 @@
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
+use Annotate\Entity\AnnotationBody;
 use Annotate\Entity\AnnotationTarget;
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
@@ -45,8 +46,31 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         return \Annotate\Entity\Annotation::class;
     }
 
+    /**
+     * The search is done on annotation bodies and targets too.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildQuery()
+     */
     public function buildQuery(QueryBuilder $qb, array $query)
     {
+        $expr = $qb->expr();
+
+        // Join all related bodies and targets to get their properties too.
+        $qb->leftJoin(
+            AnnotationBody::class,
+            AnnotationBody::class,
+            \Doctrine\ORM\Query\Expr\Join::WITH,
+            $expr->eq(AnnotationBody::class . '.annotation', Annotation::class)
+        );
+        $qb->leftJoin(
+            AnnotationTarget::class,
+            AnnotationTarget::class,
+            \Doctrine\ORM\Query\Expr\Join::WITH,
+            $expr->eq(AnnotationTarget::class . '.annotation', Annotation::class)
+        );
+
+        // Added before parent buildQuery because a property is added.
         if (isset($query['annotator'])) {
             if ($query['annotator'] === '0') {
                 $query['property'][] = [
@@ -60,7 +84,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $this->getEntityClass() . '.owner',
                     $userAlias
                 );
-                $qb->andWhere($qb->expr()->isNull($userAlias . '.id'));
+                $qb->andWhere($expr->isNull($userAlias . '.id'));
             } else {
                 $query['property'][] = [
                     'joiner' => 'and',
@@ -74,7 +98,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         parent::buildQuery($qb, $query);
 
         if (isset($query['id'])) {
-            $qb->andWhere($qb->expr()->eq('Annotate\Entity\Annotation.id', $query['id']));
+            $qb->andWhere($expr->eq('Annotate\Entity\Annotation.id', $query['id']));
         }
 
         if (isset($query['resource_id'])) {
@@ -85,7 +109,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $resources = array_filter($resources, 'is_numeric');
 
             if ($resources) {
-                $expr = $qb->expr();
                 // TODO Make the property id of oa:hasSource static or integrate it to avoid a double query.
                 $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
                 // The resource is attached via the property oa:hasSource of the
@@ -117,7 +140,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Make the limit to a site working for item sets and media too.
         if (!empty($query['site_id'])) {
             try {
-                $expr = $qb->expr();
                 // See \Omeka\Api\Adapter\ItemAdapter::buildQuery().
                 $siteAdapter = $this->getAdapter('sites');
                 $site = $siteAdapter->findEntity($query['site_id']);
@@ -185,7 +207,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                         )
                     )
                 );
-
             } catch (Exception\NotFoundException $e) {
             }
         }
@@ -205,7 +226,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $this->getEntityClass() . '.resourceClass',
                 $resourceClassAlias
             );
-            $qb->andWhere($qb->expr()->eq(
+            $qb->andWhere($expr->eq(
                 $resourceClassAlias . '.id',
                 $this->createNamedParameter($qb, $resourceClass))
             );
