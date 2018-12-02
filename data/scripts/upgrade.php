@@ -4,21 +4,21 @@ namespace Annotate;
 /**
  * @var Module $this
  * @var \Zend\ServiceManager\ServiceLocatorInterface $serviceLocator
- * @var string $oldVersion
  * @var string $newVersion
+ * @var string $oldVersion
+ *
+ * @var \Doctrine\DBAL\Connection $connection
+ * @var \Doctrine\ORM\EntityManager $entityManager
+ * @var \Omeka\Api\Manager $api
  */
 $services = $serviceLocator;
-
-/**
- * @var \Omeka\Settings\Settings $settings
- * @var \Doctrine\DBAL\Connection $connection
- * @var \Omeka\Api\Manager $api
- * @var array $config
- */
 $settings = $services->get('Omeka\Settings');
-$connection = $services->get('Omeka\Connection');
-$api = $services->get('Omeka\ApiManager');
 $config = require dirname(dirname(__DIR__)) . '/config/module.config.php';
+$connection = $services->get('Omeka\Connection');
+$entityManager = $services->get('Omeka\EntityManager');
+$plugins = $services->get('ControllerPluginManager');
+$api = $plugins->get('api');
+$space = strtolower(__NAMESPACE__);
 
 if (version_compare($oldVersion, '3.0.1', '<')) {
     // The media-type is not standard, but application/wkt seems better.
@@ -62,4 +62,37 @@ SQL;
         'o:label' => $label,
         'o:terms' => implode(PHP_EOL, $terms),
     ], [], ['isPartial' => true]);
+}
+
+if (version_compare($oldVersion, '3.0.5', '<')) {
+    // Replace all resources rdf:value by oa:hasBody for annotation bodies.
+    $rdfValueId = $api
+        ->searchOne('properties', ['term' => 'rdf:value'])->getContent()
+        ->id();
+    $oaHasBodyId = $api
+        ->searchOne('properties', ['term' => 'oa:hasBody'])->getContent()
+        ->id();
+    $sql = <<<SQL
+UPDATE value
+JOIN annotation_body ON value.resource_id = annotation_body.id
+SET property_id = $oaHasBodyId
+WHERE value.property_id = $rdfValueId
+AND value.type = "resource"
+SQL;
+    $connection->exec($sql);
+
+    // Unlike bodies, targets are saved in oa:hasSource (items in Cartography),
+    // so there is no need to update them as "oa:hasTarget". Nevertheless,
+    // replace all resources rdf:value by oa:hasSelector for annotation targets.
+    $oaHasSelectorId = $api
+        ->searchOne('properties', ['term' => 'oa:hasSelector'])->getContent()
+        ->id();
+    $sql = <<<SQL
+UPDATE value
+JOIN annotation_target ON value.resource_id = annotation_target.id
+SET property_id = $oaHasSelectorId
+WHERE value.property_id = $rdfValueId
+AND value.type = "resource"
+SQL;
+    $connection->exec($sql);
 }

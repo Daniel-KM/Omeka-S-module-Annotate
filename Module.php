@@ -617,18 +617,6 @@ SQL;
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
-        // Add the Annotation definition.
-        $sharedEventManager->attach(
-            '*',
-            'api.context',
-            function (Event $event) {
-                $context = $event->getParam('context');
-                $context['o-module-annotate'] = 'http://omeka.org/s/vocabs/module/annotate#';
-                $event->setParam('context', $context);
-            }
-        );
-
-        // TODO Remove annotation as part of resources: they are independant.
         // Add the annotation part to the representation.
         $representations = [
             'user' => UserRepresentation::class,
@@ -833,8 +821,10 @@ SQL;
         $annotations = $api
             ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
             ->getContent();
-        $jsonLd['o-module-annotate:annotation'] = $annotations;
-        $event->setParam('jsonLd', $jsonLd);
+        if ($annotations) {
+            $jsonLd['oa:Annotation'] = $annotations;
+            $event->setParam('jsonLd', $jsonLd);
+        }
     }
 
     /**
@@ -954,9 +944,9 @@ SQL;
         $data = [];
         // TODO Make the property id of oa:hasTarget/oa:hasSource static or integrate it to avoid a double query.
         $propertyId = $api->searchOne('properties', ['term' => 'oa:hasSource'])->getContent()->id();
-        $data['o-module-annotate:target[0][oa:hasSource][0][property_id]'] = $propertyId;
-        $data['o-module-annotate:target[0][oa:hasSource][0][type]'] = 'resource';
-        $data['o-module-annotate:target[0][oa:hasSource][0][value_resource_id]'] = $resource->id();
+        $data['oa:hasTarget[0][oa:hasSource][0][property_id]'] = $propertyId;
+        $data['oa:hasTarget[0][oa:hasSource][0][type]'] = 'resource';
+        $data['oa:hasTarget[0][oa:hasSource][0][value_resource_id]'] = $resource->id();
 
         echo $view->showAnnotateForm($resource, $options, $attributes, $data);
     }

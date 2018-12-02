@@ -146,8 +146,8 @@ class DivideMergedValues extends AbstractPlugin
         } else {
             unset($data['rdf:type']);
         }
-        $data['o-module-annotate:body'] = $rdfTypes['body'];
-        $data['o-module-annotate:target'] = $rdfTypes['target'];
+        $data['oa:hasBody'] = $rdfTypes['body'];
+        $data['oa:hasTarget'] = $rdfTypes['target'];
 
         // Step 2.
         // Manage standard and recommended annotation properties.
@@ -155,10 +155,10 @@ class DivideMergedValues extends AbstractPlugin
             if (in_array($term, $map['annotation'])) {
                 continue;
             } elseif (in_array($term, $map['body'])) {
-                $data['o-module-annotate:body'][0][$term] = $values;
+                $data['oa:hasBody'][0][$term] = $values;
                 unset($data[$term]);
             } elseif (in_array($term, $map['target'])) {
-                $data['o-module-annotate:target'][0][$term] = $values;
+                $data['oa:hasTarget'][0][$term] = $values;
                 unset($data[$term]);
             }
         }
@@ -168,32 +168,32 @@ class DivideMergedValues extends AbstractPlugin
         // Only some media type are managed, exclusively.
         // TODO Check when there are multiple bodies and targets.
         // TODO Replace rdf:value by oa:hasSelector in the form?
-        if (!empty($data['o-module-annotate:body'][0]['rdf:value'])) {
+        if (!empty($data['oa:hasBody'][0]['rdf:value'])) {
             $customVocab = $api
                 ->read('custom_vocabs', ['label' => 'Annotation Target dcterms:format'])->getContent();
             $targetFormats = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
             $property = $api->searchOne('properties', [
                 'term' => 'dcterms:format',
             ], [], ['responseContent' => 'reference'])->getContent();
-            foreach ($data['o-module-annotate:body'] as $key => $body) {
+            foreach ($data['oa:hasBody'] as $key => $body) {
                 foreach ($body['rdf:value'] as $keyB => $valueB) {
                     // TODO Manage the case where the resource is in the body (no form currently, except the main one).
                     if ($valueB['type'] === 'resource') {
-                        $data['o-module-annotate:target'][0]['rdf:value'][] = $valueB;
-                        unset($data['o-module-annotate:body'][$key]['rdf:value'][$keyB]);
+                        $data['oa:hasTarget'][0]['rdf:value'][] = $valueB;
+                        unset($data['oa:hasBody'][$key]['rdf:value'][$keyB]);
                     } else {
                         $mediaType = $this->determineMediaType($valueB['@value']);
                         // Note: the process cannot distinct text/html when xml.
                         if (in_array($mediaType, $targetFormats)) {
                             // TODO Set the media type to the right target (only one currently).
-                            $data['o-module-annotate:target'][0]['rdf:value'][] = $valueB;
+                            $data['oa:hasTarget'][0]['rdf:value'][] = $valueB;
                             // Save the media type (forced).
-                            $data['o-module-annotate:target'][0]['dcterms:format'][0] = [
+                            $data['oa:hasTarget'][0]['dcterms:format'][0] = [
                                 '@value' => $mediaType,
                                 'property_id' => $property->id(),
                                 'type' => 'customvocab:' . $customVocab->id(),
                             ];
-                            unset($data['o-module-annotate:body'][$key]['rdf:value'][$keyB]);
+                            unset($data['oa:hasBody'][$key]['rdf:value'][$keyB]);
                         }
                     }
                     // Else, this is a plain text or an html snippet (TextualBody).
@@ -314,7 +314,7 @@ class DivideMergedValues extends AbstractPlugin
      * Renormalize values as json-ld rdf Annotation resource.
      *
      * @see https://www.w3.org/TR/annotation-model/
-     * @todo Factorize with AbstractAnnotationResourceRepresentation::valuesOnly().
+     * @todo Factorize with AbstractValueResourceEntityRepresentation::valuesOnly().
      *
      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
      * @return array|string

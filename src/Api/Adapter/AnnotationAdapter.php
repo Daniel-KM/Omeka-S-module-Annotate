@@ -45,101 +45,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         return \Annotate\Entity\Annotation::class;
     }
 
-    public function hydrate(
-        Request $request,
-        EntityInterface $entity,
-        ErrorStore $errorStore
-    ) {
-        $this->normalizeRequest($request, $entity, $errorStore);
-
-        parent::hydrate($request, $entity, $errorStore);
-
-        // $isUpdate = Request::UPDATE === $request->getOperation();
-        // $isPartial = $isUpdate && $request->getOption('isPartial');
-        // $append = $isPartial && 'append' === $request->getOption('collectionAction');
-        // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
-
-        $childEntities = [
-            'o-module-annotate:body' => 'annotation_bodies',
-            'o-module-annotate:target' => 'annotation_targets',
-        ];
-        foreach ($childEntities as $jsonName => $resourceName) {
-            if ($this->shouldHydrate($request, $jsonName)) {
-                $childrenData = $request->getValue($jsonName, []);
-                $adapter = $this->getAdapter($resourceName);
-                $class = $adapter->getEntityClass();
-                $retainChildren = [];
-                foreach ($childrenData as $childData) {
-                    $subErrorStore = new ErrorStore;
-                    // Keep an existing child.
-                    if (is_object($childData)) {
-                        $child = $this->getAdapter($resourceName)
-                            ->findEntity($childData);
-                        $retainChildren[] = $child;
-                    } elseif (isset($childData['o:id'])) {
-                        $child = $adapter->findEntity($childData['o:id']);
-                        if (isset($childData['o:is_public'])) {
-                            $child->setIsPublic($childData['o:is_public']);
-                        }
-                        $retainChildren[] = $child;
-                    }
-                    // Create a new child.
-                    else {
-                        $child = new $class;
-                        $child->setAnnotation($entity);
-                        $subrequest = new Request(Request::CREATE, $resourceName);
-                        $subrequest->setContent($childData);
-                        try {
-                            $adapter->hydrateEntity($subrequest, $child, $subErrorStore);
-                        } catch (Exception\ValidationException $e) {
-                            $errorStore->mergeErrors($e->getErrorStore(), $jsonName);
-                        }
-                        switch ($resourceName) {
-                            case 'annotation_bodies':
-                                $entity->getBodies()->add($child);
-                                break;
-                            case 'annotation_targets':
-                                $entity->getTargets()->add($child);
-                                break;
-                        }
-                        $retainChildren[] = $child;
-                    }
-                }
-                // Remove child not included in request.
-                switch ($resourceName) {
-                    case 'annotation_bodies':
-                        $children = $entity->getBodies();
-                        break;
-                    case 'annotation_targets':
-                        $children = $entity->getTargets();
-                        break;
-                }
-                foreach ($children as $child) {
-                    if (!in_array($child, $retainChildren, true)) {
-                        $children->removeElement($child);
-                    }
-                }
-            }
-        }
-    }
-
-    public function validateRequest(Request $request, ErrorStore $errorStore)
-    {
-        $data = $request->getContent();
-
-        if (array_key_exists('o-module-annotate:body', $data)
-            && !is_array($data['o-module-annotate:body'])
-        ) {
-            $errorStore->addError('o-module-annotate:body', 'Body must be an array'); // @translate
-        }
-
-        if (array_key_exists('o-module-annotate:target', $data)
-            && !is_array($data['o-module-annotate:target'])
-        ) {
-            $errorStore->addError('o-module-annotate:target', 'Targets must be an array'); // @translate
-        }
-    }
-
     public function buildQuery(QueryBuilder $qb, array $query)
     {
         if (isset($query['annotator'])) {
@@ -289,6 +194,117 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Query has_body / linked resource id.
     }
 
+    public function hydrate(
+        Request $request,
+        EntityInterface $entity,
+        ErrorStore $errorStore
+    ) {
+        $this->normalizeRequest($request, $entity, $errorStore);
+
+        // Skip the bodies and the targets that are hydrated separately below.
+        // It avoids the value hydrator to try to hydrate values from them: they
+        // are not properties.
+        $childEntities = [
+            'oa:hasBody' => 'annotation_bodies',
+            'oa:hasTarget' => 'annotation_targets',
+        ];
+        $children = [];
+        $data = $request->getContent();
+        foreach ($childEntities as $jsonName => $resourceName) {
+            $children[$jsonName] = $request->getValue($jsonName, []);
+            unset($data[$jsonName]);
+        }
+        $request->setContent($data);
+        parent::hydrate($request, $entity, $errorStore);
+        // Reset the bodies and the targets that were skipped above.
+        foreach ($childEntities as $jsonName => $resourceName) {
+            $data[$jsonName] = $children[$jsonName];
+        }
+        $request->setContent($data);
+
+        // $isUpdate = Request::UPDATE === $request->getOperation();
+        // $isPartial = $isUpdate && $request->getOption('isPartial');
+        // $append = $isPartial && 'append' === $request->getOption('collectionAction');
+        // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
+
+        // TODO Remove the checks of the existing id, since it's a simple hydrator now.
+        foreach ($childEntities as $jsonName => $resourceName) {
+            if ($this->shouldHydrate($request, $jsonName)) {
+                $childrenData = $request->getValue($jsonName, []);
+                $adapter = $this->getAdapter($resourceName);
+                $class = $adapter->getEntityClass();
+                $retainChildren = [];
+                foreach ($childrenData as $childData) {
+                    $subErrorStore = new ErrorStore;
+                    // Keep an existing child.
+                    if (is_object($childData)) {
+                        $child = $this->getAdapter($resourceName)
+                            ->findEntity($childData);
+                        $retainChildren[] = $child;
+                    } elseif (isset($childData['o:id'])) {
+                        $child = $adapter->findEntity($childData['o:id']);
+                        if (isset($childData['o:is_public'])) {
+                            $child->setIsPublic($childData['o:is_public']);
+                        }
+                        $retainChildren[] = $child;
+                    }
+                    // Create a new child.
+                    else {
+                        $child = new $class;
+                        $child->setAnnotation($entity);
+                        $subrequest = new Request(Request::CREATE, $resourceName);
+                        $subrequest->setContent($childData);
+                        try {
+                            $adapter->hydrateEntity($subrequest, $child, $subErrorStore);
+                        } catch (Exception\ValidationException $e) {
+                            $errorStore->mergeErrors($e->getErrorStore(), $jsonName);
+                        }
+                        switch ($resourceName) {
+                            case 'annotation_bodies':
+                                $entity->getBodies()->add($child);
+                                break;
+                            case 'annotation_targets':
+                                $entity->getTargets()->add($child);
+                                break;
+                        }
+                        $retainChildren[] = $child;
+                    }
+                }
+                // Remove child not included in request.
+                switch ($resourceName) {
+                    case 'annotation_bodies':
+                        $children = $entity->getBodies();
+                        break;
+                    case 'annotation_targets':
+                        $children = $entity->getTargets();
+                        break;
+                }
+                foreach ($children as $child) {
+                    if (!in_array($child, $retainChildren, true)) {
+                        $children->removeElement($child);
+                    }
+                }
+            }
+        }
+    }
+
+    public function validateRequest(Request $request, ErrorStore $errorStore)
+    {
+        $data = $request->getContent();
+
+        if (array_key_exists('oa:hasBody', $data)
+            && !is_array($data['oa:hasBody'])
+        ) {
+            $errorStore->addError('oa:hasBody', 'Body must be an array'); // @translate
+        }
+
+        if (array_key_exists('oa:hasTarget', $data)
+            && !is_array($data['oa:hasTarget'])
+        ) {
+            $errorStore->addError('oa:hasTarget', 'Target must be an array'); // @translate
+        }
+    }
+
     /**
      * Normalize an annotation request (move properties in bodies and targets).
      *
@@ -312,13 +328,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Remove any language, since data model require to use a property.
 
         // Check if the data are already normalized.
-        if (isset($data['o-module-annotate:target'])
-            || isset($data['o-module-annotate:body'])
-            // For direct annotation (directly from rdf or standard annotation).
-            || isset($data['oa:hasTarget'])
+        if (isset($data['oa:hasTarget'])
             || isset($data['oa:hasBody'])
-            || isset($data['target'])
-            || isset($data['body'])
         ) {
             return;
         }
@@ -346,7 +357,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     unset($value['@value']);
                 // }
             }
-            $data['o-module-annotate:target'][0]['oa:hasSource'][] = $value;
+            $data['oa:hasTarget'][0]['oa:hasSource'][] = $value;
             unset($data['oa:hasSource']);
         }
 
@@ -355,13 +366,13 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $value = $value['@value'];
             switch ($value) {
                 case 'application/wkt':
-                    $data['o-module-annotate:target'][0]['rdf:type'][] = [
+                    $data['oa:hasTarget'][0]['rdf:type'][] = [
                         'property_id' => $this->propertyId('rdf:type'),
                         'type' => 'customvocab:' . $this->customVocabId('Annotation Target rdf:type'),
                         '@value' => 'oa:Selector',
                     ];
-                    $data['o-module-annotate:target'][0]['dcterms:format'] = $data['dcterms:format'];
-                    $data['o-module-annotate:target'][0]['dcterms:format'][0]['@language'] = null;
+                    $data['oa:hasTarget'][0]['dcterms:format'] = $data['dcterms:format'];
+                    $data['oa:hasTarget'][0]['dcterms:format'][0]['@language'] = null;
                     unset($data['dcterms:format']);
                     $mainValueIsTarget = true;
                     break;
@@ -369,34 +380,34 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         if (isset($data['oa:styleClass'])) {
-            $data['o-module-annotate:target'][0]['oa:styleClass'] = $data['oa:styleClass'];
+            $data['oa:hasTarget'][0]['oa:styleClass'] = $data['oa:styleClass'];
             unset($data['oa:styleClass']);
         }
 
         if ($mainValueIsTarget) {
             $mainValue = reset($data['rdf:value']);
             $mainValue = $mainValue['@value'];
-            $data['o-module-annotate:target'][0]['rdf:value'] = $data['rdf:value'];
-            $data['o-module-annotate:target'][0]['rdf:value'][0]['@language'] = null;
+            $data['oa:hasTarget'][0]['rdf:value'] = $data['rdf:value'];
+            $data['oa:hasTarget'][0]['rdf:value'][0]['@language'] = null;
             unset($data['rdf:value']);
         }
 
         // Bodies (single).
 
         if (isset($data['oa:hasPurpose'])) {
-            $data['o-module-annotate:body'][0]['oa:hasPurpose'] = $data['oa:hasPurpose'];
+            $data['oa:hasBody'][0]['oa:hasPurpose'] = $data['oa:hasPurpose'];
             unset($data['oa:hasPurpose']);
         }
 
         if (!$mainValueIsTarget && isset($data['rdf:value'])) {
             $mainValue = reset($data['rdf:value']);
             $mainValue = $mainValue['@value'];
-            $data['o-module-annotate:body'][0]['rdf:value'] = $data['rdf:value'];
+            $data['oa:hasBody'][0]['rdf:value'] = $data['rdf:value'];
             unset($data['rdf:value']);
 
-            $format = $this->isHtml($data['o-module-annotate:body'][0]['rdf:value']) ? 'text/html' : null;
+            $format = $this->isHtml($data['oa:hasBody'][0]['rdf:value']) ? 'text/html' : null;
             if ($format) {
-                $data['o-module-annotate:body'][0]['dcterms:format'][] = [
+                $data['oa:hasBody'][0]['dcterms:format'][] = [
                     'property_id' => $this->propertyId('dcterms:format'),
                     'type' => 'customvocab:' . $this->customVocabId('Annotation Body dcterms:format'),
                     '@value' => $format,

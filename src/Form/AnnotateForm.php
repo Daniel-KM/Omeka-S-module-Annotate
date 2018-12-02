@@ -101,17 +101,17 @@ class AnnotateForm extends Form
             'required' => false,
         ]);
         $inputFilter->add([
-            'name' => 'o-module-annotate:body[0][oa:hasPurpose][0][@value]',
+            'name' => 'oa:hasBody[0][oa:hasPurpose][0][@value]',
             'required' => false,
         ]);
         /*
         $inputFilter->add([
-            'name' => 'o-module-annotate:body[0][dcterms:format][0][@value]',
+            'name' => 'oa:hasBody[0][dcterms:format][0][@value]',
             'required' => false,
         ]);
         */
         $inputFilter->add([
-            'name' => 'o-module-annotate:target[0][rdf:type][0][@value]',
+            'name' => 'oa:hasTarget[0][rdf:type][0][@value]',
             'required' => false,
         ]);
     }
@@ -127,14 +127,14 @@ class AnnotateForm extends Form
         // Rdf value.
         $this->add([
             'type' => Element\Textarea::class,
-            'name' => 'o-module-annotate:body[0][rdf:value][0][@value]',
+            'name' => 'oa:hasBody[0][rdf:value][0][@value]',
             'options' => [
                 'label' => 'Content of the annotation', // @translate
                 'info' => 'The value of the body is generally the textual content of the annotation.', // @translate
             ],
             'attributes' => [
                 'rows' => 15,
-                'id' => 'o-module-annotate:body[0][rdf:value][0][@value]',
+                'id' => 'oa:hasBody[0][rdf:value][0][@value]',
                 'class' => 'media-text',
                 'placeholder' => 'Any plain text or html…', // @translate'
                 // TODO The body is not required in some cases, for example highlight: improve the dynamic validator.
@@ -143,12 +143,12 @@ class AnnotateForm extends Form
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][rdf:value][0][property_id]',
+            'name' => 'oa:hasBody[0][rdf:value][0][property_id]',
             'attributes' => ['value' => $this->propertyId('rdf:value')],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][rdf:value][0][type]',
+            'name' => 'oa:hasBody[0][rdf:value][0][type]',
             'attributes' => ['value' => 'literal'],
         ]);
 
@@ -158,7 +158,7 @@ class AnnotateForm extends Form
         $terms = array_combine($terms, $terms);
         $this->add([
             'type' => Element\Select::class,
-            'name' => 'o-module-annotate:body[0][oa:hasPurpose][0][@value]',
+            'name' => 'oa:hasBody[0][oa:hasPurpose][0][@value]',
             'options' => [
                 'label' => 'Purpose of this content', // @translate
                 'value_options' => $terms,
@@ -166,19 +166,19 @@ class AnnotateForm extends Form
             ],
             'attributes' => [
                 'rows' => 15,
-                'id' => 'o-module-annotate:body[0][oa:hasPurpose][0][@value]',
+                'id' => 'oa:hasBody[0][oa:hasPurpose][0][@value]',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select the purpose of this body content, if needed…', // @translate
             ],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][oa:hasPurpose][0][property_id]',
+            'name' => 'oa:hasBody[0][oa:hasPurpose][0][property_id]',
             'attributes' => ['value' => $this->propertyId('oa:hasPurpose')],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][oa:hasPurpose][0][type]',
+            'name' => 'oa:hasBody[0][oa:hasPurpose][0][type]',
             'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
         ]);
 
@@ -189,7 +189,7 @@ class AnnotateForm extends Form
         $terms = array_combine($terms, $terms);
         $this ->add([
             'type' => Element\Select::class,
-            'name' => 'o-module-annotate:body[0][dcterms:format][0][@value]',
+            'name' => 'oa:hasBody[0][dcterms:format][0][@value]',
             'options' => [
                 'label' => 'Format', // @translate
                 'value_options' => $terms,
@@ -197,19 +197,19 @@ class AnnotateForm extends Form
             ],
             'attributes' => [
                 'rows' => 15,
-                'id' => 'o-module-annotate:body[0][dcterms:format][0][@value]',
+                'id' => 'oa:hasBody[0][dcterms:format][0][@value]',
                 'class' => 'chosen-select',
                 'data-placeholder' => 'Select the format of the content of the annotation…', // @translate
             ],
         ]);
         $this ->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][dcterms:format][0][property_id]',
+            'name' => 'oa:hasBody[0][dcterms:format][0][property_id]',
             'attributes' => ['value' => $this->propertyId('dcterms:format')],
         ]);
         $this ->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][dcterms:format][0][type]',
+            'name' => 'oa:hasBody[0][dcterms:format][0][type]',
             'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
         ]);
         */
@@ -218,7 +218,7 @@ class AnnotateForm extends Form
         // The resource template is always the annotation body resource template.
         $this ->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][o:resource_template][o:id]',
+            'name' => 'oa:hasBody[0][o:resource_template][o:id]',
             'attributes' => ['value' => $resourceTemplateId],
         ]);
         */
@@ -227,7 +227,7 @@ class AnnotateForm extends Form
         // when a media or a map is annotated.
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:body[0][o:resource_class][o:id]',
+            'name' => 'oa:hasBody[0][o:resource_class][o:id]',
             'attributes' => ['value' => $resourceClassId],
         ]);
     }
@@ -245,17 +245,17 @@ class AnnotateForm extends Form
         // The source of the annotation target is the current resource.
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][oa:hasSource][0][property_id]',
+            'name' => 'oa:hasTarget[0][oa:hasSource][0][property_id]',
             'attributes' => ['value' => $this->propertyId('oa:hasSource')],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][oa:hasSource][0][type]',
+            'name' => 'oa:hasTarget[0][oa:hasSource][0][type]',
             'attributes' => ['value' => 'resource'],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][oa:hasSource][0][value_resource_id]',
+            'name' => 'oa:hasTarget[0][oa:hasSource][0][value_resource_id]',
         ]);
 
         // Note, oa:hasSelector references an entity that have a rdf:type and a
@@ -265,7 +265,7 @@ class AnnotateForm extends Form
         $terms = array_combine($terms, $terms);
         $this->add([
             'type' => Element\Select::class,
-            'name' => 'o-module-annotate:target[0][rdf:type][0][@value]',
+            'name' => 'oa:hasTarget[0][rdf:type][0][@value]',
             'options' => [
                 'label' => 'Type of the target selector', // @translate
                 'value_options' => $terms,
@@ -280,37 +280,37 @@ class AnnotateForm extends Form
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][rdf:type][0][property_id]',
+            'name' => 'oa:hasTarget[0][rdf:type][0][property_id]',
             'attributes' => ['value' => $this->propertyId('rdf:type')],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][rdf:type][0][type]',
+            'name' => 'oa:hasTarget[0][rdf:type][0][type]',
             'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
         ]);
 
         $this->add([
             'type' => Element\Textarea::class,
-            'name' => 'o-module-annotate:target[0][rdf:value][0][@value]',
+            'name' => 'oa:hasTarget[0][rdf:value][0][@value]',
             'options' => [
                 'label' => 'Target selector', // @translate
                 'info' => 'Allows to delimit a portion of the resource (part of a text, an image or an item…).', // @translate
             ],
             'attributes' => [
                 'rows' => 15,
-                'id' => 'o-module-annotate:target[0][rdf:value][0][@value]',
+                'id' => 'oa:hasTarget[0][rdf:value][0][@value]',
                 'class' => 'media-text',
                 'placeholder' => 'Any xml, json, svg, media api url, media id, etc. according to the type of selector.', // @translate'
             ],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][rdf:value][0][property_id]',
+            'name' => 'oa:hasTarget[0][rdf:value][0][property_id]',
             'attributes' => ['value' => $this->propertyId('rdf:value')],
         ]);
         $this->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][rdf:value][0][type]',
+            'name' => 'oa:hasTarget[0][rdf:value][0][type]',
             'attributes' => ['value' => 'literal'],
         ]);
 
@@ -318,14 +318,14 @@ class AnnotateForm extends Form
         // The resource template is always the annotation body resource template.
         $this ->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][o:resource_template][o:id]',
+            'name' => 'oa:hasTarget[0][o:resource_template][o:id]',
             'attributes' => ['value' => $resourceTemplateId],
         ]);
 
         // The resource class is the textual body by default.
         $this ->add([
             'type' => Element\Hidden::class,
-            'name' => 'o-module-annotate:target[0][o:resource_class][o:id]',
+            'name' => 'oa:hasTarget[0][o:resource_class][o:id]',
             'attributes' => ['value' => $resourceClassId],
         ]);
         */

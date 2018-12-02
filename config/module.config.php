@@ -5,8 +5,30 @@ return [
     'entity_manager' => [
         'resource_discriminator_map' => [
             Entity\Annotation::class => Entity\Annotation::class,
+            // oa:hasBody can be used by oa:Annotation only.
             Entity\AnnotationBody::class => Entity\AnnotationBody::class,
+            // oa:hasTarget can be used by oa:Annotation only.
             Entity\AnnotationTarget::class => Entity\AnnotationTarget::class,
+            // May be added for full coverage of data model (useless for current modules):
+            // oa:hasSelector can be used by body (rare) or target (mainly for
+            // cartographic annotation here). The selector is not a Resource,
+            // but depends on oa:ResourceSelection.
+            // oa:refinedBy can be used by oa:hasSelector and oa:hasState only.
+            // The oa:refinedBy is another selector or state.
+            // oa:hasSource (for body (rare) or target).
+            // as:items
+            // oa:hasState
+            // oa:hasStartSelector
+            // oa:hasEndSelector
+            // oa:renderedVia
+            // oa:styledBy
+            // as:generator
+            // dcterms:creator
+            // schema:audience
+            // @link https://www.w3.org/TR/annotation-vocab/#as-application
+            // TODO Any property can be another resource (uri), so it may be genericized, but the structure of
+            // Omeka is not designed in such a way (and all values must be in the table value). Use datatype to bypass? So oa:resource:item?
+            // The current desing simplifies search queries too.
         ],
         'mapping_classes_paths' => [
             dirname(__DIR__) . '/src/Entity',
@@ -18,8 +40,15 @@ return [
     'api_adapters' => [
         'invokables' => [
             'annotations' => Api\Adapter\AnnotationAdapter::class,
-            // TODO Don't make bodies and targets available through api, since
-            // they are not classes. See ValueHydrator.
+            // Bodies and targets should not be available through api since they
+            // are not meaningfull objects, but part of the main annotation one.
+            // Nevertheless, they are resources with property values, and the
+            // adapter must be available. See ValueHydrator or ResourceTemplateProperty.
+            // These feature is working, but will be disabled once a way to
+            // import them by csv import will be found (oa:hasBody::dcterms:creator?)
+            // TODO Disable annotation_bodies and annotation_targets api.
+            // Eventually create another class for selector, refinedBy, etc.
+            /** @deprecated Api manager for bodies and targets will be removed soon. */
             'annotation_bodies' => Api\Adapter\AnnotationBodyAdapter::class,
             'annotation_targets' => Api\Adapter\AnnotationTargetAdapter::class,
         ],

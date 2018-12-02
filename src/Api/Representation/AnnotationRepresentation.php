@@ -37,18 +37,21 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 
     public function getResourceJsonLd()
     {
-        return [
-            'oa:hasBody' => $this->bodies(),
-            'oa:hasTarget' => $this->targets(),
-        ];
+        $result = [];
+        $bodies = $this->bodies();
+        // Complies with https://www.w3.org/TR/annotation-model/#cardinality-of-bodies-and-targets
+        if ($bodies) {
+            $result['oa:hasBody'] = $bodies;
+        }
+        $result['oa:hasTarget'] = $this->targets();
+        return $result;
     }
 
     /**
      * {@inheritDoc}
      *
-     * Two rdf contexts are used: Annotation (main) and Omeka (secondary).
-     * @todo Display the full terms for Annotation? An option to let admin choose?
-     * @todo oa:styledBy should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet). But GeoJson allows to manage css.
+     * Two rdf contexts are used: Open Annotation (main) and Omeka (secondary).
+     * @todo Extend oa model: oa:styledBy should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet). But GeoJson allows to manage css.
      *
      * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
      */
@@ -57,38 +60,17 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $jsonLd = parent::jsonSerialize();
 
         $jsonLd['@context'] = [
-            'http://www.w3.org/ns/anno.jsonld',
-            ['o' => 'http://localhost/OmekaS/api-context'],
+            'oa' => 'http://www.w3.org/ns/anno.jsonld',
+            'o' => 'http://localhost/OmekaS/api-context',
         ];
-
-        if (isset($jsonLd['oa:motivatedBy'])) {
-            $jsonLd['motivation'] = $this->valuesOnly($jsonLd['oa:motivatedBy']);
-            unset($jsonLd['oa:motivatedBy']);
-        }
-
-        if (isset($jsonLd['oa:styledBy'])) {
-            $jsonLd['stylesheet']['type'] = 'oa:Style';
-            $jsonLd['stylesheet']['value'] = $this->valuesOnly($jsonLd['oa:styledBy']);
-            unset($jsonLd['oa:styledBy']);
-        }
-
-        if (isset($jsonLd['oa:hasBody'])) {
-            $value = $jsonLd['oa:hasBody'];
-            unset($jsonLd['oa:hasBody']);
-            $jsonLd['body'] = count($value) === 1 ? reset($value) : $value;
-        }
-
-        if (isset($jsonLd['oa:hasTarget'])) {
-            $value = $jsonLd['oa:hasTarget'];
-            unset($jsonLd['oa:hasTarget']);
-            $jsonLd['target'] = count($value) === 1 ? reset($value) : $value;;
-        }
 
         return $jsonLd;
     }
 
     /**
      * Get the bodies assigned to this annotation.
+     *
+     * @todo Remove bodies without properties.
      *
      * @return AnnotationBodyRepresentation[]
      */
@@ -213,7 +195,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             $public['id'] = false;
             if (is_null($default)) {
                 $translator = $this->getServiceLocator()->get('MvcTranslator');
-                $public['name'] = $translator->translate('[Unknown]');
+                $public['name'] = $translator->translate('[Unknown]'); // @translate
             } else {
                 $public['name'] = $default;
             }
@@ -331,47 +313,47 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         return $divideMergedValues($data);
     }
 
-    /**
-     * Detect if a string is html or not.
-     *
-     * @see \Annotate\Controller\Admin\AnnotationController::isHtml()
-     *
-     * @param string $string
-     * @return bool
-     */
-    protected function isHtml($string)
-    {
-        return $string != strip_tags($string);
-    }
+//     /**
+//      * Detect if a string is html or not.
+//      *
+//      * @see \Annotate\Controller\Admin\AnnotationController::isHtml()
+//      *
+//      * @param string $string
+//      * @return bool
+//      */
+//     protected function isHtml($string)
+//     {
+//         return $string != strip_tags($string);
+//     }
 
-    /**
-     * Renormalize values as json-ld rdf Annotation resource.
-     *
-     * @see https://www.w3.org/TR/annotation-model/
-     * @todo Factorize with AbstractAnnotationResourceRepresentation::valuesOnly().
-     *
-     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
-     * @return array|string
-     */
-    protected function valuesOnly(array $values)
-    {
-        $result = [];
+//     /**
+//      * Renormalize values as json-ld rdf Annotation resource.
+//      *
+//      * @see https://www.w3.org/TR/annotation-model/
+//      * @todo Factorize with AbstractValueResourceEntityRepresentation::valuesOnly().
+//      *
+//      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
+//      * @return array|string
+//      */
+//     protected function valuesOnly(array $values)
+//     {
+//         $result = [];
 
-        foreach ($values as $value) {
-            switch ($value->type()) {
-                case 'resource':
-                    $result[] = $value->valueResource()->apiUrl();
-                    break;
-                case 'uri':
-                    $result[] = $value->uri();
-                    break;
-                case 'literal':
-                default:
-                    $result[] = $value->value();
-                    break;
-            }
-        }
+//         foreach ($values as $value) {
+//             switch ($value->type()) {
+//                 case 'resource':
+//                     $result[] = $value->valueResource()->apiUrl();
+//                     break;
+//                 case 'uri':
+//                     $result[] = $value->uri();
+//                     break;
+//                 case 'literal':
+//                 default:
+//                     $result[] = $value->value();
+//                     break;
+//             }
+//         }
 
-        return count($result) > 1 ? $result : reset($result);
-    }
+//         return count($result) > 1 ? $result : reset($result);
+//     }
 }

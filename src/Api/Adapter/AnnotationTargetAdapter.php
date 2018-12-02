@@ -37,20 +37,20 @@ class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
         EntityInterface $entity,
         ErrorStore $errorStore
     ) {
-        // Hydrate most of the metadata.
+        // The annotation id may be set or not, it is not updated in any case.
         parent::hydrate($request, $entity, $errorStore);
 
         $data = $request->getContent();
 
         if (Request::CREATE === $request->getOperation()) {
-            if (!empty($data['o-module-annotate:annotation'])) {
-                if (is_object($data['o-module-annotate:annotation'])) {
+            if (!empty($data['oa:Annotation'])) {
+                if (is_object($data['oa:Annotation'])) {
                     $annotation = $this->getAdapter('annotations')
-                        ->findEntity($data['o-module-annotate:annotation']->id());
+                        ->findEntity($data['oa:Annotation']->id());
                     $entity->setAnnotation($annotation);
-                } elseif (isset($data['o-module-annotate:annotation']['o:id'])) {
+                } elseif (isset($data['oa:Annotation']['o:id'])) {
                     $annotation = $this->getAdapter('annotations')
-                        ->findEntity($data['o-module-annotate:annotation']['o:id']);
+                        ->findEntity($data['oa:Annotation']['o:id']);
                     $entity->setAnnotation($annotation);
                 }
             }
@@ -70,11 +70,17 @@ class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
         ErrorStore $errorStore
     ) {
         if (!($entity->getAnnotation() instanceof Annotation)) {
-            $errorStore->addError('o-module-annotate:annotation', 'An annotation target must be attached to an Annotation.'); // @translate
+            $errorStore->addError('oa:Annotation', 'An annotation target must be attached to an Annotation.'); // @translate
         }
         parent::validateEntity($entity, $errorStore);
     }
 
+    /**
+     * @deprecated Will be removed in a next version and replaced by args of "annotations".
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildQuery()
+     */
     public function buildQuery(QueryBuilder $qb, array $query)
     {
         parent::buildQuery($qb, $query);

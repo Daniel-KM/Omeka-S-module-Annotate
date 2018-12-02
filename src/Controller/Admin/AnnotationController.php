@@ -95,7 +95,7 @@ class AnnotationController extends AbstractActionController
         $form = $this->getForm(AnnotateForm::class);
         $data = $this->params()->fromPost();
 
-        $resourceId = $data['o-module-annotate:target'][0]['oa:hasSource'][0]['value_resource_id'];
+        $resourceId = $data['oa:hasTarget'][0]['oa:hasSource'][0]['value_resource_id'];
         if (empty($resourceId)) {
             if ($isAjax) {
                 return $this->jsonError('Resource not found.', Response::STATUS_CODE_404); // @translate
@@ -129,13 +129,13 @@ class AnnotationController extends AbstractActionController
 
         // Check if there is a value or a selector.
         // TODO Improve the checks of the annotation and move them in the right place.
-        $bodyValue = (isset($data['o-module-annotate:body'][0]['rdf:value'][0]['@value'])
-                && strlen(trim($data['o-module-annotate:body'][0]['rdf:value'][0]['@value'])))
-            ? trim($data['o-module-annotate:body'][0]['rdf:value'][0]['@value'])
+        $bodyValue = (isset($data['oa:hasBody'][0]['rdf:value'][0]['@value'])
+                && strlen(trim($data['oa:hasBody'][0]['rdf:value'][0]['@value'])))
+            ? trim($data['oa:hasBody'][0]['rdf:value'][0]['@value'])
             : null;
-        $targetValue = (isset($data['o-module-annotate:target'][0]['rdf:value'][0]['@value'])
-                && strlen(trim($data['o-module-annotate:target'][0]['rdf:value'][0]['@value'])))
-            ? trim($data['o-module-annotate:target'][0]['rdf:value'][0]['@value'])
+        $targetValue = (isset($data['oa:hasTarget'][0]['rdf:value'][0]['@value'])
+                && strlen(trim($data['oa:hasTarget'][0]['rdf:value'][0]['@value'])))
+            ? trim($data['oa:hasTarget'][0]['rdf:value'][0]['@value'])
             : null;
         if (is_null($bodyValue) && is_null($targetValue)) {
             $message = 'The annotation is empty.'; // @translate
@@ -163,7 +163,7 @@ class AnnotationController extends AbstractActionController
                 $property = $api->searchOne('properties', [
                         'term' => 'dcterms:format',
                     ], [], ['responseContent' => 'reference'])->getContent();
-                $data['o-module-annotate:body'][0]['dcterms:format'][] = [
+                $data['oa:hasBody'][0]['dcterms:format'][] = [
                     'property_id' => $property->id(),
                     'type' => 'customvocab:' . $customVocab->id(),
                     '@value' => $format,
@@ -181,18 +181,18 @@ class AnnotationController extends AbstractActionController
                 $property = $api->searchOne('properties', [
                     'term' => 'dcterms:format',
                 ], [], ['responseContent' => 'reference'])->getContent();
-                $data['o-module-annotate:target'][0]['dcterms:format'][] = [
+                $data['oa:hasTarget'][0]['dcterms:format'][] = [
                     'property_id' => $property->id(),
                     'type' => 'customvocab:' . $customVocab->id(),
                     '@value' => $format,
                 ];
             }
 
-            $targetSelectorType = $data['o-module-annotate:target'][0]['rdf:type'][0]['@value'];
+            $targetSelectorType = $data['oa:hasTarget'][0]['rdf:type'][0]['@value'];
             if (in_array($targetSelectorType, ['o:Item', 'o:ItemSet', 'o:Media'])) {
                 $resourceType = $resource->getResourceJsonLdType();
                 if ($targetSelectorType === $resourceType) {
-                    $message = 'A resource can‘t have the same resource as selector.'; // @translate
+                    $message = 'A resource can’t have the same resource as selector.'; // @translate
                     if ($isAjax) {
                         return $this->jsonError($message);
                     } else {
@@ -201,7 +201,7 @@ class AnnotationController extends AbstractActionController
                     }
                 }
                 if ($resourceType === 'o:Media') {
-                    $message = 'A media can‘t have a resource selector.'; // @translate
+                    $message = 'A media can’t have a resource selector.'; // @translate
                     if ($isAjax) {
                         return $this->jsonError($message);
                     } else {
@@ -210,7 +210,7 @@ class AnnotationController extends AbstractActionController
                     }
                 }
                 if ($resourceType === 'o:Item' && $targetSelectorType === 'o:ItemSet') {
-                    $message = 'An item can‘t have an item set selector.'; // @translate
+                    $message = 'An item can’t have an item set selector.'; // @translate
                     if ($isAjax) {
                         return $this->jsonError($message);
                     } else {
@@ -288,8 +288,8 @@ class AnnotationController extends AbstractActionController
                 }
 
                 // Convert the text selector into a resource selector.
-                $data['o-module-annotate:target'][0]['rdf:value'][0] = [
-                    'property_id' => $data['o-module-annotate:target'][0]['rdf:value'][0]['property_id'],
+                $data['oa:hasTarget'][0]['rdf:value'][0] = [
+                    'property_id' => $data['oa:hasTarget'][0]['rdf:value'][0]['property_id'],
                     'type' => 'resource',
                     'value_resource_id' => $targetValue,
                 ];
