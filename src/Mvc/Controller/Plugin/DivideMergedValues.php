@@ -25,21 +25,26 @@ class DivideMergedValues extends AbstractPlugin
      * Separate properties between annotation, bodies and targets.
      *
      * Note: only standard annotation data are managed. Specific properties are
-     * moved in the annotation.
+     * moved in the annotation, except when it is specified via a resource
+     * template data.
+     * @see https://www.w3.org/TR/annotation-vocab/
      *
      * @todo Use a standard rdf process, with no entities for bodies and targets.
-     * @todo Clean the form to manage sub-entities.
+     * @todo Clean the form to manage sub-entities (use the resource template).
      *
-     * @param array $data
+     * @param array $data List of properties of an annotation.
+     * @param array $resourceTemplateData Associative array with the term as key
+     * and the annotation part as value ("oa:Annotation", "oa:hasBody" or
+     * "oa:hasTarget").
      * @return array
      */
-    public function __invoke(array $data)
+    public function __invoke(array $data, array $resourceTemplateData = [])
     {
         $api = $this->api;
 
         // Standard or recommended properties from https://www.w3.org/TR/annotation-vocab.
         $map = [
-            'annotation' => [
+            'oa:Annotation' => [
                 'oa:annotationService',
                 // TODO Convert into a textual body rdf value (in adapter).
                 'oa:bodyValue',
@@ -66,7 +71,7 @@ class DivideMergedValues extends AbstractPlugin
                 'rdf:type',
                 'schema:audience',
             ],
-            'body' => [
+            'oa:hasBody' => [
                 'oa:hasPurpose',
                 'oa:processingLanguage',
                 'oa:textDirection',
@@ -76,7 +81,7 @@ class DivideMergedValues extends AbstractPlugin
                 // (json, css, xpath, svg, etc).
                 'rdf:value',
             ],
-            'target' => [
+            'oa:hasTarget' => [
                 'dcterms:format',
                 // Others oa.
                 'oa:cachedSource',
@@ -122,42 +127,45 @@ class DivideMergedValues extends AbstractPlugin
         $customVocab = $api
             ->read('custom_vocabs', ['label' => 'Annotation Target rdf:type'])->getContent();
 
-        $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
+        $terms = $customVocab->terms();
+        if (!is_array($terms)) {
+            $terms = array_map('trim', explode("\n", $terms));
+        }
         $rdfTypeData = empty($data['rdf:type']) ? [] : $data['rdf:type'];
         unset($data['rdf:type']);
         $rdfTypes = [
-            'annotation' => [],
-            'body' => [],
-            'target' => [],
+            'oa:Annotation' => [],
+            'oa:hasBody' => [],
+            'oa:hasTarget' => [],
         ];
         foreach ($rdfTypeData as $key => $rdfTypeArray) {
             // TODO Manage oa:Choice and ordered collection with rdf type.
             $rdfType = $rdfTypeArray['@value'];
             if ($rdfType === 'oa:TextualBody') {
-                $rdfTypes['body'][] = ['rdf:type' => [$rdfTypeArray]];
+                $rdfTypes['oa:hasBody'][] = ['rdf:type' => [$rdfTypeArray]];
             } elseif (in_array($rdfType, $terms)) {
-                $rdfTypes['target'][] = ['rdf:type' => [$rdfTypeArray]];
+                $rdfTypes['oa:hasTarget'][] = ['rdf:type' => [$rdfTypeArray]];
             } else {
-                $rdfTypes['annotation'][] = $rdfTypeArray;
+                $rdfTypes['oa:Annotation'][] = $rdfTypeArray;
             }
         }
-        if ($rdfTypes['annotation']) {
-            $data['rdf:type'] = $rdfTypes['annotation'];
+        if ($rdfTypes['oa:Annotation']) {
+            $data['rdf:type'] = $rdfTypes['oa:Annotation'];
         } else {
             unset($data['rdf:type']);
         }
-        $data['oa:hasBody'] = $rdfTypes['body'];
-        $data['oa:hasTarget'] = $rdfTypes['target'];
+        $data['oa:hasBody'] = $rdfTypes['oa:hasBody'];
+        $data['oa:hasTarget'] = $rdfTypes['oa:hasTarget'];
 
         // Step 2.
         // Manage standard and recommended annotation properties.
         foreach ($data as $term => $values) {
-            if (in_array($term, $map['annotation'])) {
+            if (in_array($term, $map['oa:Annotation'])) {
                 continue;
-            } elseif (in_array($term, $map['body'])) {
+            } elseif (in_array($term, $map['oa:hasBody'])) {
                 $data['oa:hasBody'][0][$term] = $values;
                 unset($data[$term]);
-            } elseif (in_array($term, $map['target'])) {
+            } elseif (in_array($term, $map['oa:hasTarget'])) {
                 $data['oa:hasTarget'][0][$term] = $values;
                 unset($data[$term]);
             }
@@ -171,7 +179,10 @@ class DivideMergedValues extends AbstractPlugin
         if (!empty($data['oa:hasBody'][0]['rdf:value'])) {
             $customVocab = $api
                 ->read('custom_vocabs', ['label' => 'Annotation Target dcterms:format'])->getContent();
-            $targetFormats = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
+            $targetFormats = $customVocab->terms();
+            if (!is_array($targetFormats)) {
+                $targetFormats = array_map('trim', explode("\n", $targetFormats));
+            }
             $property = $api->searchOne('properties', [
                 'term' => 'dcterms:format',
             ], [], ['responseContent' => 'reference'])->getContent();
@@ -202,6 +213,28 @@ class DivideMergedValues extends AbstractPlugin
         }
 
         // TODO Fix the resource class of the body.
+
+        // TODO Manage annotation properties with the resource template data only?
+        // Step 4: fix the data with the resource template.
+        foreach ($resourceTemplateData as $term => $annotationPart) {
+            // Don't check properties that are already inside the Annotation..
+            if (!in_array($annotationPart, ['oa:hasBody', 'oa:hasTarget'])) {
+                continue;
+            }
+            foreach (['oa:hasBody', 'oa:hasTarget'] as $key) {
+                // Don't check the official properties.
+                if (in_array($term, $map[$key])) {
+                    continue;
+                }
+                // Move the property if needed.
+                if ($key !== $annotationPart && isset($data[$key][$term])) {
+                    foreach ($data[$key][$term] as $value) {
+                        $data[$annotationPart][$term][] = $value;
+                    }
+                    unset($data[$key][$term]);
+                }
+            }
+        }
 
         return $data;
     }
