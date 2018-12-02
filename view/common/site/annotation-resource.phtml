@@ -87,6 +87,7 @@ $annotationBodies = $annotation->bodies();
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
+                    <?php $isLong = false; ?>
                     <?php echo $value->valueResource()->linkPretty(); ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
@@ -143,6 +144,7 @@ foreach ($annotationTargets as $annotationTarget) {
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
+                    <?php $isLong = false; ?>
                     <?php echo $value->valueResource()->linkPretty(); ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
