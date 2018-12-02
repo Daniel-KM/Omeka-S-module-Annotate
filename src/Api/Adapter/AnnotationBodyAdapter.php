@@ -92,7 +92,5 @@ class AnnotationBodyAdapter extends AbstractResourceEntityAdapter
         if (isset($query['annotation_id'])) {
             $qb->andWhere($qb->expr()->eq('Annotate\Entity\AnnotationBody.annotation', $query['annotation_id']));
         }
-
-        // TODO Build queries to find annotation target from annotation body here?
     }
 }

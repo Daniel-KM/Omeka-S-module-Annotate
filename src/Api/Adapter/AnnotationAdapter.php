@@ -313,13 +313,15 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         if (array_key_exists('oa:hasBody', $data)
             && !is_array($data['oa:hasBody'])
         ) {
-            $errorStore->addError('oa:hasBody', 'Body must be an array'); // @translate
+            $errorStore->addError('oa:hasBody', 'Annotation body must be an array.'); // @translate
         }
 
-        if (array_key_exists('oa:hasTarget', $data)
-            && !is_array($data['oa:hasTarget'])
-        ) {
-            $errorStore->addError('oa:hasTarget', 'Target must be an array'); // @translate
+        if (array_key_exists('oa:hasTarget', $data)) {
+            if (!is_array($data['oa:hasTarget'])) {
+                $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
+            } elseif (count($data['oa:hasTarget']) < 1) {
+                $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
+            }
         }
     }
 
