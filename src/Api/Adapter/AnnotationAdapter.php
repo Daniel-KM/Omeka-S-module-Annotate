@@ -190,8 +190,26 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
-        // TODO Build queries to find annotations by query on targets and bodies here?
+        // TODO Build queries to find annotations by query on targets and bodies here.
         // TODO Query has_body / linked resource id.
+
+        if (isset($query['resource_class'])) {
+            if (is_numeric($query['resource_class'])) {
+                $resourceClass = (int) $query['resource_class'];
+            } else {
+                $resourceClass = $this->getResourceClassByTerm($query['resource_class']);
+                $resourceClass = $resourceClass ? $resourceClass->getId() : 0;
+            }
+            $resourceClassAlias = $this->createAlias();
+            $qb->innerJoin(
+                $this->getEntityClass() . '.resourceClass',
+                $resourceClassAlias
+            );
+            $qb->andWhere($qb->expr()->eq(
+                $resourceClassAlias . '.id',
+                $this->createNamedParameter($qb, $resourceClass))
+            );
+        }
     }
 
     public function hydrate(
@@ -443,5 +461,33 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     protected function isHtml($string)
     {
         return $string != strip_tags($string);
+    }
+
+    /**
+     * Get a resource class entity by JSON-LD term.
+     *
+     * @param string $term
+     * @return \Omeka\Entity\ResourceClass
+     */
+    public function getResourceClassByTerm($term)
+    {
+        if (!$this->isTerm($term)) {
+            return null;
+        }
+        list($prefix, $localName) = explode(':', $term);
+        $dql = <<<DQL
+SELECT r
+FROM Omeka\Entity\ResourceClass r
+JOIN r.vocabulary v
+WHERE r.localName = :localName
+AND v.prefix = :prefix
+DQL;
+        return $this->getEntityManager()
+            ->createQuery($dql)
+            ->setParameters([
+                'localName' => $localName,
+                'prefix' => $prefix,
+            ])
+            ->getOneOrNullResult();
     }
 }
