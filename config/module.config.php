@@ -91,7 +91,7 @@ return [
     ],
     'navigation' => [
         'AdminResource' => [
-            [
+            'annotate' => [
                 'label' => 'Annotations', // @translate
                 'class' => 'annotations far fa-hand-o-up',
                 'route' => 'admin/annotate/default',
