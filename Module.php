@@ -617,7 +617,7 @@ SQL;
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
-        // Add the annotation part to the representation.
+        // Add the Open Annotation part to the representation.
         $representations = [
             'user' => UserRepresentation::class,
             'item_sets' => ItemSetRepresentation::class,
@@ -726,6 +726,7 @@ SQL;
             [$this, 'handleResourceTemplateDeletePost']
         );
 
+        // Site settings.
         $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
             'form.add_elements',
@@ -745,6 +746,30 @@ SQL;
             'form.add_elements',
             [$this, 'addCsvImportFormElements']
         );
+    }
+
+    /**
+     * Add the annotation data to the resource JSON-LD.
+     *
+     * @param Event $event
+     */
+    public function filterJsonLd(Event $event)
+    {
+        if (!$this->userCanRead()) {
+            return;
+        }
+
+        $resource = $event->getTarget();
+        $entityColumnName = $this->columnNameOfRepresentation($resource);
+        $jsonLd = $event->getParam('jsonLd');
+        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $annotations = $api
+        ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
+        ->getContent();
+        if ($annotations) {
+            $jsonLd['oa:Annotation'] = $annotations;
+            $event->setParam('jsonLd', $jsonLd);
+        }
     }
 
     public function handleResourceTemplateCreateOrUpdatePost(Event $event)
@@ -870,30 +895,6 @@ SQL;
         }
         $form->addProcessElements();
         $form->addAdvancedElements();
-    }
-
-    /**
-     * Add the annotation data to the resource JSON-LD.
-     *
-     * @param Event $event
-     */
-    public function filterJsonLd(Event $event)
-    {
-        if (!$this->userCanRead()) {
-            return;
-        }
-
-        $resource = $event->getTarget();
-        $entityColumnName = $this->columnNameOfRepresentation($resource);
-        $jsonLd = $event->getParam('jsonLd');
-        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
-        $annotations = $api
-            ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
-            ->getContent();
-        if ($annotations) {
-            $jsonLd['oa:Annotation'] = $annotations;
-            $event->setParam('jsonLd', $jsonLd);
-        }
     }
 
     /**

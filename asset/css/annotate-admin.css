@@ -6,6 +6,9 @@
     .annotations .no-resources:before {
         content:"";
     }
+    #annotate .no-resources:before {
+        content:"";
+    }
 
     /* Annotation show */
     .annotations .annotation-caption {

@@ -11,6 +11,7 @@ use Annotate\Api\Adapter\AnnotationAdapter;
 
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
+$hyperlink = $this->plugin('hyperlink');
 
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
@@ -22,19 +23,19 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
 $sortHeadings = [
     [
         'label' => $translate('Annotator'),
-        'value' => 'name'
+        'value' => 'name',
     ],
     [
         'label' => $translate('Annotator email'),
-        'value' => 'email'
+        'value' => 'email',
     ],
     [
         'label' => $translate('Resource'),
-        'value' => 'resource_id'
+        'value' => 'resource_id',
     ],
     [
         'label' => $translate('Date annotated'),
-        'value' => 'created'
+        'value' => 'created',
     ],
 ];
 ?>
@@ -119,14 +120,14 @@ $sortHeadings = [
                     ]); ?></li>
                     <?php endif; ?>
                     <?php if ($userIsAllowedDelete): ?>
-                    <li><?php echo $this->hyperlink('', '#', [
+                    <li><?php echo $hyperlink('', '#', [
                         'data-sidebar-selector' => '#sidebar',
                         'data-sidebar-content-url' => $annotation->url('delete-confirm'),
                         'class' => 'o-icon-delete sidebar-content',
                         'title' => $translate('Delete'),
                     ]); ?></li>
                     <?php endif; ?>
-                    <li><?php echo $this->hyperlink('', '#', [
+                    <li><?php echo $hyperlink('', '#', [
                         'data-sidebar-selector' => '#sidebar',
                         'data-sidebar-content-url' => $annotation->url('show-details'),
                         'class' => 'o-icon-more sidebar-content',
@@ -167,7 +168,7 @@ $sortHeadings = [
 </div>
 
 <div id="sidebar" class="sidebar">
-    <?php echo $this->hyperlink('', '#', [
+    <?php echo $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
     ]); ?>
@@ -176,7 +177,7 @@ $sortHeadings = [
 
 <?php if ($userIsAllowedBatchDelete): ?>
 <div id="sidebar-delete-selected" class="sidebar">
-    <?php echo $this->hyperlink('', '#', [
+    <?php echo $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
     ]); ?>
@@ -194,7 +195,7 @@ $sortHeadings = [
     </div>
 </div>
 <div id="sidebar-delete-all" class="sidebar">
-    <?php echo $this->hyperlink('', '#', [
+    <?php echo $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
     ]); ?>
