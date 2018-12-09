@@ -137,29 +137,31 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
         // Manage some specifici properties.
 
         $term = 'rdf:type';
-        foreach ($values[$term] as $key => $valueRepresentation) {
-            $val = $valueRepresentation->uri() ?: (string) $valueRepresentation;
-            if (in_array($val, $map['oa:hasTarget']) || isset($map['oa:hasTarget'][$val])) {
-                continue;
-            } elseif (in_array($val, $map['oa:hasSelector']) || isset($map['oa:hasSelector'][$val])) {
-                $values['oa:hasSelector'][$term][] = $valueRepresentation;
-                unset($values[$term][$key]);
-            } elseif (in_array($val, $map['oa:hasState']) || isset($map['oa:hasState'][$val])) {
-                $values['oa:hasState'][$term][] = $valueRepresentation;
-                unset($values[$term][$key]);
-            } elseif (in_array($val, $map['oa:renderedVia']) || isset($map['oa:renderedVia'][$val])) {
-                $values['renderedVia'][$term][] = $valueRepresentation;
-                unset($values[$term][$key]);
-            } elseif (substr($val, -8) === 'Selector') {
-                $values['oa:hasSelector'][$term][] = $valueRepresentation;
-                unset($values[$term][$key]);
-            } elseif (substr($val, -5) === 'State') {
-                $values['oa:hasState'][$term][] = $valueRepresentation;
-                unset($values[$term][$key]);
+        if (array_key_exists($term, $values)) {
+            foreach ($values[$term] as $key => $valueRepresentation) {
+                $val = $valueRepresentation->uri() ?: (string) $valueRepresentation;
+                if (in_array($val, $map['oa:hasTarget']) || isset($map['oa:hasTarget'][$val])) {
+                    continue;
+                } elseif (in_array($val, $map['oa:hasSelector']) || isset($map['oa:hasSelector'][$val])) {
+                    $values['oa:hasSelector'][$term][] = $valueRepresentation;
+                    unset($values[$term][$key]);
+                } elseif (in_array($val, $map['oa:hasState']) || isset($map['oa:hasState'][$val])) {
+                    $values['oa:hasState'][$term][] = $valueRepresentation;
+                    unset($values[$term][$key]);
+                } elseif (in_array($val, $map['oa:renderedVia']) || isset($map['oa:renderedVia'][$val])) {
+                    $values['renderedVia'][$term][] = $valueRepresentation;
+                    unset($values[$term][$key]);
+                } elseif (substr($val, -8) === 'Selector') {
+                    $values['oa:hasSelector'][$term][] = $valueRepresentation;
+                    unset($values[$term][$key]);
+                } elseif (substr($val, -5) === 'State') {
+                    $values['oa:hasState'][$term][] = $valueRepresentation;
+                    unset($values[$term][$key]);
+                }
             }
-        }
-        if (empty($values[$term])) {
-            unset($values[$term]);
+            if (empty($values[$term])) {
+                unset($values[$term]);
+            }
         }
 
         // Manage the sub value resource entities: if it's a resource, it should
