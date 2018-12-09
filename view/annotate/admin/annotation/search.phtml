@@ -1,0 +1,21 @@
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->htmlElement('body')->appendAttribute('class', 'annotations search');
+?>
+<?php echo $this->pageTitle($translate('Advanced search'), 1, $translate('Annotations')); ?>
+<form id="advanced-search" method="get" action="<?php echo $escape($this->url(null, ['action' => 'browse'], true)); ?>">
+<?php echo $this->partial(
+    'common/advanced-search',
+    ['query' => $this->params()->fromQuery(), 'resourceType' => 'annotation']
+); ?>
+<div id="page-actions">
+    <?php echo $this->hyperlink($translate('Reset'), $this->url(null, [], true), ['class' => 'button']); ?>
+    <input type="submit" name="submit" value="<?php echo $escape($translate('Search')); ?>">
+</div>
+</form>

@@ -1,0 +1,96 @@
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var array $query
+ */
+
+$translate = $this->plugin('translate');
+$escape = $this->plugin('escapeHtml');
+// Adapted from the advanced-search/properties.phtml template.
+$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
+
+// Prepare the datetime queries.
+$datetimes = isset($query['datetime']) ? (is_array($query['datetime']) ? $query['datetime'] : [['value' => $query['datetime']]]) : [];
+$datetimes = array_filter($datetimes, function ($v) {
+    return isset($v['value']) ? trim($v['value']) !== '' : (isset($v['type']) && in_array($v['type'], ['ex', 'nex']));
+});
+// Allows to display one empty field.
+if (empty($datetimes)) $datetimes = [[]];
+
+$querySelectOption = function($value, array $search, $key, $text) {
+    $selected = null;
+    if (isset($search[$key]) && $value === $search[$key]) {
+        $selected = ' selected';
+    }
+    return sprintf('<option value="%s"%s>%s</option>', $value, $selected, $text);
+};
+
+// TODO Use a widget or a validator (but allow partial date/time: year only, date only, etc.).
+$queryInputText = function(array $search, $index) {
+    $value = isset($search['value']) ? $search['value'] : null;
+    $translate = $this->plugin('translate');
+    $escape = $this->plugin('escapeHtml');
+    return sprintf('<input type="text" class="query-datetime query-text" name="%s" value="%s" aria-label="%s" placeholder="2017-11-07 17:21:17">',
+        $escape("datetime[$index][value]"),
+        $escape($value),
+        $escape($translate('Date / time')));
+}
+?>
+
+<div id="datetime-queries" class="field removable multi-value" role="group" aria-labelledby="by-datetime-label">
+    <div class="field-meta">
+        <span id="by-datetime-label" class="label"><?php echo $translate('Search by date / time'); ?></span>
+        <a class="expand" title="<?php echo $translate('Expand'); ?>" href="#" aria-label="<?php echo $translate('Expand'); ?>"></a>
+        <div class="collapsible">
+            <div class="field-description">
+                <?php echo $translate('Date / time can be full like "2018-01-23 12:34:56", or partial like "2018-12-25" or "2017-11".'); ?>
+            </div>
+        </div>
+    </div>
+    <div class="inputs">
+        <?php
+        $index = 0;
+        foreach ($datetimes as $datetime):
+        $stem = 'datetime[' . $index . ']';
+        ?>
+        <div class="value">
+            <select class="joiner" name="<?php echo $escape($stem . '[joiner]'); ?>">
+                <?php echo $querySelectOption('and', $datetime, 'joiner', $translate('And')); ?>
+                <?php echo $querySelectOption('or', $datetime, 'joiner', $translate('Or')); ?>
+            </select>
+            <?php
+            $select = (new \Zend\Form\Element\Select())
+                ->setName($stem . '[field]')
+                ->setValueOptions([
+                    'created' => 'Created', // @translate
+                    'modified' => 'Modified', // @translate
+                ])
+                ->setAttributes([
+                    'class' => 'query-datetime',
+                    'value' => isset($datetime['field']) ? $datetime['field'] : null,
+                    'aria-label' => $translate('Creation or modification date / time'),
+                ]);
+            echo $this->formSelect($select);
+            ?>
+            <select class="query-type" name="<?php echo $escape($stem . '[type]'); ?>" aria-label="<?php echo $translate('Query type'); ?>">
+                <?php echo $querySelectOption('gt', $datetime, 'type', $translate('after')); ?>
+                <?php echo $querySelectOption('gte', $datetime, 'type', $translate('after or on')); ?>
+                <?php echo $querySelectOption('eq', $datetime, 'type', $translate('on')); ?>
+                <?php echo $querySelectOption('neq', $datetime, 'type', $translate('not on')); ?>
+                <?php echo $querySelectOption('lte', $datetime, 'type', $translate('before or on')); ?>
+                <?php echo $querySelectOption('lt', $datetime, 'type', $translate('before')); ?>
+                <?php echo $querySelectOption('ex', $datetime, 'type', $translate('has any date / time')); ?>
+                <?php echo $querySelectOption('nex', $datetime, 'type', $translate('has no date / time')); ?>
+            </select>
+            <?php echo $queryInputText($datetime, $index); ?>
+            <button type="button" class="o-icon-delete remove-value button"><?php echo $translate('Remove date / time'); ?></button>
+        </div>
+        <?php
+        ++$index;
+        endforeach;
+
+        echo $this->hyperlink($translate('Add new date / time'), '#', ['class' => 'add-value button']);
+        ?>
+    </div>
+</div>

@@ -647,6 +647,13 @@ SQL;
             );
         }
 
+        // Manage the search query with special fields that are not present in
+        // default search form.
+        $sharedEventManager->attach(
+            \Annotate\Controller\Admin\AnnotationController::class,
+            'view.advanced_search',
+            [$this, 'displayAdvancedSearch']
+        );
         // Filter the search filters for the advanced search pages.
         $sharedEventManager->attach(
             \Annotate\Controller\Admin\AnnotationController::class,
@@ -777,6 +784,21 @@ SQL;
             $jsonLd['oa:Annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
+    }
+
+    /**
+     * Display the advanced search form via partial.
+     *
+     * @param Event $event
+     */
+    public function displayAdvancedSearch(Event $event)
+    {
+        $query = $event->getParam('query', []);
+        $query['datetime'] = isset($query['datetime']) ? $query['datetime'] : '';
+        $partials = $event->getParam('partials', []);
+        $partials[] = 'common/advanced-search/annotate-datetime';
+        $event->setParam('query', $query);
+        $event->setParam('partials', $partials);
     }
 
     /**
