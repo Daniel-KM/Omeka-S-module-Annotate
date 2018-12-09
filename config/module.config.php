@@ -68,6 +68,8 @@ return [
         'factories' => [
             'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
             'annotations' => Service\ViewHelper\AnnotationsFactory::class,
+            // For compatibility with Omeka < 1.2.1.
+            'resourceTemplateSelect' => Service\ViewHelper\ResourceTemplateSelectFactory::class,
         ],
     ],
     'form_elements' => [
@@ -75,6 +77,8 @@ return [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
             Form\QuickSearchForm::class => Service\Form\QuickSearchFormFactory::class,
             Form\ResourceForm::class => Service\Form\ResourceFormFactory::class,
+            // For compatibility with Omeka < 1.2.1.
+            Form\Element\ResourceTemplateSelect::class => Service\Form\Element\ResourceTemplateSelectFactory::class,
         ],
     ],
     'controllers' => [
