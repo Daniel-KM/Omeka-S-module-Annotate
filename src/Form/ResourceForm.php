@@ -1,6 +1,7 @@
 <?php
 namespace Annotate\Form;
 
+use Annotate\Form\Element\ResourceTemplateSelect;
 use Omeka\View\Helper\Api;
 use Zend\Form\Element;
 
@@ -16,6 +17,22 @@ class ResourceForm extends \Omeka\Form\ResourceForm
         parent::init();
 
         $api = $this->api;
+
+        // A resource template with class "oa:Annotation" is required when manually edited.
+        $this->add([
+            'name' => 'o:resource_template[o:id]',
+            'type' => ResourceTemplateSelect::class,
+            'options' => [
+                'label' => 'Template', // @translate
+                'empty_option' => null,
+                'query' => [
+                    'resource_class' => 'oa:Annotation',
+                ],
+            ],
+            'attributes' => [
+                'class' => 'chosen-select',
+            ],
+        ]);
 
         // The default resource template of an annotation is Annotation.
         $resourceTemplateId = $api->searchOne('resource_templates', ['label' => 'Annotation'])->getContent()->id();
