@@ -474,6 +474,8 @@ class Module extends AbstractGenericModule
             );
         }
 
+        // TODO Add the special data to the resource template.
+
         // Allows to search resource template by resource class.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ResourceTemplateAdapter::class,

@@ -488,14 +488,11 @@ class AnnotationController extends AbstractActionController
         if (!$this->getRequest()->isXmlHttpRequest()) {
             throw new NotFoundException;
         }
-        $resourceTemplateSettings = $this->settings()->get('annotate_resource_template_data', []);
         $resourceTemplateId = $this->params()->fromQuery('resource_template_id');
-        $resourceTemplateSetting = isset($resourceTemplateSettings[$resourceTemplateId])
-            ? $resourceTemplateSettings[$resourceTemplateId]
-            : [];
+        $annotationPartMap = $this->resourceTemplateAnnotationPartMap($resourceTemplateId);
         $result = [];
         $api = $this->api();
-        foreach ($resourceTemplateSetting as $term => $value) {
+        foreach ($annotationPartMap as $term => $value) {
             $property = $api->searchOne('properties', ['term' => $term])->getContent();
             if ($property) {
                 $result[$property->id()] = $value;

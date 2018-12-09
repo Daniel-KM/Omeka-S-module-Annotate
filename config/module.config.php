@@ -98,6 +98,7 @@ return [
         ],
         'factories' => [
             'divideMergedValues' => Service\ControllerPlugin\DivideMergedValuesFactory::class,
+            'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],
     ],
     'navigation' => [
