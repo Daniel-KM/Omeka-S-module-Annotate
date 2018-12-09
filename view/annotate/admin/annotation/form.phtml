@@ -1,19 +1,26 @@
 <?php
-/** @var \Annotate\Api\Representation\AnnotationRepresentation $annotation */
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Annotate\Api\Representation\AnnotationRepresentation $annotation
+ * @var \Omeka\Form\ResourceForm $form
+ * @var string $action
+ * @var string $deleteButton
+ */
 
 $translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
+$hyperlink = $this->plugin('hyperlink');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'));
 
+/*
 $sectionNavs = [
     'annotation-metadata' => $translate('Metadata'),
     'annotation-bodies' => $translate('Bodies'),
     'annotation-targets' => $translate('Targets'),
 ];
+*/
 
 $form->prepare();
-$formLabel = $this->plugin('formLabel');
 $formElement = $this->plugin('formElement');
 ?>
 
@@ -30,14 +37,14 @@ $formElement = $this->plugin('formElement');
 ]); ?>
 
 <div id="page-actions">
-    <?php if ($annotation && $annotation->isPublic() || !isset($annotation) ): ?>
-    <?php echo $this->hyperlink('', '#', [
+    <?php if ($annotation && $annotation->isPublic() || !isset($annotation)): ?>
+    <?php echo $hyperlink('', '#', [
         'class' => 'o-icon-public button',
         'title' => $translate('Make private'),
     ]); ?>
     <input type="hidden" name="o:is_public" value="1">
     <?php else: ?>
-    <?php echo $this->hyperlink('', '#', [
+    <?php echo $hyperlink('', '#', [
         'class' => 'o-icon-private button',
         'title' => $translate('Make public'),
     ]); ?>

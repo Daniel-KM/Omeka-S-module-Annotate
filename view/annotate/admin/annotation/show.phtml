@@ -11,13 +11,14 @@ $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'A
 // $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
 
 $this->htmlElement('body')->appendAttribute('class', 'annotations show');
-$owner = $annotation->owner();
 
+/*
 $sectionNavs = [
     'annotation-metadata' => $translate('Metadata'),
     'annotation-bodies' => $translate('Bodies'),
     'annotation-targets' => $translate('Targets'),
 ];
+*/
 ?>
 <?php echo $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')); ?>
 <div id="page-actions">

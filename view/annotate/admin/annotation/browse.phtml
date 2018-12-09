@@ -1,5 +1,11 @@
 <?php
-/** @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations */
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Annotate\Api\Representation\AnnotationRepresentation[] $resources
+ * @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations
+ * @var \Omeka\Form\ConfirmForm $formDeleteSelected
+ * @var \Omeka\Form\ConfirmForm $formDeleteAll
+ */
 
 use Annotate\Api\Adapter\AnnotationAdapter;
 
@@ -39,7 +45,7 @@ $sortHeadings = [
 
  <div class="browse-controls">
     <?php echo $this->pagination(); ?>
-    <?php // echo $this->hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
+    <?php echo $this->hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
     <?php echo $this->sortSelector($sortHeadings); ?>
 </div>
 

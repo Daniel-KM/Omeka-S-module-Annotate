@@ -1,8 +1,13 @@
 <?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Form\ConfirmForm $form
+ */
+
 $translate = $this->plugin('translate');
 ?>
 <div id="sidebar-confirm">
-    <h3><?php echo $translate('Delete comments'); ?></h3>
-    <p><?php echo $translate('Are you sure you would like to delete the selected comments?'); ?></p>
+    <h3><?php echo $translate('Delete annotations'); ?></h3>
+    <p><?php echo $translate('Are you sure you would like to delete the selected annotations?'); ?></p>
     <?php echo $this->form($this->form); ?>
 </div>

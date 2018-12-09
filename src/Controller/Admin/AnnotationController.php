@@ -33,6 +33,7 @@ class AnnotationController extends AbstractActionController
 
         $view = new ViewModel;
         $resources = $response->getContent();
+        $view->setVariable('resources', $resources);
         $view->setVariable('annotations', $resources);
         $view->setVariable('formDeleteSelected', $formDeleteSelected);
         $view->setVariable('formDeleteAll', $formDeleteAll);
