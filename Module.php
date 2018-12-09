@@ -1133,6 +1133,7 @@ class Module extends AbstractGenericModule
         $customVocabPaths = [
             __DIR__ . '/data/custom-vocabs/Annotation-oa-motivatedBy.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Body-dcterms-format.json',
+            __DIR__ . '/data/custom-vocabs/Annotation-Body-oa-hasPurpose.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-dcterms-format.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-rdf-type.json',
         ];
