@@ -3,6 +3,7 @@ namespace Annotate\Controller\Admin;
 
 use Annotate\Entity\Annotation;
 use Annotate\Form\AnnotateForm;
+use Annotate\Form\QuickSearchForm;
 use Annotate\Form\ResourceForm;
 use Omeka\Form\ConfirmForm;
 use Omeka\Mvc\Exception\NotFoundException;
@@ -20,6 +21,17 @@ class AnnotationController extends AbstractActionController
         $response = $this->api()->search('annotations', $this->params()->fromQuery());
         $this->paginator($response->getTotalResults(), $this->params()->fromQuery('page'));
 
+        $formSearch = $this->getForm(QuickSearchForm::class);
+        $formSearch->setAttribute('action', $this->url()->fromRoute(null, ['action' => 'browse'], true));
+        $formSearch->setAttribute('id', 'annotation-search');
+        if ($this->getRequest()->isPost()) {
+            $data = $this->params()->fromPost();
+            $formSearch->setData($data);
+        } elseif ($this->getRequest()->isGet()) {
+            $data = $this->params()->fromQuery();
+            $formSearch->setData($data);
+        }
+
         $formDeleteSelected = $this->getForm(ConfirmForm::class);
         $formDeleteSelected->setAttribute('action', $this->url()->fromRoute('admin/annotate/default', ['action' => 'batch-delete'], true));
         $formDeleteSelected->setButtonLabel('Confirm Delete'); // @translate
@@ -35,6 +47,7 @@ class AnnotationController extends AbstractActionController
         $resources = $response->getContent();
         $view->setVariable('resources', $resources);
         $view->setVariable('annotations', $resources);
+        $view->setVariable('formSearch', $formSearch);
         $view->setVariable('formDeleteSelected', $formDeleteSelected);
         $view->setVariable('formDeleteAll', $formDeleteAll);
         return $view;

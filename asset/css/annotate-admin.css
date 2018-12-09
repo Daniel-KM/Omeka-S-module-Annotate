@@ -10,6 +10,48 @@
         content:"";
     }
 
+    /* Annotation browse */
+    .annotations .sidebar.search .advanced-search::before {
+        display: inline-block;
+        font-style: normal;
+        font-variant: normal;
+        font-weight: normal;
+        line-height: 1;
+        vertical-align: -.125em;
+        font-family: "Font Awesome 5 Free";
+        content: "\f002";
+        padding: .25em;
+    }
+    .annotations .sidebar.search .advanced-search {
+        font-size: 0.9em;
+        text-align: right;
+        display: block;
+        margin-top: -12px;
+        margin-bottom: 12px;
+    }
+    .annotations .sidebar.search .field-meta {
+        width: auto;
+        max-width: 100%;
+    }
+    .annotations .sidebar.search label,
+    .annotations .sidebar.search .label,
+    .annotations .sidebar.search .inputs {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 0 6px;
+        padding: 0;
+        position: inherit;
+    }
+    .annotations .sidebar.search label::after,
+    .annotations .sidebar.search .label::after {
+        position: inherit;
+    }
+    .annotations .sidebar .resource-details .no-resources {
+        text-align: inherit;
+        position: inherit;
+        margin-top: inherit;
+    }
+
     /* Annotation show */
     .annotations .annotation-caption {
         background-color: rgba(0,0,0,0.04);
@@ -40,6 +82,11 @@
         margin-bottom: 0;
         word-wrap: break-word;
         width: 77.77778%;
+    }
+    .annotations.show .no-resources {
+        text-align: inherit;
+        position: inherit;
+        margin-top: inherit;
     }
 
     /* Resource show details */

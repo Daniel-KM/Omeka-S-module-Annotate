@@ -1,6 +1,22 @@
 $(document).ready(function() {
 
     /**
+     * Search sidebar.
+     */
+    $('#content').on('click', 'a.search', function(e) {
+        e.preventDefault();
+        var sidebar = $('#sidebar-search');
+        Omeka.openSidebar(sidebar);
+
+        // Auto-close if other sidebar opened
+        $('body').one('o:sidebar-opened', '.sidebar', function () {
+            if (!sidebar.is(this)) {
+                Omeka.closeSidebar(sidebar);
+            }
+        });
+    });
+
+    /**
      * Better display of big annotation bodies.
      */
     if ( $.isFunction($.fn.webuiPopover) ) {

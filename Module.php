@@ -647,6 +647,13 @@ SQL;
             );
         }
 
+        // Filter the search filters for the advanced search pages.
+        $sharedEventManager->attach(
+            \Annotate\Controller\Admin\AnnotationController::class,
+            'view.search.filters',
+            [$this, 'filterSearchFilters']
+        );
+
         // Events for the admin board.
         $controllers = [
             'Omeka\Controller\Admin\Item',
@@ -770,6 +777,91 @@ SQL;
             $jsonLd['oa:Annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
+    }
+
+    /**
+     * Filter search filters for display.
+     *
+     * @param Event $event
+     */
+    public function filterSearchFilters(Event $event)
+    {
+        $query = $event->getParam('query', []);
+        $view = $event->getTarget();
+        $normalizeDateTimeQuery = $view->plugin('normalizeDateTimeQuery');
+        if (empty($query['datetime'])) {
+            $query['datetime'] = [];
+        } else {
+            if (!is_array($query['datetime'])) {
+                $query['datetime'] = [$query['datetime']];
+            }
+            foreach ($query['datetime'] as $key => $datetime) {
+                $datetime = $normalizeDateTimeQuery($datetime);
+                if ($datetime) {
+                    $query['datetime'][$key] = $datetime;
+                } else {
+                    unset($query['datetime'][$key]);
+                }
+            }
+        }
+        if (!empty($query['created'])) {
+            $datetime = $normalizeDateTimeQuery($query['created'], 'created');
+            if ($datetime) {
+                $query['datetime'][] = $datetime;
+            }
+        }
+        if (!empty($query['modified'])) {
+            $datetime = $normalizeDateTimeQuery($query['modified'], 'modified');
+            if ($datetime) {
+                $query['datetime'][] = $datetime;
+            }
+        }
+
+        if (empty($query['datetime'])) {
+            return;
+        }
+
+        $filters = $event->getParam('filters');
+        $translate = $view->plugin('translate');
+        $queryTypes = [
+            '>' => $translate('after'),
+            '>=' => $translate('after or on'),
+            '=' => $translate('on'),
+            '<>' => $translate('not on'),
+            '<=' => $translate('before or on'),
+            '<' => $translate('before'),
+            'gte' => $translate('after or on'),
+            'gt' => $translate('after'),
+            'eq' => $translate('on'),
+            'neq' => $translate('not on'),
+            'lte' => $translate('before or on'),
+            'lt' => $translate('before'),
+            'ex' => $translate('has any date / time'),
+            'nex' => $translate('has no date / time'),
+        ];
+
+        $next = false;
+        foreach ($query['datetime'] as $queryRow) {
+            $joiner = $queryRow['joiner'];
+            $field = $queryRow['field'];
+            $type = $queryRow['type'];
+            $datetimeValue = $queryRow['value'];
+
+            $fieldLabel = $field === 'modified' ? $translate('Modified') : $translate('Created');
+            $filterLabel = $fieldLabel . ' ' . $queryTypes[$type];
+            if ($next) {
+                if ($joiner === 'or') {
+                    $filterLabel = $translate('OR') . ' ' . $filterLabel;
+                } else {
+                    $filterLabel = $translate('AND') . ' ' . $filterLabel;
+                }
+            } else {
+                $next = true;
+            }
+            $filters[$filterLabel][] = $datetimeValue;
+        }
+
+        $event->setParam('filters', $filters);
     }
 
     public function handleResourceTemplateCreateOrUpdatePost(Event $event)

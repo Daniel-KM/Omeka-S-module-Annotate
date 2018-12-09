@@ -73,6 +73,7 @@ return [
     'form_elements' => [
         'factories' => [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
+            Form\QuickSearchForm::class => Service\Form\QuickSearchFormFactory::class,
             Form\ResourceForm::class => Service\Form\ResourceFormFactory::class,
         ],
     ],

@@ -3,6 +3,7 @@
  * @var \Zend\View\Renderer\PhpRenderer $this
  * @var \Annotate\Api\Representation\AnnotationRepresentation[] $resources
  * @var \Annotate\Api\Representation\AnnotationRepresentation[] $annotations
+ * @var \Annotate\Form\QuickSearchForm $formSearch
  * @var \Omeka\Form\ConfirmForm $formDeleteSelected
  * @var \Omeka\Form\ConfirmForm $formDeleteAll
  */
@@ -46,7 +47,7 @@ $sortHeadings = [
 
  <div class="browse-controls">
     <?php echo $this->pagination(); ?>
-    <?php echo $this->hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
+    <?php echo $hyperlink($translate('Quick Search'), '#', ['class' => 'search advanced-search']); ?>
     <?php echo $this->sortSelector($sortHeadings); ?>
 </div>
 
@@ -247,3 +248,17 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
 </div>
 
 <?php endif; ?>
+
+<div id="sidebar-search" class="sidebar search">
+    <?php echo $hyperlink('', '#', [
+        'class' => 'sidebar-close o-icon-close',
+        'title' => $translate('Close'),
+    ]); ?>
+    <div class="sidebar-content">
+        <div id="sidebar-search-form" class="disable-unsaved-warning">
+            <h3><?php echo $translate('Search annotations'); ?></h3>
+            <?php echo $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
+            <?php echo $this->form($formSearch); ?>
+        </div>
+    </div>
+</div>
