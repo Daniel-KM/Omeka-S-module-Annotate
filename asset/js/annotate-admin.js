@@ -83,6 +83,7 @@ $(document).ready(function() {
             ${Omeka.jsTranslate('It can be the annotation itself (default), but the body or the target too.')}
         </p>
         <p>${Omeka.jsTranslate('For example, to add an indication on a uncertainty of  a highlighted segment, the property should be attached to the target, but the description of a link should be attached to the body.')}</p>
+        <p>${Omeka.jsTranslate('Standard non-ambivalent properties are automatically managed.')}</p>
     </div>`;
     }
 

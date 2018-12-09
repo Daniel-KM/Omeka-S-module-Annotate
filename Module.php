@@ -786,24 +786,28 @@ class Module extends AbstractGenericModule
     public function handleResourceTemplateCreateOrUpdatePost(Event $event)
     {
         // The acl are already checked via the api.
-        $services = $this->getServiceLocator();
         $request = $event->getParam('request');
         $response = $event->getParam('response');
+        $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
+        $controllerPlugins = $services->get('ControllerPluginManager');
+        $annotationPartMapper = $controllerPlugins->get('annotationPartMapper');
 
         $result = [];
         $requestContent = $request->getContent();
         $requestResourceProperties = isset($requestContent['o:resource_template_property']) ? $requestContent['o:resource_template_property'] : [];
         foreach ($requestResourceProperties as $propertyId => $requestResourceProperty) {
-            if (isset($requestResourceProperty['data']['annotation_part'])) {
-                try {
-                    /** @var \Omeka\Api\Representation\PropertyRepresentation $property */
-                    $property = $api->read('properties', $propertyId)->getContent();
-                } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                    continue;
-                }
-                $result[$property->term()] = $requestResourceProperty['data']['annotation_part'];
+            if (!isset($requestResourceProperty['data']['annotation_part'])) {
+                continue;
             }
+            try {
+                /** @var \Omeka\Api\Representation\PropertyRepresentation $property */
+                $property = $api->read('properties', $propertyId)->getContent();
+            } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                continue;
+            }
+            $term = $property->term();
+            $result[$term] = $annotationPartMapper($term, $requestResourceProperty['data']['annotation_part']);
         }
 
         $resourceTemplateId = $response->getContent()->getId();

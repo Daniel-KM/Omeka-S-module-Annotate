@@ -97,6 +97,7 @@ return [
             'totalResourceAnnotations' => Mvc\Controller\Plugin\TotalResourceAnnotations::class,
         ],
         'factories' => [
+            'annotationPartMapper' => Service\ControllerPlugin\AnnotationPartMapperFactory::class,
             'divideMergedValues' => Service\ControllerPlugin\DivideMergedValuesFactory::class,
             'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],
