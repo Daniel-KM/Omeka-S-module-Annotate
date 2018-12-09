@@ -632,6 +632,13 @@ SQL;
             );
         }
 
+        // Allows to search resource template by resource class.
+        $sharedEventManager->attach(
+            \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
+            'api.search.query',
+            [$this, 'searchQueryResourceTemplate']
+        );
+
         // Events for the public front-end.
         $controllers = [
             'Omeka\Controller\Site\Item',
@@ -784,6 +791,52 @@ SQL;
             $jsonLd['oa:Annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
+    }
+
+    /**
+     * Helper to filter search queries for resource templates.
+     *
+     * @param Event $event
+     */
+    public function searchQueryResourceTemplate(Event $event)
+    {
+        $query = $event->getParam('request')->getContent();
+        if (empty($query['resource_class'])) {
+            return;
+        }
+
+        list($prefix, $localName) = explode(':', $query['resource_class']);
+
+        /** @var \Doctrine\ORM\QueryBuilder $qb */
+        $qb = $event->getParam('queryBuilder');
+        /** @var \Omeka\Api\Adapter\ResourceTemplateAdapter $adapter */
+        $adapter = $event->getTarget();
+
+        $expr = $qb->expr();
+        $resourceClassAlias = $adapter->createAlias();
+        $qb->innerJoin(
+            $adapter->getEntityClass() . '.resourceClass',
+            $resourceClassAlias
+        );
+        $vocabularyAlias = $adapter->createAlias();
+        $qb->innerJoin(
+            \Omeka\Entity\Vocabulary::class,
+            $vocabularyAlias,
+            \Doctrine\ORM\Query\Expr\Join::WITH,
+            $expr->eq($resourceClassAlias . '.vocabulary', $vocabularyAlias . '.id')
+        );
+        $qb->andWhere(
+            $expr->andX(
+                $expr->eq(
+                    $vocabularyAlias . '.prefix',
+                    $adapter->createNamedParameter($qb, $prefix)
+                ),
+                $expr->eq(
+                    $resourceClassAlias . '.localName',
+                    $adapter->createNamedParameter($qb, $localName)
+                )
+            )
+        );
     }
 
     /**
