@@ -17,6 +17,8 @@ use Omeka\Stdlib\ErrorStore;
  */
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
+    use QueryDateTimeTrait;
+
     protected $annotables = [
         \Omeka\Entity\Item::class,
         \Omeka\Entity\Media::class,
@@ -211,8 +213,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
-        // TODO Build queries to find annotations by query on targets and bodies here.
-        // TODO Query has_body / linked resource id.
+        // TODO Query annotation by resources metadata too.
 
         if (isset($query['resource_class'])) {
             if (is_numeric($query['resource_class'])) {
@@ -231,6 +232,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $this->createNamedParameter($qb, $resourceClass))
             );
         }
+
+        $this->searchDateTime($qb, $query);
     }
 
     public function hydrate(

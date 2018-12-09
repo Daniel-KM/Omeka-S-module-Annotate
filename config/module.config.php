@@ -62,6 +62,9 @@ return [
         ],
     ],
     'view_helpers' => [
+        'invokables' => [
+            'normalizeDateTimeQuery' => View\Helper\NormalizeDateTimeQuery::class,
+        ],
         'factories' => [
             'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
             'annotations' => Service\ViewHelper\AnnotationsFactory::class,
