@@ -73,6 +73,19 @@ $(document).ready(function() {
             : null;
     }
 
+    var annotationInfo = function() {
+        return `
+    <br />
+    <div id="annotation-info">
+        <h3>${Omeka.jsTranslate('Web Open Annotation')}</h3>
+        <p>
+            ${Omeka.jsTranslate('With the class <code>oa:Annotation</code>, it’s important to choose the part of the annotation to which the property is attached:')}
+            ${Omeka.jsTranslate('It can be the annotation itself (default), but the body or the target too.')}
+        </p>
+        <p>${Omeka.jsTranslate('For example, to add an indication on a uncertainty of  a highlighted segment, the property should be attached to the target, but the description of a link should be attached to the body.')}</p>
+    </div>`;
+    }
+
     // Template of  the annotation sub-form (application/view/omeka/admin/resource-template/form.phtml).
     var annotationPartInput = function(propertyId, annotationPart) {
         annotationPart = annotationPart || 'oa:Annotation';
@@ -117,6 +130,7 @@ $(document).ready(function() {
             });
         // Initialization of the sidebar.
         $('#edit-sidebar .confirm-main').append(annotationPartForm());
+        $('#content').append(annotationInfo());
     }
 
     // Set/unset the sub-form when the class oa:Annotation is selected.
@@ -125,8 +139,10 @@ $(document).ready(function() {
         var term = resourceClassTerm(termId);
         if (term === 'oa:Annotation') {
             $('#edit-sidebar .confirm-main').append(annotationPartForm());
+            $('#content').append(annotationInfo());
         } else {
             $('#annotation-options').remove();
+            $('#annotation-info').remove();
         }
     });
 
