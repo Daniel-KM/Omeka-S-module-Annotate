@@ -73,6 +73,9 @@ return [
         ],
     ],
     'form_elements' => [
+        'invokables' => [
+            Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
+        ],
         'factories' => [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
             Form\QuickSearchForm::class => Service\Form\QuickSearchFormFactory::class,
