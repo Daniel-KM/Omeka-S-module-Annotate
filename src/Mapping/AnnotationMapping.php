@@ -38,10 +38,6 @@ class AnnotationMapping extends AbstractResourceMapping
             $resourceTypes = [
                 'annotations' => 'annotations',
                 'annotation' => 'annotations',
-                'annotationbody' => 'annotation_bodies',
-                'annotationbodies' => 'annotation_bodies',
-                'annotationtarget' => 'annotation_targets',
-                'annotationtargets' => 'annotation_targets',
             ];
             if (isset($resourceTypes[$resourceType])) {
                 $data['resource_type'] = $resourceTypes[$resourceType];

@@ -1,6 +1,8 @@
 <?php
 namespace Annotate\Api\Representation;
 
+use Annotate\Api\Adapter\AnnotationBodyHydrator;
+use Annotate\Api\Adapter\AnnotationTargetHydrator;
 use Annotate\Entity\Annotation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
@@ -77,7 +79,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     public function bodies()
     {
         $bodies = [];
-        $bodyAdapter = $this->getAdapter('annotation_bodies');
+        $bodyAdapter = new AnnotationBodyHydrator();
+        $bodyAdapter->setServiceLocator($this->getServiceLocator());
         foreach ($this->resource->getBodies() as $bodyEntity) {
             $bodies[] = $bodyAdapter->getRepresentation($bodyEntity);
         }
@@ -103,7 +106,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     public function targets()
     {
         $targets = [];
-        $targetAdapter = $this->getAdapter('annotation_targets');
+        $targetAdapter = new AnnotationTargetHydrator();
+        $targetAdapter->setServiceLocator($this->getServiceLocator());
         foreach ($this->resource->getTargets() as $targetEntity) {
             $targets[] = $targetAdapter->getRepresentation($targetEntity);
         }

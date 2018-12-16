@@ -151,7 +151,7 @@ $annotationBodies = $annotation->bodies();
                     <?php echo $annotationBody->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation body')]); ?>
                     </span>
                 </li>
-                <?php if ($annotationBody->userIsAllowed('update')): ?>
+                <?php if ($annotation->userIsAllowed('update')): ?>
                 <li>
                     <span>
                     <?php echo $annotationBody->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation body')]); ?>
@@ -160,7 +160,7 @@ $annotationBodies = $annotation->bodies();
                 <?php endif; ?>
                 <?php // TODO Confirm delete annotation from item show. ?>
                 <?php /*
-                <?php if ($annotationBody->userIsAllowed('delete')): ?>
+                <?php if ($annotation->userIsAllowed('delete')): ?>
                 <li>
                     <span class="single-action">
                     <?php echo $annotationBody->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation body')]); ?>
@@ -243,7 +243,7 @@ foreach ($annotationTargets as $annotationTarget) {
                     <?php echo $annotationTarget->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation target')]); ?>
                     </span>
                 </li>
-                <?php if ($annotationTarget->userIsAllowed('update')): ?>
+                <?php if ($annotation->userIsAllowed('update')): ?>
                 <li>
                     <span>
                         <?php echo $annotationTarget->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation target')]); ?>
@@ -252,7 +252,7 @@ foreach ($annotationTargets as $annotationTarget) {
                 <?php endif; ?>
                 <?php // TODO Confirm delete annotation from item show. ?>
                 <?php /*
-                <?php if ($annotationTarget->userIsAllowed('delete')): ?>
+                <?php if ($annotation->userIsAllowed('delete')): ?>
                 <li>
                     <span class="single-action">
                     <?php echo $annotationTarget->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation target')]); ?>

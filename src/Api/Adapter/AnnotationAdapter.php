@@ -12,8 +12,9 @@ use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
 /**
- * @todo Make Annotation more independant from Omeka tools, and allow to import rdf annotation directly (avoid any normalization, etc.). Use easyrdf or create Selector class?
- * @todo Make annotation_bodies and annotation_targets unavailable by the api, but keep them as resource entities. Set them hydrator.
+ * The Annotation adapter use the body and the target hydrators.
+ *
+ * @todo Create another hydrator (recursive) for selector, refinedBy, etc. or use all as selector, with exception for body and target (that are nearly selector entity in fact).
  */
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
@@ -273,7 +274,17 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         foreach ($childEntities as $jsonName => $resourceName) {
             if ($this->shouldHydrate($request, $jsonName)) {
                 $childrenData = $request->getValue($jsonName, []);
-                $adapter = $this->getAdapter($resourceName);
+                // Body and target are no more adapter, but hydrator, so they
+                // are no more managed by the entity manager.
+                switch ($resourceName) {
+                    case 'annotation_bodies':
+                        $adapter = new AnnotationBodyHydrator();
+                        break;
+                    case 'annotation_targets':
+                        $adapter = new AnnotationTargetHydrator();
+                        break;
+                }
+                $adapter->setServiceLocator($this->getServiceLocator());
                 $class = $adapter->getEntityClass();
                 $retainChildren = [];
                 foreach ($childrenData as $childData) {

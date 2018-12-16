@@ -206,12 +206,12 @@ class Module extends AbstractGenericModule
     {
         $acl->allow(
             null,
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['read']
         );
         $acl->allow(
             null,
-            [Api\Adapter\AnnotationAdapter::class, Api\Adapter\AnnotationBodyAdapter::class, Api\Adapter\AnnotationTargetAdapter::class],
+            [Api\Adapter\AnnotationAdapter::class],
             ['search', 'read']
         );
         $acl->allow(
@@ -230,12 +230,12 @@ class Module extends AbstractGenericModule
     {
         $acl->allow(
             null,
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['read', 'create']
         );
         $acl->allow(
             null,
-            [Api\Adapter\AnnotationAdapter::class, Api\Adapter\AnnotationBodyAdapter::class, Api\Adapter\AnnotationTargetAdapter::class],
+            [Api\Adapter\AnnotationAdapter::class],
             ['search', 'read', 'create']
         );
         $acl->allow(
@@ -335,18 +335,18 @@ class Module extends AbstractGenericModule
         ];
         $acl->allow(
             $annotators,
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['create']
         );
         $acl->allow(
             $annotators,
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['update', 'delete'],
             new \Omeka\Permissions\Assertion\OwnsEntityAssertion
         );
         $acl->allow(
             $annotators,
-            [Api\Adapter\AnnotationAdapter::class, Api\Adapter\AnnotationBodyAdapter::class, Api\Adapter\AnnotationTargetAdapter::class],
+            [Api\Adapter\AnnotationAdapter::class],
             ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
         );
         $acl->allow(
@@ -375,23 +375,23 @@ class Module extends AbstractGenericModule
         // "view-all" is added via main acl factory for resources.
         $acl->allow(
             [\Omeka\Permissions\Acl::ROLE_REVIEWER],
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['read', 'create', 'update']
         );
         $acl->allow(
             [\Omeka\Permissions\Acl::ROLE_REVIEWER],
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['delete'],
             new \Omeka\Permissions\Assertion\OwnsEntityAssertion
         );
         $acl->allow(
             [\Omeka\Permissions\Acl::ROLE_EDITOR],
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class],
+            [Annotation::class],
             ['read', 'create', 'update', 'delete']
         );
         $acl->allow(
             $approbators,
-            [Api\Adapter\AnnotationAdapter::class, Api\Adapter\AnnotationBodyAdapter::class, Api\Adapter\AnnotationTargetAdapter::class],
+            [Api\Adapter\AnnotationAdapter::class],
             ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
         );
         $acl->allow(
@@ -445,11 +445,11 @@ class Module extends AbstractGenericModule
         ];
         $acl->allow(
             $admins,
-            [Annotation::class, AnnotationBody::class, AnnotationTarget::class]
+            [Annotation::class]
         );
         $acl->allow(
             $admins,
-            [Api\Adapter\AnnotationAdapter::class, Api\Adapter\AnnotationBodyAdapter::class, Api\Adapter\AnnotationTargetAdapter::class]
+            [Api\Adapter\AnnotationAdapter::class]
         );
         $acl->allow(
             $admins,

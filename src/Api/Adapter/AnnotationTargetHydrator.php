@@ -9,9 +9,9 @@ use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
 /**
- * @todo Make the annotation target adapter a simple hydrator.
+ * The annotation target adapter is a simple hydrator, but have the nearly same feature than a full adapter..
  */
-class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
+class AnnotationTargetHydrator extends AbstractResourceEntityAdapter
 {
     protected $sortFields = [
         'id' => 'id',
@@ -22,7 +22,7 @@ class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
 
     public function getResourceName()
     {
-        return 'annotation_targets';
+        // return 'annotation_targets';
     }
 
     public function getRepresentationClass()
@@ -58,6 +58,13 @@ class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
                 }
             }
         }
+    }
+
+    protected function authorize(EntityInterface $entity, $privilege)
+    {
+        // Always return true, since it's an hydrator (even if it has all the
+        // features of an adapter, except the declaration in the config).
+        return true;
     }
 
     public function hydrateOwner(Request $request, EntityInterface $entity)

@@ -29,7 +29,10 @@ class AnnotationTarget extends Resource
 
     public function getResourceName()
     {
-        return 'annotation_targets';
+        // An adapter should be set currently, since it's a derivative of
+        // resource, but there is no api manager, only an hydrator.
+        // return 'annotation_targets';
+        return 'annotations';
     }
 
     public function getId()

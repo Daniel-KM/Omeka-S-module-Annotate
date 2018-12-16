@@ -40,17 +40,6 @@ return [
     'api_adapters' => [
         'invokables' => [
             'annotations' => Api\Adapter\AnnotationAdapter::class,
-            // Bodies and targets should not be available through api since they
-            // are not meaningfull objects, but part of the main annotation one.
-            // Nevertheless, they are resources with property values, and the
-            // adapter must be available. See ValueHydrator or ResourceTemplateProperty.
-            // These feature is working, but will be disabled once a way to
-            // import them by csv import will be found (oa:hasBody::dcterms:creator?)
-            // TODO Disable annotation_bodies and annotation_targets api.
-            // Eventually create another class for selector, refinedBy, etc.
-            /** @deprecated Api manager for bodies and targets will be removed soon. */
-            'annotation_bodies' => Api\Adapter\AnnotationBodyAdapter::class,
-            'annotation_targets' => Api\Adapter\AnnotationTargetAdapter::class,
         ],
     ],
     'view_manager' => [
