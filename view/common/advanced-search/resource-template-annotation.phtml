@@ -1,0 +1,49 @@
+<?php
+/**
+ * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var array $query
+ */
+
+// Copy of  resource-template.phtml, except the option of the select to limit to annotation templates.
+
+$translate = $this->plugin('translate');
+
+// Prepare the resource template query.
+$ids = isset($query['resource_template_id']) ? $query['resource_template_id'] : [];
+if (!is_array($ids)) {
+    $ids = [$ids];
+}
+$ids = array_filter($ids);
+if (!$ids) {
+    $ids = [null];
+}
+?>
+<div id="resource-templates" class="field removable multi-value" role="group">
+    <div class="field-meta">
+        <span id="by-resource-template-label" class="label"><?php echo $translate('Search by template'); ?></span>
+        <?php echo $this->hyperlink('', '#', ['class' => 'expand', 'title' => $translate('Expand')]); ?>
+        <div class="collapsible">
+            <div class="field-description"><?php echo $translate('Searches for items that use any of these templates.'); ?></div>
+        </div>
+    </div>
+    <div class="inputs">
+        <?php foreach ($ids as $id): ?>
+        <div class="value">
+            <?php echo $this->resourceTemplateSelect([
+                'name' => 'resource_template_id[]',
+                'options' => [
+                    'query' => [
+                        'resource_class' => 'oa:Annotation',
+                    ],
+                ],
+                'attributes' => [
+                    'value' => $id,
+                    'aria-labelledby' =>  'by-resource-template-label'
+                ],
+            ]); ?>
+            <button type="button" class="o-icon-delete remove-value button"><?php echo $translate('Remove value'); ?></button>
+        </div>
+        <?php endforeach; ?>
+        <a href="#" class="add-value button"><?php echo $translate('Add new template'); ?></a>
+    </div>
+</div>

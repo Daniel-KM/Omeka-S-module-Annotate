@@ -694,7 +694,24 @@ class Module extends AbstractGenericModule
         $query['datetime'] = isset($query['datetime']) ? $query['datetime'] : '';
         $partials = $event->getParam('partials', []);
 
+        // Remove the resource class field, since it is always "oa:Annotation".
+        $key = array_search('common/advanced-search/resource-class', $partials);
+        if ($key !== false) {
+            unset($partials[$key]);
+        }
+
+        // Replace the resource template field, since the templates are
+        // restricted to the class "oa:Annotation".
+        $key = array_search('common/advanced-search/resource-template', $partials);
+        if ($key === false) {
+            $partials[] = 'common/advanced-search/resource-template-annotation';
+        } else {
+            $partials[$key] = 'common/advanced-search/resource-template-annotation';
+        }
+
         $partials[] = 'common/advanced-search/date-time-annotation';
+
+        // TODO Add a search form on the metadata of the resources.
 
         $event->setParam('query', $query);
         $event->setParam('partials', $partials);
