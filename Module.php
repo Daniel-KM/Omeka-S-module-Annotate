@@ -476,6 +476,12 @@ class Module extends AbstractGenericModule
 
         // TODO Add the special data to the resource template.
 
+        $sharedEventManager->attach(
+            '*',
+            'view.layout',
+            [$this, 'addHeadersAdmin']
+        );
+
         // Allows to search resource template by resource class.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
@@ -519,12 +525,6 @@ class Module extends AbstractGenericModule
             'Omeka\Controller\Admin\Media',
         ];
         foreach ($controllers as $controller) {
-            // Add a tab to the resource show admin pages.
-            $sharedEventManager->attach(
-                $controller,
-                'view.show.before',
-                [$this, 'addHeadersAdmin']
-            );
             $sharedEventManager->attach(
                 $controller,
                 'view.show.section_nav',
@@ -537,11 +537,6 @@ class Module extends AbstractGenericModule
             );
 
             // Add the details to the resource browse admin pages.
-            $sharedEventManager->attach(
-                $controller,
-                'view.browse.before',
-                [$this, 'addHeadersAdmin']
-            );
             $sharedEventManager->attach(
                 $controller,
                 'view.details',
@@ -565,16 +560,6 @@ class Module extends AbstractGenericModule
 
         // Add a tab to the resource template admin pages.
         // Can be added to the view of the form too.
-        $sharedEventManager->attach(
-            'Omeka\Controller\Admin\ResourceTemplate',
-            'view.add.after',
-            [$this, 'addHeadersAdmin']
-        );
-        $sharedEventManager->attach(
-            'Omeka\Controller\Admin\ResourceTemplate',
-            'view.edit.after',
-            [$this, 'addHeadersAdmin']
-        );
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
             'api.create.post',
@@ -878,8 +863,17 @@ class Module extends AbstractGenericModule
      */
     public function addHeadersAdmin(Event $event)
     {
+        // Hacked, because the admin layout doesn't use a partial or a trigger
+        // for the search engine.
+        $view = $event->getTarget();
+        // TODO How to attach all admin events only before 1.3?
+        if ($view->params()->fromRoute('__SITE__')) {
+            return;
+        }
         $view = $event->getTarget();
         $view->headLink()->appendStylesheet($view->assetUrl('css/annotate-admin.css', __NAMESPACE__));
+        $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate/default', ['action' => 'browse'], true), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $view->headScript()->appendScript($searchUrl);
         $view->headScript()->appendFile($view->assetUrl('js/annotate-admin.js', __NAMESPACE__));
     }
 

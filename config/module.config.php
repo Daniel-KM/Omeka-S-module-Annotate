@@ -227,6 +227,22 @@ return [
             ],
         ],
     ],
+    'js_translate_strings' => [
+        'Search annotations', // @target
+        'Annotations', // @target
+        'Web Open Annotation', // @target
+        'With the class <code>oa:Annotation</code>, it’s important to choose the part of the annotation to which the property is attached:', // @target
+        'It can be the annotation itself (default), but the body or the target too.', // @target
+        'For example, to add an indication on a uncertainty of  a highlighted segment, the property should be attached to the target, but the description of a link should be attached to the body.', // @target
+        'Standard non-ambivalent properties are automatically managed.', // @target
+        'Annotation', // @target
+        'Annotation part', // @target
+        'To comply with Annotation data model, select the part of the annotation this property will belong to.', // @target
+        'This option cannot be imported/exported currently.', // @target
+        'Annotation', // @target
+        'Annotation body', // @target
+        'Annotation target', // @target
+    ],
     'annotate' => [
         'config' => [
             'annotate_public_allow_view' => true,
