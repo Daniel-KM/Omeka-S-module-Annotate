@@ -612,12 +612,12 @@ class Module extends AbstractGenericModule
 
         $resource = $event->getTarget();
         $entityColumnName = $this->columnNameOfRepresentation($resource);
-        $jsonLd = $event->getParam('jsonLd');
         $api = $this->getServiceLocator()->get('Omeka\ApiManager');
         $annotations = $api
             ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
             ->getContent();
         if ($annotations) {
+            $jsonLd = $event->getParam('jsonLd');
             $jsonLd['oa:Annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }

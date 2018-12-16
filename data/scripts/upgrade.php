@@ -96,3 +96,59 @@ AND value.type = "resource"
 SQL;
     $connection->exec($sql);
 }
+
+if (version_compare($oldVersion, '3.0.6', '<')) {
+    $sql = <<<'SQL'
+CREATE TABLE annotation_part (
+    id INT NOT NULL,
+    annotation_id INT DEFAULT NULL,
+    part VARCHAR(190) NOT NULL,
+    INDEX IDX_4ABEA042E075FC54 (annotation_id),
+    INDEX idx_part (part),
+    PRIMARY KEY(id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
+
+ALTER TABLE annotation DROP FOREIGN KEY FK_2E443EF2BF396750;
+ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36E075FC54;
+ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36BF396750;
+ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6E075FC54;
+ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6BF396750;
+
+INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+SELECT `id`, `id`, "Annotate\\Entity\\Annotation"
+FROM `annotation`;
+
+INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationBody"
+FROM `annotation_body`;
+
+INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationTarget"
+FROM `annotation_target`;
+
+ALTER TABLE `annotation_body` DROP `annotation_id`;
+ALTER TABLE `annotation_target` DROP `annotation_id`;
+
+UPDATE `resource`
+INNER JOIN `annotation_part` annotation_part
+    ON annotation_part.id = resource.id
+        AND annotation_part.part <> "Annotate\\Entity\\Annotation"
+LEFT JOIN `resource` parent ON parent.id = annotation_part.annotation_id
+SET
+    resource.resource_class_id = parent.resource_class_id,
+    resource.resource_template_id = parent.resource_template_id,
+    resource.is_public = parent.is_public,
+    resource.created = parent.created,
+    resource.modified = parent.modified
+;
+
+ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042E075FC54 FOREIGN KEY (annotation_id) REFERENCES annotation (id) ON DELETE CASCADE;
+ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+ALTER TABLE annotation ADD CONSTRAINT FK_2E443EF2BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+ALTER TABLE annotation_body ADD CONSTRAINT FK_D819DB36BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+ALTER TABLE annotation_target ADD CONSTRAINT FK_9F53A3D6BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+SQL;
+    foreach (array_filter(explode(';', $sql)) as $sql) {
+        $connection->exec($sql);
+    }
+}

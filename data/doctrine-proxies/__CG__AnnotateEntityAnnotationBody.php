@@ -64,10 +64,10 @@ class AnnotationBody extends \Annotate\Entity\AnnotationBody implements \Doctrin
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'id', 'annotation', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+            return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
         }
 
-        return ['__isInitialized__', 'id', 'annotation', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+        return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
     }
 
     /**
@@ -187,21 +187,6 @@ class AnnotationBody extends \Annotate\Entity\AnnotationBody implements \Doctrin
     /**
      * {@inheritDoc}
      */
-    public function getId()
-    {
-        if ($this->__isInitialized__ === false) {
-            return (int)  parent::getId();
-        }
-
-
-        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getId', []);
-
-        return parent::getId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function setAnnotation(\Annotate\Entity\Annotation $annotation)
     {
 
@@ -219,6 +204,32 @@ class AnnotationBody extends \Annotate\Entity\AnnotationBody implements \Doctrin
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getAnnotation', []);
 
         return parent::getAnnotation();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPart()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getPart', []);
+
+        return parent::getPart();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getId()
+    {
+        if ($this->__isInitialized__ === false) {
+            return (int)  parent::getId();
+        }
+
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getId', []);
+
+        return parent::getId();
     }
 
     /**

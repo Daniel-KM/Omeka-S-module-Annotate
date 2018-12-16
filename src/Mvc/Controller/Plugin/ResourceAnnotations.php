@@ -10,8 +10,6 @@ class ResourceAnnotations extends AbstractPlugin
     /**
      * Helper to return the list of annotations of a resource.
      *
-     * @todo Manage properties of targets and bodies.
-     *
      * @param AbstractResourceEntityRepresentation $resource
      * @param array $query
      * @return AnnotationRepresentation[]

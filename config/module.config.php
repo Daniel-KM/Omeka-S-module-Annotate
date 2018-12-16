@@ -4,6 +4,15 @@ namespace Annotate;
 return [
     'entity_manager' => [
         'resource_discriminator_map' => [
+            // The three entities are sub-classes of the abstract class Entity\AnnotationPart,
+            // that is a subclass of Resource.
+            // This solution allows to search the property values in the three parts simpler.
+            // The other solution is to make the main annotation a sub-part too, and to do
+            // the search inside the abstract part, and to use an adapter for it (like Resource).
+            // It is cleaner, even it may be more complex because bodies and targets
+            // depends on the main annotation part. So if needed later. Note that the ids
+            // should be stable.
+
             Entity\Annotation::class => Entity\Annotation::class,
             // oa:hasBody can be used by oa:Annotation only.
             Entity\AnnotationBody::class => Entity\AnnotationBody::class,

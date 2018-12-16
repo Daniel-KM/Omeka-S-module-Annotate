@@ -64,10 +64,10 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'id', 'targets', 'bodies', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+            return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
         }
 
-        return ['__isInitialized__', 'id', 'targets', 'bodies', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+        return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
     }
 
     /**
@@ -187,21 +187,6 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function getId()
-    {
-        if ($this->__isInitialized__ === false) {
-            return (int)  parent::getId();
-        }
-
-
-        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getId', []);
-
-        return parent::getId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getTargets()
     {
 
@@ -219,6 +204,65 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getBodies', []);
 
         return parent::getBodies();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setAnnotation(\Annotate\Entity\Annotation $annotation)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setAnnotation', [$annotation]);
+
+        return parent::setAnnotation($annotation);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getAnnotation()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getAnnotation', []);
+
+        return parent::getAnnotation();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function postPersist(\Doctrine\ORM\Event\LifecycleEventArgs $eventArgs)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'postPersist', [$eventArgs]);
+
+        return parent::postPersist($eventArgs);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getPart()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getPart', []);
+
+        return parent::getPart();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getId()
+    {
+        if ($this->__isInitialized__ === false) {
+            return (int)  parent::getId();
+        }
+
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getId', []);
+
+        return parent::getId();
     }
 
     /**

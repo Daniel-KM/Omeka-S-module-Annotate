@@ -2,14 +2,18 @@
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
-use Annotate\Entity\AnnotationBody;
 use Annotate\Entity\AnnotationTarget;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Exception;
 use Omeka\Api\Request;
+use Omeka\Api\ResourceInterface;
+use Omeka\Api\Response;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
+use Zend\EventManager\Event;
 
 /**
  * The Annotation adapter use the body and the target hydrators.
@@ -49,6 +53,14 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         return \Annotate\Entity\Annotation::class;
     }
 
+    public function getRepresentation(ResourceInterface $data = null)
+    {
+        if ($data && $data->getPart() !== \Annotate\Entity\Annotation::class) {
+            $data = $data->getAnnotation();
+        }
+        return parent::getRepresentation($data);
+    }
+
     /**
      * The search is done on annotation bodies and targets too.
      *
@@ -59,21 +71,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     {
         $expr = $qb->expr();
 
-        // Join all related bodies and targets to get their properties too.
-        $qb->leftJoin(
-            AnnotationBody::class,
-            AnnotationBody::class,
-            \Doctrine\ORM\Query\Expr\Join::WITH,
-            $expr->eq(AnnotationBody::class . '.annotation', Annotation::class)
-        );
-        $qb->leftJoin(
-            AnnotationTarget::class,
-            AnnotationTarget::class,
-            \Doctrine\ORM\Query\Expr\Join::WITH,
-            $expr->eq(AnnotationTarget::class . '.annotation', Annotation::class)
-        );
-
         // Added before parent buildQuery because a property is added.
+        // TODO Currently, the annotator is not set, anyway.
         if (isset($query['annotator'])) {
             if ($query['annotator'] === '0') {
                 $query['property'][] = [
@@ -98,48 +97,24 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
+        // Added before parent buildQuery because a property is added.
+        // FIXME: oa:hasSource is used to get the target, but in very rare cases, it can be attached to the body. Require to search a property on a subpart.
+        if (isset($query['resource_id'])) {
+            $query['property'][] = [
+                'joiner' => 'and',
+                'property' => 'oa:hasSource',
+                'type' => 'res',
+                'text' => $query['resource_id'],
+            ];
+        }
+
         parent::buildQuery($qb, $query);
 
         if (isset($query['id'])) {
-            $qb->andWhere($expr->eq('Annotate\Entity\Annotation.id', $query['id']));
+            $qb->andWhere($expr->eq(\Annotate\Entity\Annotation::class . '.id', $query['id']));
         }
 
-        if (isset($query['resource_id'])) {
-            $resources = $query['resource_id'];
-            if (!is_array($resources)) {
-                $resources = [$resources];
-            }
-            $resources = array_filter($resources, 'is_numeric');
-
-            if ($resources) {
-                // TODO Make the property id of oa:hasSource static or integrate it to avoid a double query.
-                $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
-                // The resource is attached via the property oa:hasSource of the
-                // AnnotationTargets, that are attached to annotations.
-                $targetAlias = $this->createAlias();
-                $qb->innerJoin(
-                    AnnotationTarget::class,
-                    $targetAlias,
-                    \Doctrine\ORM\Query\Expr\Join::WITH,
-                    $expr->eq($targetAlias . '.annotation', Annotation::class)
-                );
-                $valuesAlias = $this->createAlias();
-                $qb->innerJoin(
-                    $targetAlias . '.values',
-                    $valuesAlias,
-                    \Doctrine\ORM\Query\Expr\Join::WITH,
-                    $expr->andX(
-                        $expr->eq($valuesAlias . '.property', $propertyId),
-                        $expr->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
-                        $expr->in(
-                            $valuesAlias . '.valueResource',
-                            $this->createNamedParameter($qb, $resources)
-                        )
-                    )
-                );
-            }
-        }
-
+        // TODO Check the query of annotations by site.
         // TODO Make the limit to a site working for item sets and media too.
         if (!empty($query['site_id'])) {
             try {
@@ -214,8 +189,329 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
-        // TODO Query annotation by resources metadata too.
+        $this->buildResourceClassQuery($qb, $query);
+        $this->searchDateTime($qb, $query);
+    }
 
+    /**
+     * Copy of the parent class, except that the "from" is AnnotationPart and
+     * the GroupBy is "Annotation".
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
+     */
+    public function search(Request $request)
+    {
+        $query = $request->getContent();
+
+        // Set default query parameters
+        $defaultQuery = [
+            'page' => null,
+            'per_page' => null,
+            'limit' => null,
+            'offset' => null,
+            'sort_by' => null,
+            'sort_order' => null,
+        ];
+        $query += $defaultQuery;
+        $query['sort_order'] = strtoupper($query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
+
+        // Begin building the search query.
+        $entityClass = $this->getEntityClass();
+        $this->index = 0;
+        // Join all related bodies and targets to get their properties too.
+        // Idealy, the request should be done on resource with a join or where
+        // condition on resource_type (in annotation, body and target), but the
+        // resource_type is not available in the ORM query builder, unlike the
+        // DBAL query builder, because it is the discriminator map.
+        // Nevertheless, Doctrine allows to use a special function in that case.
+        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#query-the-type
+        // This special function is not so simple, so use AnnotationPart: all
+        // annotations, bodies and targets are subparts of AnnotationPart. The
+        // method getRepresentation() checks the part to return always the
+        // annotation one. It avoids a "select from select unions" too.
+        $qb = $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select($entityClass)
+            // ->from($entityClass, $entityClass);
+            ->from(
+                // The annotation part allows to get values of all sub-parts
+                // in properties or via modules.
+                \Annotate\Entity\AnnotationPart::class,
+                // The alias is this class, like in the normal queries. It
+                // allows to manage derivated queries easily.
+                $entityClass
+            );
+        $this->buildQuery($qb, $query);
+        // The group is done on the annotation, not the id, so only annotations
+        // are returned.
+        $qb->groupBy("$entityClass.annotation");
+
+        // Trigger the search.query event.
+        $event = new Event('api.search.query', $this, [
+            'queryBuilder' => $qb,
+            'request' => $request,
+        ]);
+        $this->getEventManager()->triggerEvent($event);
+
+        // Finish building the search query. In addition to any sorting the
+        // adapters add, always sort by entity ID.
+        $this->sortQuery($qb, $query);
+        $this->limitQuery($qb, $query);
+        // Order by the main annotation id.
+        $qb->addOrderBy("$entityClass.annotation", $query['sort_order']);
+
+        $scalarField = $request->getOption('returnScalar');
+        if ($scalarField) {
+            $fieldNames = $this->getEntityManager()->getClassMetadata($entityClass)->getFieldNames();
+            if (!in_array($scalarField, $fieldNames)) {
+                throw new Exception\BadRequestException(sprintf(
+                    $this->getTranslator()->translate('The "%s" field is not available in the %s entity class.'),
+                    $scalarField, $entityClass
+                ));
+            }
+            $qb->select(sprintf('%s.%s', $entityClass, $scalarField));
+            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField);
+            $response = new Response($content);
+            $response->setTotalResults(count($content));
+            return $response;
+        }
+
+        $paginator = new Paginator($qb, false);
+        $entities = [];
+        // Don't make the request if the LIMIT is set to zero. Useful if the
+        // only information needed is total results.
+        if ($qb->getMaxResults() || null === $qb->getMaxResults()) {
+            foreach ($paginator as $entity) {
+                if (is_array($entity)) {
+                    // Remove non-entity columns added to the SELECT. You can use
+                    // "AS HIDDEN {alias}" to avoid this condition.
+                    $entity = $entity[0];
+                }
+                $entities[] = $entity;
+            }
+        }
+
+        $response = new Response($entities);
+        $response->setTotalResults($paginator->count());
+        return $response;
+    }
+
+    /**
+     * Set sort_by and sort_order conditions to the query builder.
+     *
+     * Note about random sorting: There is no random query in doctrine and no
+     * standard query in the sql standard, because it is too hard to implement
+     * efficiently. So this order should be used only for small bases.
+     *
+     * @param QueryBuilder $qb
+     * @param array $query
+     */
+    public function sortQuery(QueryBuilder $qb, array $query)
+    {
+        if (isset($query['sort_by']) && is_string($query['sort_by'])) {
+            if (array_key_exists($query['sort_by'], $this->sortFields)) {
+                $sortBy = $this->sortFields[$query['sort_by']];
+                $qb->addOrderBy($this->getEntityClass() . ".$sortBy", $query['sort_order']);
+            } elseif ($query['sort_by'] === 'random') {
+                $qb->orderBy('RAND()');
+            }
+        }
+    }
+
+    /**
+     * Build query on value.
+     *
+     * Similar than parent method with more query types.
+     *
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildPropertyQuery()
+     *
+     * Query format:
+     *
+     *   - property[{index}][joiner]: "and" OR "or" joiner with previous query
+     *   - property[{index}][property]: property ID
+     *   - property[{index}][text]: search text
+     *   - property[{index}][type]: search type
+     *     - eq: is exactly
+     *     - neq: is not exactly
+     *     - in: contains
+     *     - nin: does not contain
+     *     - ex: has any value
+     *     - nex: has no value
+     *     - list: is in list
+     *     - nlist: is not in list
+     *     - sw: starts with
+     *     - nsw: does not start with
+     *     - ew: ends with
+     *     - new: does not end with
+     *     - res: has resource
+     *     - nres: has no resource
+     *
+     * @param QueryBuilder $qb
+     * @param array $query
+     */
+    protected function buildPropertyQuery(QueryBuilder $qb, array $query)
+    {
+        if (!isset($query['property']) || !is_array($query['property'])) {
+            return;
+        }
+        $valuesJoin = $this->getEntityClass() . '.values';
+        $where = '';
+        // @see \Doctrine\ORM\QueryBuilder::expr().
+        $expr = $qb->expr();
+
+        foreach ($query['property'] as $queryRow) {
+            if (!(is_array($queryRow)
+                && array_key_exists('property', $queryRow)
+                && array_key_exists('type', $queryRow)
+            )) {
+                continue;
+            }
+            $propertyId = $queryRow['property'];
+            $queryType = $queryRow['type'];
+            $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
+            $value = isset($queryRow['text']) ? $queryRow['text'] : null;
+
+            if (!strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
+                continue;
+            }
+
+            $valuesAlias = $this->createAlias();
+            $positive = true;
+
+            switch ($queryType) {
+                case 'neq':
+                    $positive = false;
+                    // No break.
+                case 'eq':
+                    $param = $this->createNamedParameter($qb, $value);
+                    $predicateExpr = $expr->orX(
+                        $expr->eq("$valuesAlias.value", $param),
+                        $expr->eq("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nin':
+                    $positive = false;
+                    // No break.
+                case 'in':
+                    $param = $this->createNamedParameter($qb, "%$value%");
+                    $predicateExpr = $expr->orX(
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nlist':
+                    $positive = false;
+                    // No break.
+                case 'list':
+                    $list = is_array($value) ? $value : explode("\n", $value);
+                    $list = array_filter(array_map('trim', $list), 'strlen');
+                    if (empty($list)) {
+                        continue 2;
+                    }
+                    $param = $this->createNamedParameter($qb, $list);
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.value", $param),
+                        $expr->in("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nsw':
+                    $positive = false;
+                    // No break.
+                case 'sw':
+                    $param = $this->createNamedParameter($qb, "$value%");
+                    $predicateExpr = $expr->orX(
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'new':
+                    $positive = false;
+                    // No break.
+                case 'ew':
+                    $param = $this->createNamedParameter($qb, "%$value");
+                    $predicateExpr = $expr->orX(
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nres':
+                    $positive = false;
+                    // No break.
+                case 'res':
+                    $predicateExpr = $expr->eq(
+                        "$valuesAlias.valueResource",
+                        $this->createNamedParameter($qb, $value)
+                    );
+                    break;
+
+                case 'nex':
+                    $positive = false;
+                    // No break.
+                case 'ex':
+                    $predicateExpr = $expr->isNotNull("$valuesAlias.id");
+                    break;
+
+                default:
+                    continue 2;
+            }
+
+            $joinConditions = [];
+            // Narrow to specific property, if one is selected
+            if ($propertyId) {
+                if (is_numeric($propertyId)) {
+                    $propertyId = (int) $propertyId;
+                } else {
+                    $property = $this->getPropertyByTerm($propertyId);
+                    if ($property) {
+                        $propertyId = $property->getId();
+                    } else {
+                        $propertyId = 0;
+                    }
+                }
+                $joinConditions[] = $expr->eq("$valuesAlias.property", (int) $propertyId);
+            }
+
+            if ($positive) {
+                $whereClause = '(' . $predicateExpr . ')';
+            } else {
+                $joinConditions[] = $predicateExpr;
+                $whereClause = $expr->isNull("$valuesAlias.id");
+            }
+
+            if ($joinConditions) {
+                $qb->leftJoin($valuesJoin, $valuesAlias, 'WITH', $expr->andX(...$joinConditions));
+            } else {
+                $qb->leftJoin($valuesJoin, $valuesAlias);
+            }
+
+            if ($where == '') {
+                $where = $whereClause;
+            } elseif ($joiner == 'or') {
+                $where .= " OR $whereClause";
+            } else {
+                $where .= " AND $whereClause";
+            }
+        }
+
+        if ($where) {
+            $qb->andWhere($where);
+        }
+    }
+
+    /**
+     * Search a resource class.
+     *
+     * @param QueryBuilder $qb
+     * @param array $query
+     */
+    public function buildResourceClassQuery(QueryBuilder $qb, array $query)
+    {
         if (isset($query['resource_class'])) {
             if (is_numeric($query['resource_class'])) {
                 $resourceClass = (int) $query['resource_class'];
@@ -228,13 +524,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $this->getEntityClass() . '.resourceClass',
                 $resourceClassAlias
             );
-            $qb->andWhere($expr->eq(
+            $qb->andWhere($qb->expr()->eq(
                 $resourceClassAlias . '.id',
                 $this->createNamedParameter($qb, $resourceClass))
             );
         }
-
-        $this->searchDateTime($qb, $query);
     }
 
     public function hydrate(
@@ -250,6 +544,12 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $childEntities = [
             'oa:hasBody' => 'annotation_bodies',
             'oa:hasTarget' => 'annotation_targets',
+        ];
+        // Body and target are no more adapter, but hydrator, so they are no
+        // more managed by the api, but only the entity manager.
+        $childHydrators = [
+            'oa:hasBody' => AnnotationBodyHydrator::class,
+            'oa:hasTarget' => AnnotationTargetHydrator::class,
         ];
         $children = [];
         $data = $request->getContent();
@@ -270,74 +570,81 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // $append = $isPartial && 'append' === $request->getOption('collectionAction');
         // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
 
-        // TODO Remove the checks of the existing id, since it's a simple hydrator now.
         foreach ($childEntities as $jsonName => $resourceName) {
             if ($this->shouldHydrate($request, $jsonName)) {
-                $childrenData = $request->getValue($jsonName, []);
-                // Body and target are no more adapter, but hydrator, so they
-                // are no more managed by the entity manager.
-                switch ($resourceName) {
-                    case 'annotation_bodies':
-                        $adapter = new AnnotationBodyHydrator();
-                        break;
-                    case 'annotation_targets':
-                        $adapter = new AnnotationTargetHydrator();
-                        break;
-                }
-                $adapter->setServiceLocator($this->getServiceLocator());
-                $class = $adapter->getEntityClass();
+                $childAdapter = new $childHydrators[$jsonName];
+                $childAdapter->setServiceLocator($this->getServiceLocator());
+                $class = $childAdapter->getEntityClass();
+
                 $retainChildren = [];
+                $childrenData = $request->getValue($jsonName, []);
                 foreach ($childrenData as $childData) {
                     $subErrorStore = new ErrorStore;
-                    // Keep an existing child.
+                    $isCreate = true;
+                    // Update an existing child.
                     if (is_object($childData)) {
-                        $child = $this->getAdapter($resourceName)
-                            ->findEntity($childData);
-                        $retainChildren[] = $child;
+                        $child = $childAdapter->findEntity($childData);
+                        $isCreate = false;
                     } elseif (isset($childData['o:id'])) {
-                        $child = $adapter->findEntity($childData['o:id']);
-                        if (isset($childData['o:is_public'])) {
-                            $child->setIsPublic($childData['o:is_public']);
-                        }
-                        $retainChildren[] = $child;
+                        $child = $childAdapter->findEntity($childData['o:id']);
+                        $isCreate = false;
                     }
                     // Create a new child.
                     else {
                         $child = new $class;
-                        $child->setAnnotation($entity);
-                        $subrequest = new Request(Request::CREATE, $resourceName);
-                        $subrequest->setContent($childData);
-                        try {
-                            $adapter->hydrateEntity($subrequest, $child, $subErrorStore);
-                        } catch (Exception\ValidationException $e) {
-                            $errorStore->mergeErrors($e->getErrorStore(), $jsonName);
-                        }
-                        switch ($resourceName) {
-                            case 'annotation_bodies':
-                                $entity->getBodies()->add($child);
-                                break;
-                            case 'annotation_targets':
-                                $entity->getTargets()->add($child);
-                                break;
-                        }
-                        $retainChildren[] = $child;
                     }
+                    // The child data related to the resource should be the same
+                    // than Annotation in order to do good search on them.
+                    // Nevertheless, keep thumbnail, because there is no search
+                    // on it, and resource type.
+                    $child->setAnnotation($entity);
+                    $child->setOwner($entity->getOwner());
+                    $child->setResourceClass($entity->getResourceClass());
+                    $child->setResourceTemplate($entity->getResourceTemplate());
+                    $child->setIsPublic($entity->isPublic());
+                    $child->setCreated($entity->getCreated());
+                    $child->setModified($entity->getModified());
+
+                    $subrequest = new Request($isCreate ? Request::CREATE : Request::UPDATE, $resourceName);
+                    $subrequest->setContent($childData);
+                    try {
+                        $childAdapter->hydrateEntity($subrequest, $child, $subErrorStore);
+                    } catch (Exception\ValidationException $e) {
+                        $errorStore->mergeErrors($e->getErrorStore(), $jsonName);
+                    }
+                    if ($isCreate) {
+                        $this->getCollection($entity, $resourceName)->add($child);
+                    }
+                    $retainChildren[] = $child;
                 }
+
                 // Remove child not included in request.
-                switch ($resourceName) {
-                    case 'annotation_bodies':
-                        $children = $entity->getBodies();
-                        break;
-                    case 'annotation_targets':
-                        $children = $entity->getTargets();
-                        break;
-                }
+                $children = $this->getCollection($entity, $resourceName);
                 foreach ($children as $child) {
                     if (!in_array($child, $retainChildren, true)) {
                         $children->removeElement($child);
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Returns bodies or targets of the annotations.
+     *
+     * @param Annotation $annotation
+     * @param string $collection
+     * @return ArrayCollection
+     */
+    protected function getCollection(Annotation $annotation, $collection)
+    {
+        switch ($collection) {
+            case 'oa:hasBody':
+            case 'annotation_bodies':
+                return $annotation->getBodies();
+            case 'oa:hasTarget':
+            case 'annotation_targets':
+                return $annotation->getTargets();
         }
     }
 
