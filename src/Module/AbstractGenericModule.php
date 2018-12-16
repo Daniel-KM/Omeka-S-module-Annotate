@@ -141,13 +141,13 @@ abstract class AbstractGenericModule extends AbstractModule
 
     public function handleConfigForm(AbstractController $controller)
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+        $config = $this->getConfig();
         $space = strtolower($this->namespace);
         if (empty($config[$space]['config'])) {
             return true;
         }
 
+        $services = $this->getServiceLocator();
         $formManager = $services->get('FormElementManager');
         $formClass = $this->namespace . '\Form\ConfigForm';
         if (!$formManager->has($formClass)) {
@@ -239,8 +239,7 @@ abstract class AbstractGenericModule extends AbstractModule
     protected function manageSiteSettings($process)
     {
         $settingsType = 'site_settings';
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+        $config = $this->getConfig();
         $space = strtolower($this->namespace);
         if (empty($config[$space][$settingsType])) {
             return;
@@ -263,8 +262,7 @@ abstract class AbstractGenericModule extends AbstractModule
     protected function manageUserSettings($process)
     {
         $settingsType = 'user_settings';
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+        $config = $this->getConfig();
         $space = strtolower($this->namespace);
         if (empty($config[$space][$settingsType])) {
             return;
@@ -288,8 +286,7 @@ abstract class AbstractGenericModule extends AbstractModule
      */
     protected function manageAnySettings(SettingsInterface $settings, $settingsType, $process)
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+        $config = $this->getConfig();
         $space = strtolower($this->namespace);
         if (empty($config[$space][$settingsType])) {
             return;
@@ -365,8 +362,7 @@ abstract class AbstractGenericModule extends AbstractModule
      */
     protected function prepareDataToPopulate(SettingsInterface $settings, $settingsType)
     {
-        $services = $this->getServiceLocator();
-        $config = $services->get('Config');
+        $config = $this->getConfig();
         $space = strtolower($this->namespace);
         if (empty($config[$space][$settingsType])) {
             return;

@@ -56,6 +56,16 @@ trait ModuleResourcesTrait
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
 
+        $filepath = $vocabulary['file'];
+        if (!file_exists($filepath) || !is_readable($filepath)) {
+            throw new ModuleCannotInstallException(
+                sprintf(
+                    'The file "%s" cannot be read. Check your file system.', // @translate
+                    '/data/vocabularies/' . basename($vocabulary['file'])
+                )
+            );
+        }
+
         // Check if the vocabulary have been already imported.
         $prefix = $vocabulary['vocabulary']['o:prefix'];
 
@@ -133,6 +143,10 @@ trait ModuleResourcesTrait
                 ->read('custom_vocabs', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
             return false;
+        } catch (\Omeka\Api\Exception\BadRequestException $e) {
+            throw new ModuleCannotInstallException(
+                'The current version of this module requires the module Custom Vocab.' // @translate
+            );
         }
 
         if (implode("\n", $data['o:terms']) !== $customVocab->terms()) {
@@ -202,13 +216,12 @@ trait ModuleResourcesTrait
 
         /** @var \Omeka\Stdlib\RdfImporter $rdfImporter */
         $rdfImporter = $services->get('Omeka\RdfImporter');
-
         try {
             $rdfImporter->import(
                 $vocabulary['strategy'],
                 $vocabulary['vocabulary'],
                 [
-                    'file' => __DIR__ . '/data/vocabularies/' . $vocabulary['file'],
+                    'file' => $vocabulary['file'],
                     'format' => $vocabulary['format'],
                 ]
             );
@@ -241,14 +254,14 @@ trait ModuleResourcesTrait
         // Check if the resource template exists, so it is not replaced.
         $label = $data['o:label'];
         try {
-            $api->read('resource_templates', ['label' => $label]);
+            $resourceTemplate = $api->read('resource_templates', ['label' => $label])->getContent();
             $message = new Message(
                 'The resource template named "%s" is already available and is skipped.', // @translate
                 $label
             );
             $messenger = new Messenger();
             $messenger->addWarning($message);
-            return;
+            return $resourceTemplate;
         } catch (NotFoundException $e) {
         }
 
@@ -261,7 +274,7 @@ trait ModuleResourcesTrait
             if (strpos($templateProperty['data_type_name'], 'customvocab:') !== 0) {
                 continue;
             }
-            $label = $templateProperty['data_type_label'];
+            $label = $templateProperty['data_type_label'] ?: $templateProperty['label'];
             try {
                 $customVocab = $api
                     ->read('custom_vocabs', ['label' => $label])->getContent();
@@ -273,6 +286,7 @@ trait ModuleResourcesTrait
                     ));
             }
             $templateProperty['data_type_name'] = 'customvocab:' . $customVocab->id();
+            $templateProperty['o:data_type'] = 'customvocab:' . $customVocab->id();
         }
         unset($templateProperty);
 
@@ -292,7 +306,10 @@ trait ModuleResourcesTrait
         $api = $services->get('Omeka\ApiManager');
         $data = json_decode(file_get_contents($filepath), true);
         $data['o:terms'] = implode(PHP_EOL, $data['o:terms']);
-        $api->create('custom_vocabs', $data);
+        try {
+            $api->create('custom_vocabs', $data);
+        } catch (\Exception $e) {
+        }
     }
 
     /**
@@ -420,7 +437,8 @@ trait ModuleResourcesTrait
         $api = $services->get('Omeka\ApiManager');
         // The vocabulary may have been removed manually before.
         try {
-            $api->delete('vocabularies', ['prefix' => $prefix])->getContent();
+            $resource = $api->read('vocabularies', ['prefix' => $prefix])->getContent();
+            $api->delete('vocabularies', $resource->id())->getContent();
         } catch (NotFoundException $e) {
         }
     }
@@ -436,7 +454,8 @@ trait ModuleResourcesTrait
         $api = $services->get('Omeka\ApiManager');
         // The resource template may be renamed or removed manually before.
         try {
-            $api->delete('resource_templates', ['label' => $label])->getContent();
+            $resource = $api->read('resource_templates', ['label' => $label])->getContent();
+            $api->delete('resource_templates', $resource->id())->getContent();
         } catch (NotFoundException $e) {
         }
     }
@@ -452,7 +471,8 @@ trait ModuleResourcesTrait
         $api = $services->get('Omeka\ApiManager');
         // The custom vocab may be renamed or removed manually before.
         try {
-            $api->delete('custom_vocabs', ['label' => $label])->getContent();
+            $resource = $api->read('custom_vocabs', ['label' => $label])->getContent();
+            $api->delete('custom_vocabs', $resource->id())->getContent();
         } catch (NotFoundException $e) {
         }
     }

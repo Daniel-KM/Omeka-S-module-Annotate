@@ -34,8 +34,6 @@ require_once __DIR__ . '/src/Module/AbstractGenericModule.php';
 require_once __DIR__ . '/src/Module/ModuleResourcesTrait.php';
 
 use Annotate\Entity\Annotation;
-use Annotate\Entity\AnnotationBody;
-use Annotate\Entity\AnnotationTarget;
 use Annotate\Module\AbstractGenericModule;
 use Annotate\Module\ModuleResourcesTrait;
 use Annotate\Permissions\Acl;
@@ -69,37 +67,37 @@ class Module extends AbstractGenericModule
 
     public function install(ServiceLocatorInterface $serviceLocator)
     {
-        $this->setServiceLocator($serviceLocator);
-        $this->installResources();
         parent::install($serviceLocator);
+        $this->installResources();
     }
 
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
-        parent::uninstall($serviceLocator);
-
+        $this->setServiceLocator($serviceLocator);
         if (!empty($_POST['remove-vocabulary'])) {
             $prefix = 'rdf';
-            $this->removeVocabulary($prefix, $serviceLocator);
+            $this->removeVocabulary($prefix);
             $prefix = 'oa';
-            $this->removeVocabulary($prefix, $serviceLocator);
+            $this->removeVocabulary($prefix);
         }
 
         if (!empty($_POST['remove-custom-vocab'])) {
             $customVocab = 'Annotation oa:motivatedBy';
-            $this->removeCustomVocab($customVocab, $serviceLocator);
-            $customVocab = 'Annotation Body dcterms:format';
-            $this->removeCustomVocab($customVocab, $serviceLocator);
+            $this->removeCustomVocab($customVocab);
+            $customVocab = 'Annotation Body oa:hasPurpose';
+            $this->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target dcterms:format';
-            $this->removeCustomVocab($customVocab, $serviceLocator);
+            $this->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target rdf:type';
-            $this->removeCustomVocab($customVocab, $serviceLocator);
+            $this->removeCustomVocab($customVocab);
         }
 
         if (!empty($_POST['remove-template'])) {
             $resourceTemplate = 'Annotation';
-            $this->removeResourceTemplate($resourceTemplate, $serviceLocator);
+            $this->removeResourceTemplate($resourceTemplate);
         }
+
+        parent::uninstall($serviceLocator);
     }
 
     public function warnUninstall(Event $event)
@@ -114,7 +112,7 @@ class Module extends AbstractGenericModule
         $t = $serviceLocator->get('MvcTranslator');
 
         $vocabularyLabels = 'RDF Concepts" / "Web Annotation Ontology';
-        $customVocabs = 'Annotation oa:motivatedBy" / "dcterms:format" / "rdf:type';
+        $customVocabs = 'Annotation oa:motivatedBy" / "oa:hasPurpose" / "rdf:type" / "dcterms:format';
         $resourceTemplates = 'Annotation';
 
         $html = '<p>';
@@ -1132,7 +1130,7 @@ class Module extends AbstractGenericModule
                     'o:comment' => 'This is the RDF Schema for the RDF vocabulary terms in the RDF Namespace, defined in RDF 1.1 Concepts.', // @translate
                 ],
                 'strategy' => 'file',
-                'file' => 'rdf_2014-02-25.n3',
+                'file' => __DIR__ . '/data/vocabularies/rdf_2014-02-25.n3',
                 'format' => 'turtle',
             ],
             [
@@ -1143,7 +1141,7 @@ class Module extends AbstractGenericModule
                     'o:comment' => 'The Web Annotation Vocabulary specifies the set of RDF classes, predicates and named entities that are used by the Web Annotation Data Model (http://www.w3.org/TR/annotation-model/).', // @translate
                 ],
                 'strategy' => 'file',
-                'file' => 'oa.ttl',
+                'file' => __DIR__ . '/data/vocabularies/oa.ttl',
                 'format' => 'turtle',
             ],
         ];
@@ -1155,23 +1153,33 @@ class Module extends AbstractGenericModule
 
         $customVocabPaths = [
             __DIR__ . '/data/custom-vocabs/Annotation-oa-motivatedBy.json',
-            __DIR__ . '/data/custom-vocabs/Annotation-Body-dcterms-format.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Body-oa-hasPurpose.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-dcterms-format.json',
             __DIR__ . '/data/custom-vocabs/Annotation-Target-rdf-type.json',
         ];
-        foreach ($customVocabPaths as $key => $customVocabPath) {
-            if ($this->checkCustomVocab($customVocabPath)) {
+        foreach ($customVocabPaths as $key => $filepath) {
+            if ($this->checkCustomVocab($filepath)) {
                 unset($customVocabPaths[$key]);
             }
         }
 
         // TODO Replace the resource templates for annotations that are not items.
         $resourceTemplatePaths = [
-            __DIR__ . '/data/resource-templates/Annotation.json',
+            'Annotation' => __DIR__ . '/data/resource-templates/Annotation.json',
         ];
-        foreach ($resourceTemplatePaths as $key => $resourceTemplatePath) {
-            if ($this->checkResourceTemplate($resourceTemplatePath)) {
+        $resourceTemplateSettings = [
+            'Annotation' => [
+                'oa:motivatedBy' => 'oa:Annotation',
+                'rdf:value' => 'oa:hasBody',
+                'oa:hasPurpose' => 'oa:hasBody',
+                'dcterms:language' => 'oa:hasBody',
+                'oa:hasSource' => 'oa:hasTarget',
+                'rdf:type' => 'oa:hasTarget',
+                'dcterms:format' => 'oa:hasTarget',
+            ],
+        ];
+        foreach ($resourceTemplatePaths as $key => $filepath) {
+            if ($this->checkResourceTemplate($filepath)) {
                 unset($resourceTemplatePaths[$key]);
             }
         }
@@ -1181,12 +1189,19 @@ class Module extends AbstractGenericModule
             $this->createVocabulary($vocabulary);
         }
 
-        foreach ($customVocabPaths as $customVocabPath) {
-            $this->createCustomVocab($customVocabPath);
+        foreach ($customVocabPaths as $filepath) {
+            $this->createCustomVocab($filepath);
         }
 
-        foreach ($resourceTemplatePaths as $resourceTemplatePath) {
-            $this->createResourceTemplate($resourceTemplatePath);
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+
+        $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
+        foreach ($resourceTemplatePaths as $key => $filepath) {
+            $resourceTemplate = $this->createResourceTemplate($filepath);
+            // Add the special resource template settings.
+            $resourceTemplateData[$resourceTemplate->id()] = $resourceTemplateSettings[$key];
         }
+        $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 }
