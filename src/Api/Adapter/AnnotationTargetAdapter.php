@@ -8,6 +8,9 @@ use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
 
+/**
+ * @todo Make the annotation target adapter a simple hydrator.
+ */
 class AnnotationTargetAdapter extends AbstractResourceEntityAdapter
 {
     protected $sortFields = [

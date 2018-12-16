@@ -16,6 +16,7 @@ class Annotation extends Resource
     protected $id;
 
     /**
+     * @var AnnotationTarget[]
      * @OneToMany(
      *     targetEntity="AnnotationTarget",
      *     mappedBy="annotation",
@@ -28,6 +29,7 @@ class Annotation extends Resource
     protected $targets;
 
     /**
+     * @var AnnotationBody[]
      * @OneToMany(
      *     targetEntity="AnnotationBody",
      *     mappedBy="annotation",
@@ -56,11 +58,17 @@ class Annotation extends Resource
         return $this->id;
     }
 
+    /**
+     * @return \Annotate\Entity\AnnotationTarget[]
+     */
     public function getTargets()
     {
         return $this->targets;
     }
 
+    /**
+     * @return \Annotate\Entity\AnnotationBody[]
+     */
     public function getBodies()
     {
         return $this->bodies;

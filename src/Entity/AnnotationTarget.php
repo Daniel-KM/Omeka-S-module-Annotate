@@ -15,6 +15,7 @@ class AnnotationTarget extends Resource
     protected $id;
 
     /**
+     * @var Annotation
      * @ManyToOne(
      *     targetEntity="Annotation",
      *     inversedBy="annotationTarget"
@@ -36,11 +37,17 @@ class AnnotationTarget extends Resource
         return $this->id;
     }
 
+    /**
+     * @param Annotation $annotation
+     */
     public function setAnnotation(Annotation $annotation)
     {
         $this->annotation = $annotation;
     }
 
+    /**
+     * @return \Annotate\Entity\Annotation
+     */
     public function getAnnotation()
     {
         return $this->annotation;

@@ -263,6 +263,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
      *
      * @uses AbstractResourceEntityRepresentation::values()
      *
+     * @deprecated Will be replaced by a new resource form, on the resource template base.
+s     *
      * @return array
      */
     public function mergedValues()
@@ -304,15 +306,19 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
      *
      * @todo Use a standard rdf process, with no entities for bodies and targets.
      *
+     * @deprecated Will be replaced by a new resource form, on the resource template base.
+     *
      * @param array $data
      * @return array
      */
     public function divideMergedValues(array $data)
     {
         $plugins = $this->getServiceLocator()->get('ControllerPluginManager');
+        /** @var \Annotate\Mvc\Controller\Plugin\DivideMergedValues $divideMergedValues */
         $divideMergedValues = $plugins->get('divideMergedValues');
         $resourceTemplate = $this->resourceTemplate();
         if ($resourceTemplate) {
+            /** @var \Annotate\Mvc\Controller\Plugin\ResourceTemplateAnnotationPartMap $resourceTemplateAnnotationPartMap */
             $resourceTemplateAnnotationPartMap = $plugins->get('resourceTemplateAnnotationPartMap');
             $annotationPartMap = $resourceTemplateAnnotationPartMap($resourceTemplate->id());
         } else {
@@ -320,48 +326,4 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         }
         return $divideMergedValues($data, $annotationPartMap);
     }
-
-//     /**
-//      * Detect if a string is html or not.
-//      *
-//      * @see \Annotate\Controller\Admin\AnnotationController::isHtml()
-//      *
-//      * @param string $string
-//      * @return bool
-//      */
-//     protected function isHtml($string)
-//     {
-//         return $string != strip_tags($string);
-//     }
-
-//     /**
-//      * Renormalize values as json-ld rdf Annotation resource.
-//      *
-//      * @see https://www.w3.org/TR/annotation-model/
-//      * @todo Factorize with AbstractValueResourceEntityRepresentation::valuesOnly().
-//      *
-//      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
-//      * @return array|string
-//      */
-//     protected function valuesOnly(array $values)
-//     {
-//         $result = [];
-
-//         foreach ($values as $value) {
-//             switch ($value->type()) {
-//                 case 'resource':
-//                     $result[] = $value->valueResource()->apiUrl();
-//                     break;
-//                 case 'uri':
-//                     $result[] = $value->uri();
-//                     break;
-//                 case 'literal':
-//                 default:
-//                     $result[] = $value->value();
-//                     break;
-//             }
-//         }
-
-//         return count($result) > 1 ? $result : reset($result);
-//     }
 }

@@ -86,7 +86,7 @@ class AnnotationController extends AbstractActionController
         return $view;
     }
 
-    // TODO Make possible to add an annotation directly (not only ajax)?
+    // TODO Make possible to add an annotation directly (not only ajax or specialized annotation)?
 
     /**
      * Annotate a resource.
@@ -148,6 +148,8 @@ class AnnotationController extends AbstractActionController
                 return $this->redirect()->toUrl($redirect);
             }
         }
+
+        // TODO Use the annotation resource template.
 
         // Check if there is a value or a selector.
         // TODO Improve the checks of the annotation and move them in the right place.
