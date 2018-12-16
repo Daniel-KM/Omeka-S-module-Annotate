@@ -41,7 +41,7 @@ trait QueryDateTimeTrait
      */
     public function searchDateTime(QueryBuilder $qb, array $query)
     {
-        $query = $this->normalizeQuery($query);
+        $query = $this->normalizeQueryDateTime($query);
         if (empty($query['datetime'])) {
             return;
         }
@@ -152,7 +152,7 @@ trait QueryDateTimeTrait
      * @param array $query
      * @return array
      */
-    protected function normalizeQuery(array $query)
+    protected function normalizeQueryDateTime(array $query)
     {
         $normalizeDateTimeQuery = $this->getServiceLocator()->get('ViewHelperManager')->get('normalizeDateTimeQuery');
         if (empty($query['datetime'])) {

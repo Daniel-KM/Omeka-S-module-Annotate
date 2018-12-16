@@ -503,13 +503,13 @@ class Module extends AbstractGenericModule
         $sharedEventManager->attach(
             \Annotate\Controller\Admin\AnnotationController::class,
             'view.advanced_search',
-            [$this, 'displayAdvancedSearch']
+            [$this, 'displayAdvancedSearchAnnotation']
         );
         // Filter the search filters for the advanced search pages.
         $sharedEventManager->attach(
             \Annotate\Controller\Admin\AnnotationController::class,
             'view.search.filters',
-            [$this, 'filterSearchFilters']
+            [$this, 'filterSearchFiltersAnnotation']
         );
 
         // Events for the admin board.
@@ -684,26 +684,28 @@ class Module extends AbstractGenericModule
     }
 
     /**
-     * Display the advanced search form via partial.
+     * Display the advanced search form for annotations via partial.
      *
      * @param Event $event
      */
-    public function displayAdvancedSearch(Event $event)
+    public function displayAdvancedSearchAnnotation(Event $event)
     {
         $query = $event->getParam('query', []);
         $query['datetime'] = isset($query['datetime']) ? $query['datetime'] : '';
         $partials = $event->getParam('partials', []);
-        $partials[] = 'common/advanced-search/annotate-datetime';
+
+        $partials[] = 'common/advanced-search/date-time-annotation';
+
         $event->setParam('query', $query);
         $event->setParam('partials', $partials);
     }
 
     /**
-     * Filter search filters for display.
+     * Filter search filters of annotations for display.
      *
      * @param Event $event
      */
-    public function filterSearchFilters(Event $event)
+    public function filterSearchFiltersAnnotation(Event $event)
     {
         $query = $event->getParam('query', []);
         $view = $event->getTarget();
