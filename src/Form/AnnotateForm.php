@@ -16,16 +16,28 @@ class AnnotateForm extends Form
     {
         // TODO Move all static params into annotate controller?
         // TODO Improve the custom vocab module to keep "literal" as value type.
+        // TODO Convert with fieldsets to allow check via getData().
 
         $api = $this->api;
 
         $resourceTemplateId = $api->read('resource_templates', ['label' => 'Annotation'])->getContent()->id();
         $vocabulary = $api->read('vocabularies', ['prefix' => 'oa'])->getContent();
         $resourceClassId = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Annotation'])->getContent()->id();
+        $this ->add([
+            'type' => Element\Hidden::class,
+            'name' => 'o:resource_template[o:id]',
+            'attributes' => ['value' => $resourceTemplateId],
+        ]);
+        $this ->add([
+            'type' => Element\Hidden::class,
+            'name' => 'o:resource_class[o:id]',
+            'attributes' => ['value' => $resourceClassId],
+        ]);
 
         // Motivated by.
         $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
-        $terms = explode(PHP_EOL, $customVocab->terms());
+        $terms = $customVocab->terms();
+        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
         $this->add([
             'type' => Element\Select::class,
@@ -51,21 +63,6 @@ class AnnotateForm extends Form
             'type' => Element\Hidden::class,
             'name' => 'oa:motivatedBy[0][type]',
             'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
-        ]);
-
-        // The resource template is always the annotation resource template
-        // when added via the standard annotation forms.
-        $this->add([
-            'type' => Element\Hidden::class,
-            'name' => 'o:resource_template[o:id]',
-            'attributes' => ['value' => $resourceTemplateId],
-        ]);
-
-        // The resource class is always the standard annotation class.
-        $this->add([
-            'type' => Element\Hidden::class,
-            'name' => 'o:resource_class[o:id]',
-            'attributes' => ['value' => $resourceClassId],
         ]);
 
         // Annotation body.
@@ -104,12 +101,6 @@ class AnnotateForm extends Form
             'name' => 'oa:hasBody[0][oa:hasPurpose][0][@value]',
             'required' => false,
         ]);
-        /*
-        $inputFilter->add([
-            'name' => 'oa:hasBody[0][dcterms:format][0][@value]',
-            'required' => false,
-        ]);
-        */
         $inputFilter->add([
             'name' => 'oa:hasTarget[0][rdf:type][0][@value]',
             'required' => false,
@@ -119,10 +110,6 @@ class AnnotateForm extends Form
     protected function initAnnotationBody()
     {
         $api = $this->api;
-
-        // $resourceTemplateId = $api->read('resource_templates', ['label' => 'Annotation body'])->getContent()->id();
-        $vocabulary = $api->read('vocabularies', ['prefix' => 'oa'])->getContent();
-        $resourceClassId = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'TextualBody'])->getContent()->id();
 
         // Rdf value.
         $this->add([
@@ -154,7 +141,8 @@ class AnnotateForm extends Form
 
         // Has purpose (only for the body, so different of motivated by).
         $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
-        $terms = explode(PHP_EOL, $customVocab->terms());
+        $terms = $customVocab->terms();
+        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
         $this->add([
             'type' => Element\Select::class,
@@ -181,66 +169,11 @@ class AnnotateForm extends Form
             'name' => 'oa:hasBody[0][oa:hasPurpose][0][type]',
             'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
         ]);
-
-        /* // Determined automatically via the controller (plain text or html).
-        // DC Format.
-        $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation Body dcterms:format'])->getContent();
-        $terms = explode(PHP_EOL, $customVocab->terms());
-        $terms = array_combine($terms, $terms);
-        $this ->add([
-            'type' => Element\Select::class,
-            'name' => 'oa:hasBody[0][dcterms:format][0][@value]',
-            'options' => [
-                'label' => 'Format', // @translate
-                'value_options' => $terms,
-                'empty_option' => 'Select the format of the content of the annotation…', // @translate
-            ],
-            'attributes' => [
-                'rows' => 15,
-                'id' => 'oa:hasBody[0][dcterms:format][0][@value]',
-                'class' => 'chosen-select',
-                'data-placeholder' => 'Select the format of the content of the annotation…', // @translate
-            ],
-        ]);
-        $this ->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasBody[0][dcterms:format][0][property_id]',
-            'attributes' => ['value' => $this->propertyId('dcterms:format')],
-        ]);
-        $this ->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasBody[0][dcterms:format][0][type]',
-            'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
-        ]);
-        */
-
-        /*
-        // The resource template is always the annotation body resource template.
-        $this ->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasBody[0][o:resource_template][o:id]',
-            'attributes' => ['value' => $resourceTemplateId],
-        ]);
-        */
-
-        // The resource class is the textual body by default. May be different
-        // when a media or a map is annotated.
-        $this->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasBody[0][o:resource_class][o:id]',
-            'attributes' => ['value' => $resourceClassId],
-        ]);
     }
 
     protected function initAnnotationTarget()
     {
         $api = $this->api;
-
-        /* // TODO Add a resource template and class for annotation target?
-        $resourceTemplateId = $api->read('resource_templates', ['label' => 'Annotation target'])->getContent()->id();
-        $vocabulary = $api->read('vocabularies', ['prefix' => 'oa'])->getContent();
-        $resourceClassId = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Selector'])->getContent()->id();
-        */
 
         // The source of the annotation target is the current resource.
         $this->add([
@@ -261,7 +194,8 @@ class AnnotateForm extends Form
         // Note, oa:hasSelector references an entity that have a rdf:type and a
         // rdf:value, or it is a simple uri.
         $customVocab = $api->read('custom_vocabs', ['label' => 'Annotation Target rdf:type'])->getContent();
-        $terms = explode(PHP_EOL, $customVocab->terms());
+        $terms = $customVocab->terms();
+        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
         $this->add([
             'type' => Element\Select::class,
@@ -313,22 +247,6 @@ class AnnotateForm extends Form
             'name' => 'oa:hasTarget[0][rdf:value][0][type]',
             'attributes' => ['value' => 'literal'],
         ]);
-
-        /* // TODO Add a resource template and a resource class to annotation target.
-        // The resource template is always the annotation body resource template.
-        $this ->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasTarget[0][o:resource_template][o:id]',
-            'attributes' => ['value' => $resourceTemplateId],
-        ]);
-
-        // The resource class is the textual body by default.
-        $this ->add([
-            'type' => Element\Hidden::class,
-            'name' => 'oa:hasTarget[0][o:resource_class][o:id]',
-            'attributes' => ['value' => $resourceClassId],
-        ]);
-        */
     }
 
     protected function propertyId($term)

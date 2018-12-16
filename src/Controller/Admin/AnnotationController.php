@@ -113,7 +113,7 @@ class AnnotationController extends AbstractActionController
             return $this->redirect()->toUrl($redirect);
         }
 
-        // TODO Move validation inside form.
+        // TODO Move validation inside form and adapter.
         $form = $this->getForm(AnnotateForm::class);
         $data = $this->params()->fromPost();
 
@@ -149,7 +149,8 @@ class AnnotationController extends AbstractActionController
             }
         }
 
-        // TODO Use the annotation resource template.
+        // TODO Check of data form is currently not available.
+        // $data = $form->getData();
 
         // Check if there is a value or a selector.
         // TODO Improve the checks of the annotation and move them in the right place.
@@ -181,17 +182,7 @@ class AnnotationController extends AbstractActionController
             // "text/plain" is useless with TextualBody.
             $format = $this->isHtml($bodyValue) ? 'text/html' : null;
             if ($format) {
-                $customVocab = $api->read('custom_vocabs', [
-                    'label' => 'Annotation Body dcterms:format',
-                ], [], ['responseContent' => 'reference'])->getContent();
-                $property = $api->searchOne('properties', [
-                        'term' => 'dcterms:format',
-                    ], [], ['responseContent' => 'reference'])->getContent();
-                $data['oa:hasBody'][0]['dcterms:format'][] = [
-                    'property_id' => $property->id(),
-                    'type' => 'customvocab:' . $customVocab->id(),
-                    '@value' => $format,
-                ];
+                // TODO Use DataTypeRDF
             }
         }
 
