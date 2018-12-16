@@ -64,10 +64,10 @@ class AnnotationBody extends \Annotate\Entity\AnnotationBody implements \Doctrin
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+            return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'isPublic', 'created', 'modified', 'values'];
         }
 
-        return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'isPublic', 'created', 'modified', 'values'];
+        return ['__isInitialized__', 'annotation', 'part', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'isPublic', 'created', 'modified', 'values'];
     }
 
     /**
@@ -296,6 +296,28 @@ class AnnotationBody extends \Annotate\Entity\AnnotationBody implements \Doctrin
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getResourceTemplate', []);
 
         return parent::getResourceTemplate();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setThumbnail(\Omeka\Entity\Asset $thumbnail = NULL)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setThumbnail', [$thumbnail]);
+
+        return parent::setThumbnail($thumbnail);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getThumbnail()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getThumbnail', []);
+
+        return parent::getThumbnail();
     }
 
     /**
