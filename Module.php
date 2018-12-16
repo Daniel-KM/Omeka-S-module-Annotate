@@ -790,6 +790,8 @@ class Module extends AbstractGenericModule
 
     public function handleResourceTemplateCreateOrUpdatePost(Event $event)
     {
+        // TODO Allow to require a value for body or target via the template.
+
         // The acl are already checked via the api.
         $request = $event->getParam('request');
         $response = $event->getParam('response');
