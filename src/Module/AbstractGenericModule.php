@@ -412,25 +412,14 @@ abstract class AbstractGenericModule extends AbstractModule
      */
     protected function checkDependencies()
     {
-        if (empty($this->dependencies)) {
-            return;
-        }
-
-        $areAllActive = true;
-        foreach ($this->dependencies as $dependency) {
-            if (!$this->isModuleActive($dependency)) {
-                $areAllActive = false;
-                break;
-            }
-        }
-        if ($areAllActive) {
+        if (empty($this->dependencies) || $this->areModulesActive($this->dependencies)) {
             return;
         }
 
         $services = $this->getServiceLocator();
         $translator = $services->get('MvcTranslator');
-        $message = new Message($translator->translate('This module requires the module "%s".'), // @translate
-            $this->dependency
+        $message = new Message($translator->translate('This module requires modules "%s".'), // @translate
+            implode('", "', $this->dependencies)
         );
         throw new ModuleCannotInstallException($message);
     }
@@ -444,10 +433,31 @@ abstract class AbstractGenericModule extends AbstractModule
     protected function isModuleActive($moduleClass)
     {
         $services = $this->getServiceLocator();
+        /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $services->get('Omeka\ModuleManager');
         $module = $moduleManager->getModule($moduleClass);
         return $module
             && $module->getState() === \Omeka\Module\Manager::STATE_ACTIVE;
+    }
+
+    /**
+     * Check if a list of modules are active.
+     *
+     * @param array $moduleClasses
+     * @return bool
+     */
+    protected function areModulesActive(array $moduleClasses)
+    {
+        $services = $this->getServiceLocator();
+        /** @var \Omeka\Module\Manager $moduleManager */
+        $moduleManager = $services->get('Omeka\ModuleManager');
+        foreach ($moduleClasses as $moduleClass) {
+            $module = $moduleManager->getModule($moduleClass);
+            if (!$module || $module->getState() !== \Omeka\Module\Manager::STATE_ACTIVE) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
