@@ -9,12 +9,12 @@ class ResourceTemplateAnnotationPartMap extends AbstractPlugin
     /**
      * @var Settings
      */
-     protected $settings;
+    protected $settings;
 
-     public function __construct(Settings $settings)
-     {
-         $this->settings = $settings;
-     }
+    public function __construct(Settings $settings)
+    {
+        $this->settings = $settings;
+    }
 
     /**
      * Get the annotation mapping of a resource template ().

@@ -99,7 +99,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
 
         if (empty($baseApiUrl)) {
             $urlHelper = $this->getServiceLocator()->get('ViewHelperManager')->get('url');
-            $baseApiUrl = $urlHelper('api', [], ['force_canonical' =>  true]) . '/';
+            $baseApiUrl = $urlHelper('api', [], ['force_canonical' => true]) . '/';
         }
 
         $pos = strpos($url, $baseApiUrl);

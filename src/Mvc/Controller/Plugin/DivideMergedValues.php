@@ -12,15 +12,15 @@ class DivideMergedValues extends AbstractPlugin
     /**
      * @var Api
      */
-     protected $api;
+    protected $api;
 
-     /**
-      * @param Api $api
-      */
-     public function __construct(Api $api)
-     {
+    /**
+     * @param Api $api
+     */
+    public function __construct(Api $api)
+    {
         $this->api = $api;
-     }
+    }
 
     /**
      * Divide properties between the annotation, the bodies and  the target.

@@ -186,7 +186,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     {
         $owner = $this->owner();
         if ($owner) {
-           return $owner;
+            return $owner;
         }
 
         // TODO The annotator may be a public or a deleted owner.

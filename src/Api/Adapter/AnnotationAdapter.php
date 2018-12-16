@@ -135,7 +135,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             if (!in_array($scalarField, $fieldNames)) {
                 throw new Exception\BadRequestException(sprintf(
                     $this->getTranslator()->translate('The "%s" field is not available in the %s entity class.'),
-                    $scalarField, $entityClass
+                    $scalarField,
+                    $entityClass
                 ));
             }
             $qb->select(sprintf('%s.%s', $entityClass, $scalarField));
@@ -290,7 +291,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // temporary table. Currently, a simple string replacement of
                 // aliases is used.
                 // TODO Fix Omeka core for aliases in sub queries.
-                $subDql = str_replace('omeka_', 'akemo_',  $subQb->getDQL());
+                $subDql = str_replace('omeka_', 'akemo_', $subQb->getDQL());
                 /** @var \Doctrine\ORM\Query\Parameter $parameter */
                 $subParams = $subQb->getParameters();
                 foreach ($subParams as $parameter) {
@@ -375,7 +376,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $expr = $qb->expr();
 
         foreach ($query['property'] as $queryRow) {
-            if (!(is_array($queryRow)
+            if (!(
+                is_array($queryRow)
                 && array_key_exists('property', $queryRow)
                 && array_key_exists('type', $queryRow)
             )) {
@@ -396,7 +398,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             switch ($queryType) {
                 case 'neq':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'eq':
                     $param = $this->createNamedParameter($qb, $value);
                     $predicateExpr = $expr->orX(
@@ -407,7 +409,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'nin':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'in':
                     $param = $this->createNamedParameter($qb, "%$value%");
                     $predicateExpr = $expr->orX(
@@ -418,7 +420,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'nlist':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'list':
                     $list = is_array($value) ? $value : explode("\n", $value);
                     $list = array_filter(array_map('trim', $list), 'strlen');
@@ -434,7 +436,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'nsw':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'sw':
                     $param = $this->createNamedParameter($qb, "$value%");
                     $predicateExpr = $expr->orX(
@@ -445,7 +447,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'new':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'ew':
                     $param = $this->createNamedParameter($qb, "%$value");
                     $predicateExpr = $expr->orX(
@@ -456,7 +458,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'nres':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'res':
                     $predicateExpr = $expr->eq(
                         "$valuesAlias.valueResource",
@@ -466,7 +468,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
                 case 'nex':
                     $positive = false;
-                    // No break.
+                    // no break.
                 case 'ex':
                     $predicateExpr = $expr->isNotNull("$valuesAlias.id");
                     break;
@@ -538,9 +540,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $this->getEntityClass() . '.resourceClass',
                 $resourceClassAlias
             );
-            $qb->andWhere($qb->expr()->eq(
-                $resourceClassAlias . '.id',
-                $this->createNamedParameter($qb, $resourceClass))
+            $qb->andWhere(
+                $qb->expr()->eq(
+                    $resourceClassAlias . '.id',
+                    $this->createNamedParameter($qb, $resourceClass)
+                )
             );
         }
     }
@@ -727,10 +731,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // TODO Check if the resource id exists. If not, keep value.
                 // $resource = $api->searchOne('resources', ['id' => $value['@value']])->getContent();
                 // if ($resource) {
-                    $value['type'] = 'resource';
-                    $value['value_resource_id'] = $value['@value'];
-                    unset($value['@language']);
-                    unset($value['@value']);
+                $value['type'] = 'resource';
+                $value['value_resource_id'] = $value['@value'];
+                unset($value['@language']);
+                unset($value['@value']);
                 // }
             }
             $data['oa:hasTarget'][0]['oa:hasSource'][] = $value;

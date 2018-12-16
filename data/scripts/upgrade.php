@@ -50,7 +50,8 @@ SQL;
             sprintf(
                 'The custom vocab named "%s" is not available.', // @translate
                 $label
-            ));
+            )
+        );
     }
     $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
     $terms = array_unique(array_merge($terms, [

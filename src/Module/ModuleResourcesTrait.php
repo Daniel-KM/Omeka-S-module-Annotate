@@ -211,7 +211,8 @@ trait ModuleResourcesTrait
                 new Message(
                     'An error occured when adding the prefix "%s": another vocabulary exists. Resolve the conflict before installing this module.', // @translate
                     $vocabulary['vocabulary']['o:prefix']
-                ));
+                )
+            );
         }
 
         /** @var \Omeka\Stdlib\RdfImporter $rdfImporter */
@@ -229,8 +230,10 @@ trait ModuleResourcesTrait
             throw new ModuleCannotInstallException(
                 new Message(
                     'An error occured when adding the prefix "%s" and the associated properties: %s', // @translate
-                    $vocabulary['vocabulary']['o:prefix'], $e->getMessage()
-                ));
+                    $vocabulary['vocabulary']['o:prefix'],
+                    $e->getMessage()
+                )
+            );
         }
 
         return true;
@@ -283,7 +286,8 @@ trait ModuleResourcesTrait
                     new Message(
                         'The custom vocab named "%s" is not available.', // @translate
                         $label
-                    ));
+                    )
+                );
             }
             $templateProperty['data_type_name'] = 'customvocab:' . $customVocab->id();
             $templateProperty['o:data_type'] = 'customvocab:' . $customVocab->id();
@@ -415,7 +419,8 @@ trait ModuleResourcesTrait
                 new Message(
                     'The custom vocab named "%s" is not available.', // @translate
                     $label
-                ));
+                )
+            );
         }
 
         $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
