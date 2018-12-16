@@ -356,7 +356,7 @@ class Module extends AbstractGenericModule
         $acl->allow(
             $annotators,
             [Controller\Admin\AnnotationController::class],
-            ['index', 'browse', 'show', 'show-details', 'add', 'edit', 'delete', 'delete-confirm', 'flag']
+            ['index', 'search', 'browse', 'show', 'show-details', 'add', 'edit', 'delete', 'delete-confirm', 'flag']
         );
     }
 
@@ -403,6 +403,7 @@ class Module extends AbstractGenericModule
             Controller\Admin\AnnotationController::class,
             [
                 'index',
+                'search',
                 'browse',
                 'show',
                 'show-details',
