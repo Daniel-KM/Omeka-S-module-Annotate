@@ -62,6 +62,132 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     }
 
     /**
+     * Copy of the parent class, except that the "from" is AnnotationPart and
+     * the GroupBy is "Annotation".
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
+     */
+    public function search(Request $request)
+    {
+        $query = $request->getContent();
+
+        // Set default query parameters
+        $defaultQuery = [
+            'page' => null,
+            'per_page' => null,
+            'limit' => null,
+            'offset' => null,
+            'sort_by' => null,
+            'sort_order' => null,
+        ];
+        $query += $defaultQuery;
+        $query['sort_order'] = strtoupper($query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
+
+        // Begin building the search query.
+        $entityClass = $this->getEntityClass();
+        $this->index = 0;
+        // Join all related bodies and targets to get their properties too.
+        // Idealy, the request should be done on resource with a join or where
+        // condition on resource_type (in annotation, body and target), but the
+        // resource_type is not available in the ORM query builder, unlike the
+        // DBAL query builder, because it is the discriminator map.
+        // Nevertheless, Doctrine allows to use a special function in that case.
+        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#query-the-type
+        // This special function is not so simple, so use AnnotationPart: all
+        // annotations, bodies and targets are subparts of AnnotationPart. The
+        // method getRepresentation() checks the part to return always the
+        // annotation one. It avoids a "select from select unions" too.
+        $qb = $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select($entityClass)
+            // ->from($entityClass, $entityClass);
+            ->from(
+            // The annotation part allows to get values of all sub-parts
+            // in properties or via modules.
+            \Annotate\Entity\AnnotationPart::class,
+            // The alias is this class, like in the normal queries. It
+            // allows to manage derivated queries easily.
+            $entityClass
+            );
+        $this->buildQuery($qb, $query);
+        // The group is done on the annotation, not the id, so only annotations
+        // are returned.
+        $qb->groupBy("$entityClass.annotation");
+
+        // Trigger the search.query event.
+        $event = new Event('api.search.query', $this, [
+            'queryBuilder' => $qb,
+            'request' => $request,
+        ]);
+        $this->getEventManager()->triggerEvent($event);
+
+        // Finish building the search query. In addition to any sorting the
+        // adapters add, always sort by entity ID.
+        $this->sortQuery($qb, $query);
+        $this->limitQuery($qb, $query);
+        // Order by the main annotation id.
+        $qb->addOrderBy("$entityClass.annotation", $query['sort_order']);
+
+        $scalarField = $request->getOption('returnScalar');
+        if ($scalarField) {
+            $fieldNames = $this->getEntityManager()->getClassMetadata($entityClass)->getFieldNames();
+            if (!in_array($scalarField, $fieldNames)) {
+                throw new Exception\BadRequestException(sprintf(
+                    $this->getTranslator()->translate('The "%s" field is not available in the %s entity class.'),
+                    $scalarField, $entityClass
+                ));
+            }
+            $qb->select(sprintf('%s.%s', $entityClass, $scalarField));
+            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField);
+            $response = new Response($content);
+            $response->setTotalResults(count($content));
+            return $response;
+        }
+
+        $paginator = new Paginator($qb, false);
+        $entities = [];
+        // Don't make the request if the LIMIT is set to zero. Useful if the
+        // only information needed is total results.
+        if ($qb->getMaxResults() || null === $qb->getMaxResults()) {
+            foreach ($paginator as $entity) {
+                if (is_array($entity)) {
+                    // Remove non-entity columns added to the SELECT. You can use
+                    // "AS HIDDEN {alias}" to avoid this condition.
+                    $entity = $entity[0];
+                }
+                $entities[] = $entity;
+            }
+        }
+
+        $response = new Response($entities);
+        $response->setTotalResults($paginator->count());
+        return $response;
+    }
+
+    /**
+     * Set sort_by and sort_order conditions to the query builder.
+     *
+     * Note about random sorting: There is no random query in doctrine and no
+     * standard query in the sql standard, because it is too hard to implement
+     * efficiently. So this order should be used only for small bases.
+     *
+     * @param QueryBuilder $qb
+     * @param array $query
+     */
+    public function sortQuery(QueryBuilder $qb, array $query)
+    {
+        if (isset($query['sort_by']) && is_string($query['sort_by'])) {
+            if (array_key_exists($query['sort_by'], $this->sortFields)) {
+                $sortBy = $this->sortFields[$query['sort_by']];
+                $qb->addOrderBy($this->getEntityClass() . ".$sortBy", $query['sort_order']);
+            } elseif ($query['sort_by'] === 'random') {
+                $qb->orderBy('RAND()');
+            }
+        }
+    }
+
+    /**
      * The search is done on annotation bodies and targets too.
      *
      * {@inheritDoc}
@@ -108,10 +234,24 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             ];
         }
 
+        // Parent buildQuery() uses "id" when "id" is queried, but it should be
+        // "annotation_id".
+        // So either copy all the parent method, either unset it before and
+        // check it after. Else, change the data model to set "id" for "root".
+        $hasQueryId = isset($query['id']) && is_numeric($query['id']);
+        if ($hasQueryId) {
+            $id = $query['id'];
+            $qb->andWhere($expr->eq(
+                $this->getEntityClass() . '.annotation',
+                $this->createNamedParameter($qb, $query['id'])
+            ));
+            unset($query['id']);
+        }
+
         parent::buildQuery($qb, $query);
 
-        if (isset($query['id'])) {
-            $qb->andWhere($expr->eq(\Annotate\Entity\Annotation::class . '.id', $query['id']));
+        if ($hasQueryId) {
+            $query['id'] = $id;
         }
 
         // TODO Check the query of annotations by site.
@@ -191,132 +331,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         $this->buildResourceClassQuery($qb, $query);
         $this->searchDateTime($qb, $query);
-    }
-
-    /**
-     * Copy of the parent class, except that the "from" is AnnotationPart and
-     * the GroupBy is "Annotation".
-     *
-     * {@inheritDoc}
-     * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
-     */
-    public function search(Request $request)
-    {
-        $query = $request->getContent();
-
-        // Set default query parameters
-        $defaultQuery = [
-            'page' => null,
-            'per_page' => null,
-            'limit' => null,
-            'offset' => null,
-            'sort_by' => null,
-            'sort_order' => null,
-        ];
-        $query += $defaultQuery;
-        $query['sort_order'] = strtoupper($query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
-
-        // Begin building the search query.
-        $entityClass = $this->getEntityClass();
-        $this->index = 0;
-        // Join all related bodies and targets to get their properties too.
-        // Idealy, the request should be done on resource with a join or where
-        // condition on resource_type (in annotation, body and target), but the
-        // resource_type is not available in the ORM query builder, unlike the
-        // DBAL query builder, because it is the discriminator map.
-        // Nevertheless, Doctrine allows to use a special function in that case.
-        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#query-the-type
-        // This special function is not so simple, so use AnnotationPart: all
-        // annotations, bodies and targets are subparts of AnnotationPart. The
-        // method getRepresentation() checks the part to return always the
-        // annotation one. It avoids a "select from select unions" too.
-        $qb = $this->getEntityManager()
-            ->createQueryBuilder()
-            ->select($entityClass)
-            // ->from($entityClass, $entityClass);
-            ->from(
-                // The annotation part allows to get values of all sub-parts
-                // in properties or via modules.
-                \Annotate\Entity\AnnotationPart::class,
-                // The alias is this class, like in the normal queries. It
-                // allows to manage derivated queries easily.
-                $entityClass
-            );
-        $this->buildQuery($qb, $query);
-        // The group is done on the annotation, not the id, so only annotations
-        // are returned.
-        $qb->groupBy("$entityClass.annotation");
-
-        // Trigger the search.query event.
-        $event = new Event('api.search.query', $this, [
-            'queryBuilder' => $qb,
-            'request' => $request,
-        ]);
-        $this->getEventManager()->triggerEvent($event);
-
-        // Finish building the search query. In addition to any sorting the
-        // adapters add, always sort by entity ID.
-        $this->sortQuery($qb, $query);
-        $this->limitQuery($qb, $query);
-        // Order by the main annotation id.
-        $qb->addOrderBy("$entityClass.annotation", $query['sort_order']);
-
-        $scalarField = $request->getOption('returnScalar');
-        if ($scalarField) {
-            $fieldNames = $this->getEntityManager()->getClassMetadata($entityClass)->getFieldNames();
-            if (!in_array($scalarField, $fieldNames)) {
-                throw new Exception\BadRequestException(sprintf(
-                    $this->getTranslator()->translate('The "%s" field is not available in the %s entity class.'),
-                    $scalarField, $entityClass
-                ));
-            }
-            $qb->select(sprintf('%s.%s', $entityClass, $scalarField));
-            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField);
-            $response = new Response($content);
-            $response->setTotalResults(count($content));
-            return $response;
-        }
-
-        $paginator = new Paginator($qb, false);
-        $entities = [];
-        // Don't make the request if the LIMIT is set to zero. Useful if the
-        // only information needed is total results.
-        if ($qb->getMaxResults() || null === $qb->getMaxResults()) {
-            foreach ($paginator as $entity) {
-                if (is_array($entity)) {
-                    // Remove non-entity columns added to the SELECT. You can use
-                    // "AS HIDDEN {alias}" to avoid this condition.
-                    $entity = $entity[0];
-                }
-                $entities[] = $entity;
-            }
-        }
-
-        $response = new Response($entities);
-        $response->setTotalResults($paginator->count());
-        return $response;
-    }
-
-    /**
-     * Set sort_by and sort_order conditions to the query builder.
-     *
-     * Note about random sorting: There is no random query in doctrine and no
-     * standard query in the sql standard, because it is too hard to implement
-     * efficiently. So this order should be used only for small bases.
-     *
-     * @param QueryBuilder $qb
-     * @param array $query
-     */
-    public function sortQuery(QueryBuilder $qb, array $query)
-    {
-        if (isset($query['sort_by']) && is_string($query['sort_by'])) {
-            if (array_key_exists($query['sort_by'], $this->sortFields)) {
-                $sortBy = $this->sortFields[$query['sort_by']];
-                $qb->addOrderBy($this->getEntityClass() . ".$sortBy", $query['sort_order']);
-            } elseif ($query['sort_by'] === 'random') {
-                $qb->orderBy('RAND()');
-            }
-        }
     }
 
     /**
