@@ -376,6 +376,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // @see \Doctrine\ORM\QueryBuilder::expr().
         $expr = $qb->expr();
 
+        $escape = function ($string) {
+            return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $string);
+        };
+
         foreach ($query['property'] as $queryRow) {
             if (!(
                 is_array($queryRow)
@@ -412,7 +416,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $positive = false;
                     // no break.
                 case 'in':
-                    $param = $this->createNamedParameter($qb, "%$value%");
+                    $param = $this->createNamedParameter($qb, '%' . $escape($value) . '%');
                     $predicateExpr = $expr->orX(
                         $expr->like("$valuesAlias.value", $param),
                         $expr->like("$valuesAlias.uri", $param)
@@ -439,7 +443,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $positive = false;
                     // no break.
                 case 'sw':
-                    $param = $this->createNamedParameter($qb, "$value%");
+                    $param = $this->createNamedParameter($qb, $escape($value) . '%');
                     $predicateExpr = $expr->orX(
                         $expr->like("$valuesAlias.value", $param),
                         $expr->like("$valuesAlias.uri", $param)
@@ -450,7 +454,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $positive = false;
                     // no break.
                 case 'ew':
-                    $param = $this->createNamedParameter($qb, "%$value");
+                    $param = $this->createNamedParameter($qb, '%' . $escape($value));
                     $predicateExpr = $expr->orX(
                         $expr->like("$valuesAlias.value", $param),
                         $expr->like("$valuesAlias.uri", $param)
