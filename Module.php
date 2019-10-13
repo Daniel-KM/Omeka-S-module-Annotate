@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright Daniel Berthereau, 2017-2018
+ * Copyright Daniel Berthereau, 2017-2019
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -29,14 +29,15 @@
 
 namespace Annotate;
 
-// TODO Remove this requirement.
-require_once __DIR__ . '/src/Module/AbstractGenericModule.php';
-require_once __DIR__ . '/src/Module/ModuleResourcesTrait.php';
+if (!class_exists(\Generic\AbstractModule::class)) {
+    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
+        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
+        : __DIR__ . '/src/Generic/AbstractModule.php';
+}
 
 use Annotate\Entity\Annotation;
-use Annotate\Module\AbstractGenericModule;
-use Annotate\Module\ModuleResourcesTrait;
 use Annotate\Permissions\Acl;
+use Generic\AbstractModule;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -50,9 +51,9 @@ use Zend\Mvc\MvcEvent;
 use Zend\Permissions\Acl\Acl as ZendAcl;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class Module extends AbstractGenericModule
+class Module extends AbstractModule
 {
-    use ModuleResourcesTrait;
+    const NAMESPACE = __NAMESPACE__;
 
     protected $dependency = 'CustomVocab';
 
@@ -74,27 +75,38 @@ class Module extends AbstractGenericModule
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
         $this->setServiceLocator($serviceLocator);
+        $services = $serviceLocator;
+
+        if (!class_exists(\Generic\InstallResources::class)) {
+            require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')
+                ? dirname(__DIR__) . '/Generic/InstallResources.php'
+                : __DIR__ . '/src/Generic/InstallResources.php';
+        }
+
+        $installResources = new \Generic\InstallResources($services);
+        $installResources = $installResources();
+
         if (!empty($_POST['remove-vocabulary'])) {
             $prefix = 'rdf';
-            $this->removeVocabulary($prefix);
+            $installResources->removeVocabulary($prefix);
             $prefix = 'oa';
-            $this->removeVocabulary($prefix);
+            $installResources->removeVocabulary($prefix);
         }
 
         if (!empty($_POST['remove-custom-vocab'])) {
             $customVocab = 'Annotation oa:motivatedBy';
-            $this->removeCustomVocab($customVocab);
+            $installResources->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Body oa:hasPurpose';
-            $this->removeCustomVocab($customVocab);
+            $installResources->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target dcterms:format';
-            $this->removeCustomVocab($customVocab);
+            $installResources->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target rdf:type';
-            $this->removeCustomVocab($customVocab);
+            $installResources->removeCustomVocab($customVocab);
         }
 
         if (!empty($_POST['remove-template'])) {
             $resourceTemplate = 'Annotation';
-            $this->removeResourceTemplate($resourceTemplate);
+            $installResources->removeResourceTemplate($resourceTemplate);
         }
 
         parent::uninstall($serviceLocator);
@@ -1127,6 +1139,16 @@ class Module extends AbstractGenericModule
 
     protected function installResources()
     {
+        if (!class_exists(\Generic\InstallResources::class)) {
+            require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')
+                ? dirname(__DIR__) . '/Generic/InstallResources.php'
+                : __DIR__ . '/src/Generic/InstallResources.php';
+        }
+
+        $services = $this->getServiceLocator();
+        $installResources = new \Generic\InstallResources($services);
+        $installResources = $installResources();
+
         $vocabularies = [
             [
                 'vocabulary' => [
@@ -1152,7 +1174,7 @@ class Module extends AbstractGenericModule
             ],
         ];
         foreach ($vocabularies as $key => $vocabulary) {
-            if ($this->checkVocabulary($vocabulary)) {
+            if ($installResources->checkVocabulary($vocabulary)) {
                 unset($vocabularies[$key]);
             }
         }
@@ -1164,7 +1186,7 @@ class Module extends AbstractGenericModule
             __DIR__ . '/data/custom-vocabs/Annotation-Target-rdf-type.json',
         ];
         foreach ($customVocabPaths as $key => $filepath) {
-            if ($this->checkCustomVocab($filepath)) {
+            if ($installResources->checkCustomVocab($filepath)) {
                 unset($customVocabPaths[$key]);
             }
         }
@@ -1185,26 +1207,25 @@ class Module extends AbstractGenericModule
             ],
         ];
         foreach ($resourceTemplatePaths as $key => $filepath) {
-            if ($this->checkResourceTemplate($filepath)) {
+            if ($installResources->checkResourceTemplate($filepath)) {
                 unset($resourceTemplatePaths[$key]);
             }
         }
 
         // Checks are ok, so process the install.
         foreach ($vocabularies as $vocabulary) {
-            $this->createVocabulary($vocabulary);
+            $installResources->createVocabulary($vocabulary);
         }
 
         foreach ($customVocabPaths as $filepath) {
-            $this->createCustomVocab($filepath);
+            $installResources->createCustomVocab($filepath);
         }
 
-        $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
 
         $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
         foreach ($resourceTemplatePaths as $key => $filepath) {
-            $resourceTemplate = $this->createResourceTemplate($filepath);
+            $resourceTemplate = $installResources->createResourceTemplate($filepath);
             // Add the special resource template settings.
             $resourceTemplateData[$resourceTemplate->id()] = $resourceTemplateSettings[$key];
         }

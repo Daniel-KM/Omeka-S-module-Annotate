@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright Daniel Berthereau, 2018
+ * Copyright Daniel Berthereau, 2018-2019
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -26,23 +26,36 @@
  * knowledge of the CeCILL license and that you accept its terms.
  */
 
-namespace Annotate\Module;
+namespace Generic;
 
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
-/**
- * This generic trait allows to manage all resources methods that should run
- * once only and that are generic to all modules. A little config over code.
- */
-trait ModuleResourcesTrait
+class InstallResources
 {
     /**
-     * Install vocabulary resources (vocabulary, custom vocabulary, etc.).
+     * @var ServiceLocatorInterface
      */
-    abstract protected function installResources();
+    protected $services;
+
+    public function __construct(ServiceLocatorInterface $services)
+    {
+        $this->services = $services;
+    }
+
+    /**
+     * Allows to manage all resources methods that should run once only and that
+     * are generic to all modules. A little config over code.
+     *
+     * @return self
+     */
+    public function __invoke()
+    {
+        return $this;
+    }
 
     /**
      * Check if a vocabulary exists and throws an exception if different.
@@ -51,7 +64,7 @@ trait ModuleResourcesTrait
      * @throws ModuleCannotInstallException
      * @return bool False if not found, true if exists.
      */
-    protected function checkVocabulary(array $vocabulary)
+    public function checkVocabulary(array $vocabulary)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -100,7 +113,7 @@ trait ModuleResourcesTrait
      * @throws ModuleCannotInstallException
      * @return bool False if not found, true if exists.
      */
-    protected function checkResourceTemplate($filepath)
+    public function checkResourceTemplate($filepath)
     {
         $services = $this->getServiceLocator();
         $data = json_decode(file_get_contents($filepath), true);
@@ -130,7 +143,7 @@ trait ModuleResourcesTrait
      * @throws ModuleCannotInstallException
      * @return bool False if not found, true if exists.
      */
-    protected function checkCustomVocab($filepath)
+    public function checkCustomVocab($filepath)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -180,7 +193,7 @@ trait ModuleResourcesTrait
      * @return bool True if the vocabulary has been created, false if it exists
      * already, so it is not created twice.
      */
-    protected function createVocabulary(array $vocabulary)
+    public function createVocabulary(array $vocabulary)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -248,7 +261,7 @@ trait ModuleResourcesTrait
      * @return \Omeka\Api\Representation\ResourceTemplateRepresentation
      * @throws ModuleCannotInstallException
      */
-    protected function createResourceTemplate($filepath)
+    public function createResourceTemplate($filepath)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('ControllerPluginManager')->get('api');
@@ -304,7 +317,7 @@ trait ModuleResourcesTrait
      *
      * @param string $filepath
      */
-    protected function createCustomVocab($filepath)
+    public function createCustomVocab($filepath)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -366,7 +379,7 @@ trait ModuleResourcesTrait
             return false;
         };
 
-        if (isset($import['o:resource_class'])) {
+        if (!empty($import['o:resource_class'])) {
             if ($vocab = $getVocab($import['o:resource_class']['vocabulary_namespace_uri'])) {
                 $import['o:resource_class']['vocabulary_prefix'] = $vocab->prefix();
                 $class = $api->searchOne('resource_classes', [
@@ -404,7 +417,7 @@ trait ModuleResourcesTrait
      * @param string $filepath
      * @throws ModuleCannotInstallException
      */
-    protected function updateCustomVocab($filepath)
+    public function updateCustomVocab($filepath)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -436,7 +449,7 @@ trait ModuleResourcesTrait
      *
      * @param string $prefix
      */
-    protected function removeVocabulary($prefix)
+    public function removeVocabulary($prefix)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -453,7 +466,7 @@ trait ModuleResourcesTrait
      *
      * @param string $label
      */
-    protected function removeResourceTemplate($label)
+    public function removeResourceTemplate($label)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -470,7 +483,7 @@ trait ModuleResourcesTrait
      *
      * @param string $label
      */
-    protected function removeCustomVocab($label)
+    public function removeCustomVocab($label)
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -480,5 +493,13 @@ trait ModuleResourcesTrait
             $api->delete('custom_vocabs', $resource->id())->getContent();
         } catch (NotFoundException $e) {
         }
+    }
+
+    /**
+     * @return \Zend\ServiceManager\ServiceLocatorInterface
+     */
+    public function getServiceLocator()
+    {
+        return $this->services;
     }
 }
