@@ -181,6 +181,12 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $acl = $services->get('Omeka\Acl');
 
+        // Since Omeka 1.4, modules are ordered, so Guest come after Annotate.
+        // See \Guest\Module::onBootstrap().
+        if (!$acl->hasRole('guest')) {
+            $acl->addRole('guest');
+        }
+
         $acl
             ->addRole(Acl::ROLE_ANNOTATOR)
             ->addRoleLabel(Acl::ROLE_ANNOTATOR, 'Annotator'); // @translate
@@ -463,15 +469,12 @@ class Module extends AbstractModule
         $acl
             ->allow(
                 $admins,
-                [Annotation::class]
-            )
-            ->allow(
-                $admins,
-                [Api\Adapter\AnnotationAdapter::class]
-            )
-            ->allow(
-                $admins,
-                [Controller\Site\AnnotationController::class, Controller\Admin\AnnotationController::class]
+                [
+                    Annotation::class,
+                    Api\Adapter\AnnotationAdapter::class,
+                    Controller\Site\AnnotationController::class,
+                    Controller\Admin\AnnotationController::class,
+                ]
             );
     }
 
