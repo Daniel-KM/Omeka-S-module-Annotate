@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[omeka-s.module-annotate]
+[omeka-s.module-Annotate]
 file_filter = language/<lang>.po
 source_file = language/template.pot
 source_lang = en

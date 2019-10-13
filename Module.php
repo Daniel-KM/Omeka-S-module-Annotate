@@ -169,8 +169,9 @@ class Module extends AbstractGenericModule
         $services = $this->getServiceLocator();
         $acl = $services->get('Omeka\Acl');
 
-        $acl->addRole(Acl::ROLE_ANNOTATOR);
-        $acl->addRoleLabel(Acl::ROLE_ANNOTATOR, 'Annotator'); // @translate
+        $acl
+            ->addRole(Acl::ROLE_ANNOTATOR)
+            ->addRoleLabel(Acl::ROLE_ANNOTATOR, 'Annotator'); // @translate
 
         $settings = $services->get('Omeka\Settings');
         // TODO Set rights to false when the visibility filter will be ready.
@@ -202,21 +203,22 @@ class Module extends AbstractGenericModule
      */
     protected function addRulesForVisitors(ZendAcl $acl)
     {
-        $acl->allow(
-            null,
-            [Annotation::class],
-            ['read']
-        );
-        $acl->allow(
-            null,
-            [Api\Adapter\AnnotationAdapter::class],
-            ['search', 'read']
-        );
-        $acl->allow(
-            null,
-            [Controller\Site\AnnotationController::class],
-            ['index', 'browse', 'show', 'search', 'flag']
-        );
+        $acl
+            ->allow(
+                null,
+                [Annotation::class],
+                ['read']
+            )
+            ->allow(
+                null,
+                [Api\Adapter\AnnotationAdapter::class],
+                ['search', 'read']
+            )
+            ->allow(
+                null,
+                [Controller\Site\AnnotationController::class],
+                ['index', 'browse', 'show', 'search', 'flag']
+            );
     }
 
     /**
@@ -226,21 +228,22 @@ class Module extends AbstractGenericModule
      */
     protected function addRulesForVisitorAnnotators(ZendAcl $acl)
     {
-        $acl->allow(
-            null,
-            [Annotation::class],
-            ['read', 'create']
-        );
-        $acl->allow(
-            null,
-            [Api\Adapter\AnnotationAdapter::class],
-            ['search', 'read', 'create']
-        );
-        $acl->allow(
-            null,
-            [Controller\Site\AnnotationController::class],
-            ['index', 'browse', 'show', 'search', 'add', 'flag']
-        );
+        $acl
+            ->allow(
+                null,
+                [Annotation::class],
+                ['read', 'create']
+            )
+            ->allow(
+                null,
+                [Api\Adapter\AnnotationAdapter::class],
+                ['search', 'read', 'create']
+            )
+            ->allow(
+                null,
+                [Controller\Site\AnnotationController::class],
+                ['index', 'browse', 'show', 'search', 'add', 'flag']
+            );
     }
 
     /**
@@ -253,70 +256,71 @@ class Module extends AbstractGenericModule
         // The annotator has less rights than Researcher for core resources, but
         // similar rights for annotations that Author has for core resources.
         // The rights related to annotation are set with all other annotators.
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            [
-                'Omeka\Controller\Admin\Index',
-                'Omeka\Controller\Admin\Item',
-                'Omeka\Controller\Admin\ItemSet',
-                'Omeka\Controller\Admin\Media',
-            ],
-            [
-                'index',
-                'browse',
-                'show',
-                'show-details',
-            ]
-        );
+        $acl
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                [
+                    'Omeka\Controller\Admin\Index',
+                    'Omeka\Controller\Admin\Item',
+                    'Omeka\Controller\Admin\ItemSet',
+                    'Omeka\Controller\Admin\Media',
+                ],
+                [
+                    'index',
+                    'browse',
+                    'show',
+                    'show-details',
+                ]
+            )
 
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            [
-                'Omeka\Controller\Admin\Item',
-                'Omeka\Controller\Admin\ItemSet',
-                'Omeka\Controller\Admin\Media',
-            ],
-            [
-                'search',
-                'sidebar-select',
-            ]
-        );
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                [
+                    'Omeka\Controller\Admin\Item',
+                    'Omeka\Controller\Admin\ItemSet',
+                    'Omeka\Controller\Admin\Media',
+                ],
+                [
+                    'search',
+                    'sidebar-select',
+                ]
+            )
 
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            ['Omeka\Controller\Admin\User'],
-            ['show', 'edit']
-        );
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            ['Omeka\Api\Adapter\UserAdapter'],
-            ['read', 'update', 'search']
-        );
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            [\Omeka\Entity\User::class],
-            ['read']
-        );
-        $acl->allow(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            [\Omeka\Entity\User::class],
-            ['update', 'change-password', 'edit-keys'],
-            new \Omeka\Permissions\Assertion\IsSelfAssertion
-        );
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                ['Omeka\Controller\Admin\User'],
+                ['show', 'edit']
+            )
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                ['Omeka\Api\Adapter\UserAdapter'],
+                ['read', 'update', 'search']
+            )
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                [\Omeka\Entity\User::class],
+                ['read']
+            )
+            ->allow(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                [\Omeka\Entity\User::class],
+                ['update', 'change-password', 'edit-keys'],
+                new \Omeka\Permissions\Assertion\IsSelfAssertion
+            )
 
-        // TODO Remove this rule for Omeka >= 1.2.1.
-        $acl->deny(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            [
-                'Omeka\Controller\SiteAdmin\Index',
-                'Omeka\Controller\SiteAdmin\Page',
-            ]
-        );
-        $acl->deny(
-            [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
-            ['Omeka\Controller\Admin\User'],
-            ['browse']
-        );
+            // TODO Remove this rule for Omeka >= 1.2.1.
+            ->deny(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                [
+                    'Omeka\Controller\SiteAdmin\Index',
+                    'Omeka\Controller\SiteAdmin\Page',
+                ]
+            )
+            ->deny(
+                [\Annotate\Permissions\Acl::ROLE_ANNOTATOR],
+                ['Omeka\Controller\Admin\User'],
+                ['browse']
+            );
     }
 
     /**
@@ -331,31 +335,32 @@ class Module extends AbstractGenericModule
             \Omeka\Permissions\Acl::ROLE_RESEARCHER,
             \Omeka\Permissions\Acl::ROLE_AUTHOR,
         ];
-        $acl->allow(
-            $annotators,
-            [Annotation::class],
-            ['create']
-        );
-        $acl->allow(
-            $annotators,
-            [Annotation::class],
-            ['update', 'delete'],
-            new \Omeka\Permissions\Assertion\OwnsEntityAssertion
-        );
-        $acl->allow(
-            $annotators,
-            [Api\Adapter\AnnotationAdapter::class],
-            ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
-        );
-        $acl->allow(
-            $annotators,
-            [Controller\Site\AnnotationController::class]
-        );
-        $acl->allow(
-            $annotators,
-            [Controller\Admin\AnnotationController::class],
-            ['index', 'search', 'browse', 'show', 'show-details', 'add', 'edit', 'delete', 'delete-confirm', 'flag']
-        );
+        $acl
+            ->allow(
+                $annotators,
+                [Annotation::class],
+                ['create']
+            )
+            ->allow(
+                $annotators,
+                [Annotation::class],
+                ['update', 'delete'],
+                new \Omeka\Permissions\Assertion\OwnsEntityAssertion
+            )
+            ->allow(
+                $annotators,
+                [Api\Adapter\AnnotationAdapter::class],
+                ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
+            )
+            ->allow(
+                $annotators,
+                [Controller\Site\AnnotationController::class]
+            )
+            ->allow(
+                $annotators,
+                [Controller\Admin\AnnotationController::class],
+                ['index', 'search', 'browse', 'show', 'show-details', 'add', 'edit', 'delete', 'delete-confirm', 'flag']
+            );
     }
 
     /**
@@ -371,64 +376,65 @@ class Module extends AbstractGenericModule
             \Omeka\Permissions\Acl::ROLE_EDITOR,
         ];
         // "view-all" is added via main acl factory for resources.
-        $acl->allow(
-            [\Omeka\Permissions\Acl::ROLE_REVIEWER],
-            [Annotation::class],
-            ['read', 'create', 'update']
-        );
-        $acl->allow(
-            [\Omeka\Permissions\Acl::ROLE_REVIEWER],
-            [Annotation::class],
-            ['delete'],
-            new \Omeka\Permissions\Assertion\OwnsEntityAssertion
-        );
-        $acl->allow(
-            [\Omeka\Permissions\Acl::ROLE_EDITOR],
-            [Annotation::class],
-            ['read', 'create', 'update', 'delete']
-        );
-        $acl->allow(
-            $approbators,
-            [Api\Adapter\AnnotationAdapter::class],
-            ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
-        );
-        $acl->allow(
-            $approbators,
-            [Controller\Site\AnnotationController::class]
-        );
-        $acl->allow(
-            $approbators,
-            Controller\Admin\AnnotationController::class,
-            [
-                'index',
-                'search',
-                'browse',
-                'show',
-                'show-details',
-                'add',
-                'edit',
-                'delete',
-                'delete-confirm',
-                'flag',
-                'batch-approve',
-                'batch-unapprove',
-                'batch-flag',
-                'batch-unflag',
-                'batch-set-spam',
-                'batch-set-not-spam',
-                'toggle-approved',
-                'toggle-flagged',
-                'toggle-spam',
-                'batch-delete',
-                'batch-delete-all',
-                'batch-update',
-                'approve',
-                'unflag',
-                'set-spam',
-                'set-not-spam',
-                'show-details',
-            ]
-        );
+        $acl
+            ->allow(
+                [\Omeka\Permissions\Acl::ROLE_REVIEWER],
+                [Annotation::class],
+                ['read', 'create', 'update']
+            )
+            ->allow(
+                [\Omeka\Permissions\Acl::ROLE_REVIEWER],
+                [Annotation::class],
+                ['delete'],
+                new \Omeka\Permissions\Assertion\OwnsEntityAssertion
+            )
+            ->allow(
+                [\Omeka\Permissions\Acl::ROLE_EDITOR],
+                [Annotation::class],
+                ['read', 'create', 'update', 'delete']
+            )
+            ->allow(
+                $approbators,
+                [Api\Adapter\AnnotationAdapter::class],
+                ['search', 'read', 'create', 'update', 'delete', 'batch_create', 'batch_update', 'batch_delete']
+            )
+            ->allow(
+                $approbators,
+                [Controller\Site\AnnotationController::class]
+            )
+            ->allow(
+                $approbators,
+                Controller\Admin\AnnotationController::class,
+                [
+                    'index',
+                    'search',
+                    'browse',
+                    'show',
+                    'show-details',
+                    'add',
+                    'edit',
+                    'delete',
+                    'delete-confirm',
+                    'flag',
+                    'batch-approve',
+                    'batch-unapprove',
+                    'batch-flag',
+                    'batch-unflag',
+                    'batch-set-spam',
+                    'batch-set-not-spam',
+                    'toggle-approved',
+                    'toggle-flagged',
+                    'toggle-spam',
+                    'batch-delete',
+                    'batch-delete-all',
+                    'batch-update',
+                    'approve',
+                    'unflag',
+                    'set-spam',
+                    'set-not-spam',
+                    'show-details',
+                ]
+            );
     }
 
     /**
@@ -442,18 +448,19 @@ class Module extends AbstractGenericModule
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
             \Omeka\Permissions\Acl::ROLE_SITE_ADMIN,
         ];
-        $acl->allow(
-            $admins,
-            [Annotation::class]
-        );
-        $acl->allow(
-            $admins,
-            [Api\Adapter\AnnotationAdapter::class]
-        );
-        $acl->allow(
-            $admins,
-            [Controller\Site\AnnotationController::class, Controller\Admin\AnnotationController::class]
-        );
+        $acl
+            ->allow(
+                $admins,
+                [Annotation::class]
+            )
+            ->allow(
+                $admins,
+                [Api\Adapter\AnnotationAdapter::class]
+            )
+            ->allow(
+                $admins,
+                [Controller\Site\AnnotationController::class, Controller\Admin\AnnotationController::class]
+            );
     }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
@@ -871,7 +878,6 @@ class Module extends AbstractGenericModule
         if ($view->params()->fromRoute('__SITE__')) {
             return;
         }
-        $view = $event->getTarget();
         $view->headLink()->appendStylesheet($view->assetUrl('css/annotate-admin.css', __NAMESPACE__));
         $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate/default', ['action' => 'browse'], true), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         $view->headScript()->appendScript($searchUrl);

@@ -103,12 +103,12 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             ->select($entityClass)
             // ->from($entityClass, $entityClass);
             ->from(
-            // The annotation part allows to get values of all sub-parts
-            // in properties or via modules.
-            \Annotate\Entity\AnnotationPart::class,
-            // The alias is this class, like in the normal queries. It
-            // allows to manage derivated queries easily.
-            $entityClass
+                // The annotation part allows to get values of all sub-parts
+                // in properties or via modules.
+                \Annotate\Entity\AnnotationPart::class,
+                // The alias is this class, like in the normal queries. It
+                // allows to manage derivated queries easily.
+                $entityClass
             );
         $this->buildQuery($qb, $query);
         // The group is done on the annotation, not the id, so only annotations
@@ -283,7 +283,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     ->from($subEntityClass, $subEntityClass);
                 $subAdapter
                     ->buildQuery($subQb, $params);
-                $subQb->groupBy($subEntityClass . '.id');
+                $subQb
+                    ->groupBy($subEntityClass . '.id');
 
                 // The subquery cannot manage the parameters, since there are
                 // two independant queries, but they use the same aliases. Since

@@ -123,7 +123,7 @@ class AnnotateForm extends Form
                 'rows' => 15,
                 'id' => 'oa:hasBody[0][rdf:value][0][@value]',
                 'class' => 'media-text',
-                'placeholder' => 'Any plain text or html…', // @translate'
+                'placeholder' => 'Any plain text or html…', // @translate
                 // TODO The body is not required in some cases, for example highlight: improve the dynamic validator.
                 'required' => false,
             ],
@@ -234,7 +234,7 @@ class AnnotateForm extends Form
                 'rows' => 15,
                 'id' => 'oa:hasTarget[0][rdf:value][0][@value]',
                 'class' => 'media-text',
-                'placeholder' => 'Any xml, json, svg, media api url, media id, etc. according to the type of selector.', // @translate'
+                'placeholder' => 'Any xml, json, svg, media api url, media id, etc. according to the type of selector.', // @translate
             ],
         ]);
         $this->add([
