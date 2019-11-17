@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-10-14 00:00+0200\n"
+"POT-Creation-Date: 2019-11-18 00:00+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -121,17 +121,17 @@ msgstr ""
 msgid "[Annotation target #%d]"
 msgstr ""
 
-#: src/Generic/AbstractModule.php:498
+#: src/Generic/AbstractModule.php:518
 #, php-format
 msgid "This module requires the module \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:518
+#: src/Generic/AbstractModule.php:538
 #, php-format
 msgid "This module requires modules \"%s\"."
 msgstr ""
 
-#: src/Generic/AbstractModule.php:586
+#: src/Generic/AbstractModule.php:606
 #, php-format
 msgid ""
 "The module \"%s\" was automatically deactivated because the dependencies are "
@@ -391,21 +391,21 @@ msgstr ""
 msgid "The custom vocab named \"%s\" is not available."
 msgstr ""
 
-#: Module.php:1160
+#: Module.php:1162
 msgid "The RDF Concepts Vocabulary (RDF)"
 msgstr ""
 
-#: Module.php:1161
+#: Module.php:1163
 msgid ""
 "This is the RDF Schema for the RDF vocabulary terms in the RDF Namespace, "
 "defined in RDF 1.1 Concepts."
 msgstr ""
 
-#: Module.php:1171
+#: Module.php:1173
 msgid "Web Annotation Ontology"
 msgstr ""
 
-#: Module.php:1172
+#: Module.php:1174
 msgid ""
 "The Web Annotation Vocabulary specifies the set of RDF classes, predicates "
 "and named entities that are used by the Web Annotation Data Model (http://"
@@ -596,15 +596,15 @@ msgstr ""
 msgid "An annotation target must be attached to an Annotation."
 msgstr ""
 
-#: src/Api/Adapter/AnnotationAdapter.php:681
+#: src/Api/Adapter/AnnotationAdapter.php:904
 msgid "Annotation body must be an array."
 msgstr ""
 
-#: src/Api/Adapter/AnnotationAdapter.php:686
+#: src/Api/Adapter/AnnotationAdapter.php:909
 msgid "Annotation target must be an array."
 msgstr ""
 
-#: src/Api/Adapter/AnnotationAdapter.php:688
+#: src/Api/Adapter/AnnotationAdapter.php:911
 msgid "There must be one annotation target at least."
 msgstr ""
 
