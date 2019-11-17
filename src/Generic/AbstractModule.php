@@ -59,6 +59,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     public function install(ServiceLocatorInterface $serviceLocator)
     {
         $this->setServiceLocator($serviceLocator);
+        $this->preInstall();
         $this->checkDependency();
         $this->checkDependencies();
         $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
@@ -66,17 +67,20 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $this->manageMainSettings('install');
         $this->manageSiteSettings('install');
         $this->manageUserSettings('install');
+        $this->postInstall();
     }
 
     public function uninstall(ServiceLocatorInterface $serviceLocator)
     {
         $this->setServiceLocator($serviceLocator);
+        $this->preUninstall();
         $this->execSqlFromFile($this->modulePath() . '/data/install/uninstall.sql');
         $this->manageConfig('uninstall');
         $this->manageMainSettings('uninstall');
         $this->manageSiteSettings('uninstall');
         // Don't uninstall user settings, they don't belong to admin.
         // $this->manageUserSettings('uninstall');
+        $this->postUninstall();
     }
 
     public function upgrade($oldVersion, $newVersion, ServiceLocatorInterface $serviceLocator)
@@ -173,6 +177,22 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     protected function modulePath()
     {
         return OMEKA_PATH . '/modules/' . static::NAMESPACE;
+    }
+
+    protected function preInstall()
+    {
+    }
+
+    protected function postInstall()
+    {
+    }
+
+    protected function preUninstall()
+    {
+    }
+
+    protected function postUninstall()
+    {
     }
 
     /**
