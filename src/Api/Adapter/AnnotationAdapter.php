@@ -86,6 +86,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         // Begin building the search query.
         $entityClass = $this->getEntityClass();
+
+        $isOldOmeka = \Omeka\Module::VERSION < 2;
+        $alias = $isOldOmeka ? $entityClass : 'omeka_root';
+
         $this->index = 0;
         // Join all related bodies and targets to get their properties too.
         // Idealy, the request should be done on resource with a join or where
@@ -100,20 +104,20 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // annotation one. It avoids a "select from select unions" too.
         $qb = $this->getEntityManager()
             ->createQueryBuilder()
-            ->select($entityClass)
-            // ->from($entityClass, $entityClass);
+            ->select($alias)
+            // ->from($entityClass, $alias);
             ->from(
                 // The annotation part allows to get values of all sub-parts
                 // in properties or via modules.
                 \Annotate\Entity\AnnotationPart::class,
                 // The alias is this class, like in the normal queries. It
                 // allows to manage derivated queries easily.
-                $entityClass
+                $alias
             );
         $this->buildQuery($qb, $query);
         // The group is done on the annotation, not the id, so only annotations
         // are returned.
-        $qb->groupBy("$entityClass.annotation");
+        $qb->groupBy("$alias.annotation");
 
         // Trigger the search.query event.
         $event = new Event('api.search.query', $this, [
@@ -122,12 +126,20 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         ]);
         $this->getEventManager()->triggerEvent($event);
 
+        // Add the LIMIT clause.
+        $this->limitQuery($qb, $query);
+
+        // Before adding the ORDER BY clause, set a paginator responsible for
+        // getting the total count. This optimization excludes the ORDER BY
+        // clause from the count query, greatly speeding up response time.
+        $countQb = clone $qb;
+        $countQb->select('1')->resetDQLPart('orderBy');
+        $countPaginator = new Paginator($countQb, false);
+
         // Finish building the search query. In addition to any sorting the
         // adapters add, always sort by entity ID.
         $this->sortQuery($qb, $query);
-        $this->limitQuery($qb, $query);
-        // Order by the main annotation id.
-        $qb->addOrderBy("$entityClass.annotation", $query['sort_order']);
+        $qb->addOrderBy("$alias.annotation", $query['sort_order']);
 
         $scalarField = $request->getOption('returnScalar');
         if ($scalarField) {
@@ -139,7 +151,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $entityClass
                 ));
             }
-            $qb->select(sprintf('%s.%s', $entityClass, $scalarField));
+            $qb->select($alias . '.' . $scalarField);
             $content = array_column($qb->getQuery()->getScalarResult(), $scalarField);
             $response = new Response($content);
             $response->setTotalResults(count($content));
@@ -162,7 +174,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         $response = new Response($entities);
-        $response->setTotalResults($paginator->count());
+        $response->setTotalResults($countPaginator->count());
         return $response;
     }
 
@@ -180,8 +192,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     {
         if (isset($query['sort_by']) && is_string($query['sort_by'])) {
             if (array_key_exists($query['sort_by'], $this->sortFields)) {
+                $isOldOmeka = \Omeka\Module::VERSION < 2;
+                $alias = $isOldOmeka ? $this->getEntityClass() : 'omeka_root';
                 $sortBy = $this->sortFields[$query['sort_by']];
-                $qb->addOrderBy($this->getEntityClass() . ".$sortBy", $query['sort_order']);
+                $qb->addOrderBy($alias . '.' . $sortBy, $query['sort_order']);
             } elseif ($query['sort_by'] === 'random') {
                 $qb->orderBy('RAND()');
             }
@@ -196,6 +210,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      */
     public function buildQuery(QueryBuilder $qb, array $query)
     {
+        $isOldOmeka = \Omeka\Module::VERSION < 2;
+        $alias = $isOldOmeka ? $this->getEntityClass() : 'omeka_root';
         $expr = $qb->expr();
 
         // Added before parent buildQuery because a property is added.
@@ -210,7 +226,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // Manage a null owner.
                 $userAlias = $this->createAlias();
                 $qb->innerJoin(
-                    $this->getEntityClass() . '.owner',
+                    $alias . '.owner',
                     $userAlias
                 );
                 $qb->andWhere($expr->isNull($userAlias . '.id'));
@@ -243,7 +259,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         if ($hasQueryId) {
             $id = $query['id'];
             $qb->andWhere($expr->eq(
-                $this->getEntityClass() . '.annotation',
+                $alias . '.annotation',
                 $this->createNamedParameter($qb, $query['id'])
             ));
             unset($query['id']);
@@ -277,14 +293,15 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // TODO Add a sub-event on the sub query to limit annotations to the site? There is none for items (but it's the same).
                 $subAdapter = $this->getAdapter('items');
                 $subEntityClass = \Omeka\Entity\Item::class;
+                $subEntityAlias = $isOldOmeka ? $subEntityClass : $this->createAlias();
                 $subQb = $this->getEntityManager()
                     ->createQueryBuilder()
-                    ->select($subEntityClass . '.id')
-                    ->from($subEntityClass, $subEntityClass);
+                    ->select($subEntityAlias . '.id')
+                    ->from($subEntityClass, $subEntityAlias);
                 $subAdapter
                     ->buildQuery($subQb, $params);
                 $subQb
-                    ->groupBy($subEntityClass . '.id');
+                    ->groupBy($subEntityAlias . '.id');
 
                 // The subquery cannot manage the parameters, since there are
                 // two independant queries, but they use the same aliases. Since
@@ -371,6 +388,208 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         if (!isset($query['property']) || !is_array($query['property'])) {
             return;
         }
+
+        if (\Omeka\Module::VERSION < 2) {
+            return $this->buildPropertyQuery($qb, $query);
+        }
+
+        $valuesJoin = 'omeka_root.values';
+        $where = '';
+        // @see \Doctrine\ORM\QueryBuilder::expr().
+        $expr = $qb->expr();
+
+        $escape = function ($string) {
+            return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $string);
+        };
+
+        foreach ($query['property'] as $queryRow) {
+            if (!(
+                is_array($queryRow)
+                && array_key_exists('property', $queryRow)
+                && array_key_exists('type', $queryRow)
+            )) {
+                continue;
+            }
+            $propertyId = $queryRow['property'];
+            $queryType = $queryRow['type'];
+            $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
+            $value = isset($queryRow['text']) ? $queryRow['text'] : null;
+
+            if (!strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
+                continue;
+            }
+
+            $valuesAlias = $this->createAlias();
+            $positive = true;
+
+            switch ($queryType) {
+                case 'neq':
+                    $positive = false;
+                    // no break.
+                case 'eq':
+                    $param = $this->createNamedParameter($qb, $value);
+                    $subqueryAlias = $this->createAlias();
+                    $subquery = $this->getEntityManager()
+                        ->createQueryBuilder()
+                        ->select("$subqueryAlias.id")
+                        ->from('Omeka\Entity\Resource', $subqueryAlias)
+                        ->where($expr->eq("$subqueryAlias.title", $param));
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.valueResource", $subquery->getDQL()),
+                        $expr->eq("$valuesAlias.value", $param),
+                        $expr->eq("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nin':
+                    $positive = false;
+                    // no break.
+                case 'in':
+                    $param = $this->createNamedParameter($qb, '%' . $escape($value) . '%');
+                    $subqueryAlias = $this->createAlias();
+                    $subquery = $this->getEntityManager()
+                        ->createQueryBuilder()
+                        ->select("$subqueryAlias.id")
+                        ->from('Omeka\Entity\Resource', $subqueryAlias)
+                        ->where($expr->like("$subqueryAlias.title", $param));
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.valueResource", $subquery->getDQL()),
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nlist':
+                    $positive = false;
+                    // no break.
+                case 'list':
+                    $list = is_array($value) ? $value : explode("\n", $value);
+                    $list = array_filter(array_map('trim', $list), 'strlen');
+                    if (empty($list)) {
+                        continue 2;
+                    }
+                    $param = $this->createNamedParameter($qb, $list);
+                    $subqueryAlias = $this->createAlias();
+                    $subquery = $this->getEntityManager()
+                        ->createQueryBuilder()
+                        ->select("$subqueryAlias.id")
+                        ->from('Omeka\Entity\Resource', $subqueryAlias)
+                        ->where($expr->eq("$subqueryAlias.title", $param));
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.valueResource", $subquery->getDQL()),
+                        $expr->in("$valuesAlias.value", $param),
+                        $expr->in("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nsw':
+                    $positive = false;
+                    // no break.
+                case 'sw':
+                    $param = $this->createNamedParameter($qb, $escape($value) . '%');
+                    $subqueryAlias = $this->createAlias();
+                    $subquery = $this->getEntityManager()
+                        ->createQueryBuilder()
+                        ->select("$subqueryAlias.id")
+                        ->from('Omeka\Entity\Resource', $subqueryAlias)
+                        ->where($expr->like("$subqueryAlias.title", $param));
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.valueResource", $subquery->getDQL()),
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'new':
+                    $positive = false;
+                    // no break.
+                case 'ew':
+                    $param = $this->createNamedParameter($qb, '%' . $escape($value));
+                    $subqueryAlias = $this->createAlias();
+                    $subquery = $this->getEntityManager()
+                        ->createQueryBuilder()
+                        ->select("$subqueryAlias.id")
+                        ->from('Omeka\Entity\Resource', $subqueryAlias)
+                        ->where($expr->like("$subqueryAlias.title", $param));
+                    $predicateExpr = $expr->orX(
+                        $expr->in("$valuesAlias.valueResource", $subquery->getDQL()),
+                        $expr->like("$valuesAlias.value", $param),
+                        $expr->like("$valuesAlias.uri", $param)
+                    );
+                    break;
+
+                case 'nres':
+                    $positive = false;
+                    // no break.
+                case 'res':
+                    $predicateExpr = $expr->eq(
+                        "$valuesAlias.valueResource",
+                        $this->createNamedParameter($qb, $value)
+                    );
+                    break;
+
+                case 'nex':
+                    $positive = false;
+                    // no break.
+                case 'ex':
+                    $predicateExpr = $expr->isNotNull("$valuesAlias.id");
+                    break;
+
+                default:
+                    continue 2;
+            }
+
+            $joinConditions = [];
+            // Narrow to specific property, if one is selected
+            if ($propertyId) {
+                if (is_numeric($propertyId)) {
+                    $propertyId = (int) $propertyId;
+                } else {
+                    $property = $this->getPropertyByTerm($propertyId);
+                    if ($property) {
+                        $propertyId = $property->getId();
+                    } else {
+                        $propertyId = 0;
+                    }
+                }
+                $joinConditions[] = $expr->eq("$valuesAlias.property", (int) $propertyId);
+            }
+
+            if ($positive) {
+                $whereClause = '(' . $predicateExpr . ')';
+            } else {
+                $joinConditions[] = $predicateExpr;
+                $whereClause = $expr->isNull("$valuesAlias.id");
+            }
+
+            if ($joinConditions) {
+                $qb->leftJoin($valuesJoin, $valuesAlias, 'WITH', $expr->andX(...$joinConditions));
+            } else {
+                $qb->leftJoin($valuesJoin, $valuesAlias);
+            }
+
+            if ($where == '') {
+                $where = $whereClause;
+            } elseif ($joiner == 'or') {
+                $where .= " OR $whereClause";
+            } else {
+                $where .= " AND $whereClause";
+            }
+        }
+
+        if ($where) {
+            $qb->andWhere($where);
+        }
+    }
+
+    /**
+     * Old version to build query on value.
+     *
+     * @param QueryBuilder $qb
+     * @param array $query
+     */
+    protected function buildPropertyQueryOld(QueryBuilder $qb, array $query)
+    {
         $valuesJoin = $this->getEntityClass() . '.values';
         $where = '';
         // @see \Doctrine\ORM\QueryBuilder::expr().
@@ -534,6 +753,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     public function buildResourceClassQuery(QueryBuilder $qb, array $query)
     {
         if (isset($query['resource_class'])) {
+            $isOldOmeka = \Omeka\Module::VERSION < 2;
+            $alias = $isOldOmeka ? $this->getEntityClass() : 'omeka_root';
+            $expr = $qb->expr();
+
             if (is_numeric($query['resource_class'])) {
                 $resourceClass = (int) $query['resource_class'];
             } else {
@@ -542,11 +765,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
             $resourceClassAlias = $this->createAlias();
             $qb->innerJoin(
-                $this->getEntityClass() . '.resourceClass',
+                $alias . '.resourceClass',
                 $resourceClassAlias
             );
             $qb->andWhere(
-                $qb->expr()->eq(
+                $expr->eq(
                     $resourceClassAlias . '.id',
                     $this->createNamedParameter($qb, $resourceClass)
                 )

@@ -46,6 +46,11 @@ trait QueryDateTimeTrait
             return;
         }
 
+        $resourceClass = $this->getEntityClass();
+
+        $isOldOmeka = \Omeka\Module::VERSION < 2;
+        $alias = $isOldOmeka ? $resourceClass : 'omeka_root';
+
         $where = '';
         $expr = $qb->expr();
 
@@ -54,8 +59,6 @@ trait QueryDateTimeTrait
             $field = $queryRow['field'];
             $type = $queryRow['type'];
             $value = $queryRow['value'];
-
-            $resourceClass = $this->getEntityClass();
 
             // By default, sql replace missing time by 00:00:00, but this is not
             // clear for the user. And it doesn't allow partial date/time.
@@ -72,14 +75,14 @@ trait QueryDateTimeTrait
                         $value = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->gt($resourceClass . '.' . $field, $param);
+                    $predicateExpr = $expr->gt($alias . '.' . $field, $param);
                     break;
                 case Comparison::GTE:
                     if (strlen($value) < 19) {
                         $value = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->gte($resourceClass . '.' . $field, $param);
+                    $predicateExpr = $expr->gte($alias . '.' . $field, $param);
                     break;
                 case Comparison::EQ:
                     if (strlen($value) < 19) {
@@ -87,10 +90,10 @@ trait QueryDateTimeTrait
                         $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
-                        $predicateExpr = $expr->between($resourceClass . '.' . $field, $paramFrom, $paramTo);
+                        $predicateExpr = $expr->between($alias . '.' . $field, $paramFrom, $paramTo);
                     } else {
                         $param = $this->createNamedParameter($qb, $value);
-                        $predicateExpr = $expr->eq($resourceClass . '.' . $field, $param);
+                        $predicateExpr = $expr->eq($alias . '.' . $field, $param);
                     }
                     break;
                 case Comparison::NEQ:
@@ -100,11 +103,11 @@ trait QueryDateTimeTrait
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
                         $predicateExpr = $expr->not(
-                            $expr->between($resourceClass . '.' . $field, $paramFrom, $paramTo)
+                            $expr->between($alias . '.' . $field, $paramFrom, $paramTo)
                             );
                     } else {
                         $param = $this->createNamedParameter($qb, $value);
-                        $predicateExpr = $expr->neq($resourceClass . '.' . $field, $param);
+                        $predicateExpr = $expr->neq($alias . '.' . $field, $param);
                     }
                     break;
                 case Comparison::LTE:
@@ -112,20 +115,20 @@ trait QueryDateTimeTrait
                         $value = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->lte($resourceClass . '.' . $field, $param);
+                    $predicateExpr = $expr->lte($alias . '.' . $field, $param);
                     break;
                 case Comparison::LT:
                     if (strlen($value) < 19) {
                         $value = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->lt($resourceClass . '.' . $field, $param);
+                    $predicateExpr = $expr->lt($alias . '.' . $field, $param);
                     break;
                 case 'ex':
-                    $predicateExpr = $expr->isNotNull($resourceClass . '.' . $field);
+                    $predicateExpr = $expr->isNotNull($alias . '.' . $field);
                     break;
                 case 'nex':
-                    $predicateExpr = $expr->isNull($resourceClass . '.' . $field);
+                    $predicateExpr = $expr->isNull($alias . '.' . $field);
                     break;
                 default:
                     continue 2;

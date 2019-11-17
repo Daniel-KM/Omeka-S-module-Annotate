@@ -890,13 +890,15 @@ class Module extends AbstractModule
         // for the search engine.
         $view = $event->getTarget();
         // TODO How to attach all admin events only before 1.3?
-        if ($view->params()->fromRoute('__SITE__')) {
+        if (!$view->params()->fromRoute('__ADMIN__')) {
             return;
         }
-        $view->headLink()->appendStylesheet($view->assetUrl('css/annotate-admin.css', __NAMESPACE__));
+        $view->headLink()
+            ->appendStylesheet($view->assetUrl('css/annotate-admin.css', 'Annotate'));
         $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate/default', ['action' => 'browse'], true), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
-        $view->headScript()->appendScript($searchUrl);
-        $view->headScript()->appendFile($view->assetUrl('js/annotate-admin.js', __NAMESPACE__));
+        $view->headScript()
+            ->appendScript($searchUrl)
+            ->appendFile($view->assetUrl('js/annotate-admin.js', 'Annotate'));
     }
 
     /**
