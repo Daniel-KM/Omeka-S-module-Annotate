@@ -665,10 +665,13 @@ class Module extends AbstractModule
         /** @var \Omeka\Api\Adapter\ResourceTemplateAdapter $adapter */
         $adapter = $event->getTarget();
 
+        $isOldOmeka = \Omeka\Module::VERSION < 2;
+        $resourceTemplateAlias = $isOldOmeka ? $adapter->getEntityClass() : 'omeka_root';
+
         $expr = $qb->expr();
         $resourceClassAlias = $adapter->createAlias();
         $qb->innerJoin(
-            $adapter->getEntityClass() . '.resourceClass',
+            $resourceTemplateAlias . '.resourceClass',
             $resourceClassAlias
         );
         $vocabularyAlias = $adapter->createAlias();
