@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright Daniel Berthereau, 2018-2019
+ * Copyright Daniel Berthereau, 2018-2020
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -62,7 +62,9 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $this->preInstall();
         $this->checkDependency();
         $this->checkDependencies();
+        $this->checkAllResourcesToInstall();
         $this->execSqlFromFile($this->modulePath() . '/data/install/schema.sql');
+        $this->installAllResources();
         $this->manageConfig('install');
         $this->manageMainSettings('install');
         $this->manageSiteSettings('install');
@@ -90,6 +92,48 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $this->setServiceLocator($serviceLocator);
             require_once $filepath;
         }
+    }
+
+    /**
+     * @throws \Omeka\Module\Exception\ModuleCannotInstallException
+     */
+    public function checkAllResourcesToInstall()
+    {
+        if (!class_exists(\Generic\InstallResources::class)) {
+            if (file_exists(dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php')) {
+                require_once dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php';
+            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
+                require_once __DIR__ . '/InstallResources.php';
+            } else {
+                // Nothing to install.
+                return true;
+            }
+        }
+
+        $services = $this->getServiceLocator();
+        $installResources = new \Generic\InstallResources($services);
+        $installResources->checkAllResources(static::NAMESPACE);
+    }
+
+    /**
+     * @throws \Omeka\Module\Exception\ModuleCannotInstallException
+     */
+    public function installAllResources()
+    {
+        if (!class_exists(\Generic\InstallResources::class)) {
+            if (file_exists(dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php')) {
+                require_once dirname(dirname(dirname(__DIR__))) . '/Generic/InstallResources.php';
+            } elseif (file_exists(__DIR__ . '/InstallResources.php')) {
+                require_once __DIR__ . '/InstallResources.php';
+            } else {
+                // Nothing to install.
+                return true;
+            }
+        }
+
+        $services = $this->getServiceLocator();
+        $installResources = new \Generic\InstallResources($services);
+        $installResources->createAllResources(static::NAMESPACE);
     }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -168,7 +212,17 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     public function handleUserSettings(Event $event)
     {
-        $this->handleAnySettings($event, 'user_settings');
+        $services = $this->getServiceLocator();
+        /** @var \Omeka\Mvc\Status $status */
+        $status = $services->get('Omeka\Status');
+        if ($status->isAdminRequest()) {
+            /** @var \Zend\Router\Http\RouteMatch $routeMatch */
+            $routeMatch = $services->get('Application')->getMvcEvent()->getRouteMatch();
+            if (!in_array($routeMatch->getParam('controller'), ['Omeka\Controller\Admin\User', 'user'])) {
+                return;
+            }
+            $this->handleAnySettings($event, 'user_settings');
+        }
     }
 
     /**
@@ -250,6 +304,8 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     /**
      * Set, delete or update settings of all sites.
      *
+     * @todo Replace by a single query (for install, uninstall, main, setting, user).
+     *
      * @param string $process
      * @param array $values Values to use when process is update, by site id.
      */
@@ -279,6 +335,8 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     /**
      * Set, delete or update settings of all users.
      *
+     * @todo Replace by a single query (for install, uninstall, main, setting, user).
+     *
      * @param string $process
      * @param array $values Values to use when process is update, by user id.
      */
@@ -307,6 +365,8 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     /**
      * Set, delete or update all settings of a specific type.
+     *
+     * It processes main settings, or one site, or one user.
      *
      * @param SettingsInterface $settings
      * @param string $settingsType
@@ -346,6 +406,8 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      */
     protected function handleAnySettings(Event $event, $settingsType)
     {
+        global $globalNext;
+
         $services = $this->getServiceLocator();
 
         $settingsTypes = [
@@ -380,36 +442,109 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
                 $id = $site()->id();
                 break;
             case 'user_settings':
-                /** @var \Zend\Router\RouteMatch $routeMatch */
-                $routeMatch = $event->getRouteMatch();
-                if ($routeMatch->getMatchedRouteName() !== 'admin/site/slug/action'
-                    || $routeMatch->getParam('controller') !== 'user'
-                    || !$routeMatch->getParam('id')
-                ) {
-                    return;
-                }
+                /** @var \Zend\Router\Http\RouteMatch $routeMatch */
+                $routeMatch = $services->get('Application')->getMvcEvent()->getRouteMatch();
                 $id = $routeMatch->getParam('id');
                 break;
         }
 
-        $this->initDataToPopulate($settings, $settingsType, $id);
-
-        $data = $this->prepareDataToPopulate($settings, $settingsType);
-        if (is_null($data)) {
-            return;
+        // Simplify config of settings.
+        if (empty($globalNext)) {
+            $globalNext = true;
+            $ckEditorHelper = $services->get('ViewHelperManager')->get('ckEditor');
+            $ckEditorHelper();
         }
 
-        // Simplify config of settings.
-        $ckEditorHelper = $services->get('ViewHelperManager')->get('ckEditor');
-        $ckEditorHelper();
+        // Allow to use a form without an id, for example to create a user.
+        if ($settingsType !== 'settings' && !$id) {
+            $data = [];
+        } else {
+            $this->initDataToPopulate($settings, $settingsType, $id);
+            $data = $this->prepareDataToPopulate($settings, $settingsType);
+            if (is_null($data)) {
+                return;
+            }
+        }
 
         $space = strtolower(static::NAMESPACE);
 
+        /** @var \Zend\Form\Form $form */
         $fieldset = $services->get('FormElementManager')->get($settingFieldsets[$settingsType]);
         $fieldset->setName($space);
         $form = $event->getTarget();
-        $form->add($fieldset);
-        $form->get($space)->populateValues($data);
+        // The user view is managed differently.
+        if ($settingsType === 'user_settings') {
+            // This process allows to save first level elements automatically.
+            // @see \Omeka\Controller\Admin\UserController::editAction()
+            $formFieldset = $form->get('user-settings');
+            foreach ($fieldset->getElements() as $element) {
+                $formFieldset->add($element);
+            }
+            $formFieldset->populateValues($data);
+        } else {
+            $form->add($fieldset);
+            $form->get($space)->populateValues($data);
+        }
+    }
+
+    /**
+     * Initialize each original settings, if not ready.
+     *
+     * If the default settings were never registered, it means an incomplete
+     * config, install or upgrade, or a new site or a new user. In all cases,
+     * check it and save default value first.
+     *
+     * @param SettingsInterface $settings
+     * @param string $settingsType
+     * @param int $id Site id or user id.
+     * @param array $values Specific values to populate, e.g. translated strings.
+     * @param bool True if processed.
+     */
+    protected function initDataToPopulate(SettingsInterface $settings, $settingsType, $id = null, array $values = [])
+    {
+        // This method is not in the interface, but is set for config, site and
+        // user settings.
+        if (!method_exists($settings, 'getTableName')) {
+            return false;
+        }
+
+        $config = $this->getConfig();
+        $space = strtolower(static::NAMESPACE);
+        if (empty($config[$space][$settingsType])) {
+            return false;
+        }
+
+        /** @var \Doctrine\DBAL\Connection $connection */
+        $connection = $this->getServiceLocator()->get('Omeka\Connection');
+        if ($id) {
+            if (!method_exists($settings, 'getTargetIdColumnName')) {
+                return false;
+            }
+            $sql = sprintf('SELECT id, value FROM %s WHERE %s = :target_id', $settings->getTableName(), $settings->getTargetIdColumnName());
+            $stmt = $connection->executeQuery($sql, ['target_id' => $id]);
+        } else {
+            $sql = sprintf('SELECT id, value FROM %s', $settings->getTableName());
+            $stmt = $connection->query($sql);
+        }
+
+        $currentSettings = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
+        $defaultSettings = $config[$space][$settingsType];
+        // Skip settings that are arrays, because the fields "multi-checkbox"
+        // and "multi-select" are removed when no value are selected, so it's
+        // not possible to determine if it's a new setting or an old empty
+        // setting currently. So fill them via upgrade in that case or fill the
+        // values.
+        // TODO Find a way to save empty multi-checkboxes and multi-selects (core fix).
+        $defaultSettings = array_filter($defaultSettings, function ($v) {
+            return !is_array($v);
+        });
+        $missingSettings = array_diff_key($defaultSettings, $currentSettings);
+
+        foreach ($missingSettings as $name => $value) {
+            $settings->set($name, array_key_exists($name, $values) ? $values[$name] : $value);
+        }
+
+        return true;
     }
 
     /**
@@ -442,61 +577,6 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         }
 
         return $data;
-    }
-
-    /**
-     * Initialize each original settings, if not ready.
-     *
-     * If the default settings were never registered, it means an incomplete
-     * config, install or upgrade, or a new site or a new user. In all cases,
-     * check it and save default value first.
-     *
-     * @param SettingsInterface $settings
-     * @param string $settingsType
-     * @param int $id Site id or user id.
-     */
-    protected function initDataToPopulate(SettingsInterface $settings, $settingsType, $id = null)
-    {
-        // This method is not in the interface, but is set for config, site and
-        // user settings.
-        if (!method_exists($settings, 'getTableName')) {
-            return;
-        }
-
-        $config = $this->getConfig();
-        $space = strtolower(static::NAMESPACE);
-        if (empty($config[$space][$settingsType])) {
-            return;
-        }
-
-        /** @var \Doctrine\DBAL\Connection $connection */
-        $connection = $this->getServiceLocator()->get('Omeka\Connection');
-        if ($id) {
-            if (!method_exists($settings, 'getTargetIdColumnName')) {
-                return;
-            }
-            $sql = sprintf('SELECT id, value FROM %s WHERE %s = :target_id', $settings->getTableName(), $settings->getTargetIdColumnName());
-            $stmt = $connection->executeQuery($sql, ['target_id' => $id]);
-        } else {
-            $sql = sprintf('SELECT id, value FROM %s', $settings->getTableName());
-            $stmt = $connection->query($sql);
-        }
-
-        $currentSettings = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
-        $defaultSettings = $config[$space][$settingsType];
-        // Skip settings that are arrays, because the fields "multi-checkbox"
-        // and "multi-select" are removed when no value are selected, so it's
-        // not possible to determine if it's a new setting or an old empty
-        // setting currently. So fill them via upgrade in that case.
-        // TODO Find a way to save empty multi-checkboxes and multi-selects (core fix).
-        $defaultSettings = array_filter($defaultSettings, function ($v) {
-            return !is_array($v);
-        });
-        $missingSettings = array_diff_key($defaultSettings, $currentSettings);
-
-        foreach ($missingSettings as $name => $value) {
-            $settings->set($name, $value);
-        }
     }
 
     /**
@@ -621,7 +701,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      */
     public function stringToList($string)
     {
-        return array_filter(array_map('trim', explode("\n", $this->fixEndOfLine($string))));
+        return array_filter(array_map('trim', explode("\n", $this->fixEndOfLine($string))), 'strlen');
     }
 
     /**
