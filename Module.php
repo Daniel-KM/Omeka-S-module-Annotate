@@ -638,6 +638,9 @@ class Module extends AbstractModule
             ->getContent();
         if ($annotations) {
             $jsonLd = $event->getParam('jsonLd');
+            // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations.
+            $jsonLd['o:annotations'] = $annotations;
+            // @deprecated
             $jsonLd['oa:Annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
