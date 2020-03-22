@@ -10,7 +10,7 @@
 $translate = $this->plugin('translate');
 $hyperlink = $this->plugin('hyperlink');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'));
+$this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'), 'text/javascript', ['defer' => 'defer']);
 
 /*
 $sectionNavs = [

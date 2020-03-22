@@ -9,13 +9,18 @@
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $hyperlink = $this->plugin('hyperlink');
-$this->headLink()->appendStylesheet($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'));
-$this->headScript()->appendFile($this->assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'));
-$this->headLink()->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'));
-$this->headLink()->appendStylesheet($this->assetUrl('css/annotate.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/annotate.js', 'Annotate'));
+$assetUrl = $this->plugin('assetUrl');
+
+$this->headLink()
+    ->appendStylesheet($assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'))
+    ->appendStylesheet($assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
+    ->appendStylesheet($assetUrl('css/annotate.css', 'Annotate'));
+$this->headScript()
+    ->appendFile($assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('js/annotate.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
+
 <div id="annotations" class="annotations">
 <h3><?php echo $translate('Annotations'); ?></h3>
 <?php if (empty($annotations)): ?>

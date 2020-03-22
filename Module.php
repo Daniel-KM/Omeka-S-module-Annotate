@@ -901,7 +901,7 @@ class Module extends AbstractModule
         $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate/default', ['action' => 'browse'], true), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         $view->headScript()
             ->appendScript($searchUrl)
-            ->appendFile($view->assetUrl('js/annotate-admin.js', 'Annotate'));
+            ->appendFile($view->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
     }
 
     /**

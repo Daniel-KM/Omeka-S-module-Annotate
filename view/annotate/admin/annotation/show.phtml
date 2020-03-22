@@ -8,7 +8,7 @@
 $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-// $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
+// $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
 $this->htmlElement('body')->appendAttribute('class', 'annotations show');
 

@@ -8,7 +8,7 @@ $translate = $this->plugin('translate');
 $escape = $this->plugin('escapeHtml');
 // Adapted from the advanced-search/properties.phtml template.
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'));
+$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
 // Prepare the datetime queries.
 $datetimes = isset($query['datetime']) ? (is_array($query['datetime']) ? $query['datetime'] : [['value' => $query['datetime']]]) : [];
