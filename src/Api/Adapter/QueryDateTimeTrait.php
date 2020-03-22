@@ -71,23 +71,24 @@ trait QueryDateTimeTrait
 
             switch ($type) {
                 case Comparison::GT:
-                    if (strlen($value) < 19) {
-                        $value = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        // TODO Mb substr_replace.
+                        $value = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
                     $predicateExpr = $expr->gt($alias . '.' . $field, $param);
                     break;
                 case Comparison::GTE:
-                    if (strlen($value) < 19) {
-                        $value = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        $value = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
                     $predicateExpr = $expr->gte($alias . '.' . $field, $param);
                     break;
                 case Comparison::EQ:
-                    if (strlen($value) < 19) {
-                        $valueFrom = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
-                        $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        $valueFrom = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
+                        $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
                         $predicateExpr = $expr->between($alias . '.' . $field, $paramFrom, $paramTo);
@@ -97,9 +98,9 @@ trait QueryDateTimeTrait
                     }
                     break;
                 case Comparison::NEQ:
-                    if (strlen($value) < 19) {
-                        $valueFrom = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
-                        $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        $valueFrom = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
+                        $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
                         $predicateExpr = $expr->not(
@@ -111,15 +112,15 @@ trait QueryDateTimeTrait
                     }
                     break;
                 case Comparison::LTE:
-                    if (strlen($value) < 19) {
-                        $value = substr_replace('9999-12-31 23:59:59', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        $value = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
                     $predicateExpr = $expr->lte($alias . '.' . $field, $param);
                     break;
                 case Comparison::LT:
-                    if (strlen($value) < 19) {
-                        $value = substr_replace('0000-01-01 00:00:00', $value, 0, strlen($value) - 19);
+                    if (mb_strlen($value) < 19) {
+                        $value = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
                     $predicateExpr = $expr->lt($alias . '.' . $field, $param);

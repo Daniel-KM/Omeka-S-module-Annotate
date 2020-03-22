@@ -55,7 +55,7 @@ class NormalizeDateTimeQuery extends AbstractHelper
                 $operator = isset($operators[$operator])
                     ? $operators[$operator]
                     : Comparison::EQ;
-                $value = substr($value, strlen($matches[0]));
+                $value = mb_substr($value, mb_strlen($matches[0]));
             }
             $value = trim($value);
             $query = ['type' => $operator, 'value' => $value] + $defaults;

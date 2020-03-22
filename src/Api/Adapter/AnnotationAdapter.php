@@ -415,7 +415,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
             $value = isset($queryRow['text']) ? $queryRow['text'] : null;
 
-            if (!strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
+            if (!mb_strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
             }
 
@@ -612,7 +612,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
             $value = isset($queryRow['text']) ? $queryRow['text'] : null;
 
-            if (!strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
+            if (!mb_strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
             }
 

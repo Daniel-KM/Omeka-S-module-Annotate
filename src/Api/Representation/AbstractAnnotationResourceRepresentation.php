@@ -102,11 +102,11 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             $baseApiUrl = $urlHelper('api', [], ['force_canonical' => true]) . '/';
         }
 
-        $pos = strpos($url, $baseApiUrl);
+        $pos = mb_strpos($url, $baseApiUrl);
         if ($pos !== 0) {
             return null;
         }
-        $type = strtok(substr($url, strlen($baseApiUrl)), '/');
+        $type = strtok(mb_substr($url, mb_strlen($baseApiUrl)), '/');
 
         $mapResourceTypes = [
             'items' => 'o:Item',

@@ -117,7 +117,7 @@ $annotationBodies = $annotation->bodies();
                     <?php echo $value->valueResource()->linkPretty(); ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
-                    <?php $isLong = strlen($text) > 240; ?>
+                    <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
                         <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
                     <?php else: ?>
@@ -209,7 +209,7 @@ foreach ($annotationTargets as $annotationTarget) {
                     <?php echo $value->valueResource()->linkPretty(); ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
-                    <?php $isLong = strlen($text) > 240; ?>
+                    <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
                         <div class="annotation-target-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
                     <?php else: ?>

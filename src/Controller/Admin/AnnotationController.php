@@ -241,12 +241,12 @@ class AnnotationController extends AbstractActionController
                     $url = $this->viewHelpers()->get('url');
                     $testTargetValue = null;
                     $apiUrl = $url('api/default', ['resource' => $targetSelectorResourceType], ['force_canonical' => true]) . '/';
-                    if (strpos($targetValue, $apiUrl) === 0) {
-                        $testTargetValue = (int) substr($targetValue, strlen($apiUrl));
+                    if (mb_strpos($targetValue, $apiUrl) === 0) {
+                        $testTargetValue = (int) mb_substr($targetValue, mb_strlen($apiUrl));
                     } else {
                         $apiUrl = $url('api/default', ['resource' => $targetSelectorResourceType]) . '/';
-                        if (strpos($targetValue, $apiUrl) === 0) {
-                            $testTargetValue = (int) substr($targetValue, strlen($apiUrl));
+                        if (mb_strpos($targetValue, $apiUrl) === 0) {
+                            $testTargetValue = (int) mb_substr($targetValue, mb_strlen($apiUrl));
                         }
                     }
                     if (empty($testTargetValue)) {
