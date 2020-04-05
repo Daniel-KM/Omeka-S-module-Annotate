@@ -1,0 +1,11 @@
+{
+    "vocabulary": {
+        "o:namespace_uri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "o:prefix": "rdf",
+        "o:label": "The RDF Concepts Vocabulary (RDF)",
+        "o:comment": "This is the RDF Schema for the RDF vocabulary terms in the RDF Namespace, defined in RDF 1.1 Concepts."
+    },
+    "strategy": "file",
+    "file": "rdf_2014-02-25.n3",
+    "format": "turtle"
+}

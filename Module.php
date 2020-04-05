@@ -66,10 +66,57 @@ class Module extends AbstractModule
         $this->addAclRoleAndRules();
     }
 
-    public function install(ServiceLocatorInterface $serviceLocator)
+    public function install(ServiceLocatorInterface $services)
     {
-        parent::install($serviceLocator);
-        $this->installResources();
+        $genericVersion = $services->get('Omeka\ModuleManager')->getModule('Generic')->getIni('version');
+        if (version_compare($genericVersion, '3.0.16', '<')) {
+            $translator = $services->get('MvcTranslator');
+            $message = new \Omeka\Stdlib\Message(
+                $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
+                'Generic', '3.0.16'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException($message);
+        }
+
+        parent::install($services);
+    }
+
+    protected function postInstall()
+    {
+        $services = $this->getServiceLocator();
+        $api = $services->get('Omeka\ApiManager');
+        $settings = $services->get('Omeka\Settings');
+
+        // TODO Replace the resource templates for annotations that are not items.
+
+        $resourceTemplateSettings = [
+            'Annotation' => [
+                'oa:motivatedBy' => 'oa:Annotation',
+                'rdf:value' => 'oa:hasBody',
+                'oa:hasPurpose' => 'oa:hasBody',
+                'dcterms:language' => 'oa:hasBody',
+                'oa:hasSource' => 'oa:hasTarget',
+                'rdf:type' => 'oa:hasTarget',
+                'dcterms:format' => 'oa:hasTarget',
+            ],
+        ];
+
+        $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
+        foreach ($resourceTemplateSettings as $label => $data) {
+            try {
+                $resourceTemplate = $api->read('resource_templates', ['label' => $label])->getContent();
+            } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                $message = new \Omeka\Stdlib\Message(
+                    'The settings to manage the annotation template are not saved. You shoud edit the resource template "Annotation" manually.' // @translate
+                );
+                $messenger = new \Omeka\Mvc\Controller\Plugin\Messenger();
+                $messenger->addWarning($message);
+                continue;
+            }
+            // Add the special resource template settings.
+            $resourceTemplateData[$resourceTemplate->id()] = $data;
+        }
+        $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
     public function uninstall(ServiceLocatorInterface $serviceLocator)
@@ -1146,100 +1193,5 @@ class Module extends AbstractModule
         ];
         $entityColumnName = $entityColumnNames[$representation->getControllerName()];
         return $entityColumnName;
-    }
-
-    protected function installResources()
-    {
-        if (!class_exists(\Generic\InstallResources::class)) {
-            require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')
-                ? dirname(__DIR__) . '/Generic/InstallResources.php'
-                : __DIR__ . '/src/Generic/InstallResources.php';
-        }
-
-        $services = $this->getServiceLocator();
-        $installResources = new \Generic\InstallResources($services);
-        $installResources = $installResources();
-
-        $vocabularies = [
-            [
-                'vocabulary' => [
-                    'o:namespace_uri' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-                    'o:prefix' => 'rdf',
-                    'o:label' => 'The RDF Concepts Vocabulary (RDF)', // @translate
-                    'o:comment' => 'This is the RDF Schema for the RDF vocabulary terms in the RDF Namespace, defined in RDF 1.1 Concepts.', // @translate
-                ],
-                'strategy' => 'file',
-                'file' => __DIR__ . '/data/vocabularies/rdf_2014-02-25.n3',
-                'format' => 'turtle',
-            ],
-            [
-                'vocabulary' => [
-                    'o:namespace_uri' => 'http://www.w3.org/ns/oa#',
-                    'o:prefix' => 'oa',
-                    'o:label' => 'Web Annotation Ontology', // @translate
-                    'o:comment' => 'The Web Annotation Vocabulary specifies the set of RDF classes, predicates and named entities that are used by the Web Annotation Data Model (http://www.w3.org/TR/annotation-model/).', // @translate
-                ],
-                'strategy' => 'file',
-                'file' => __DIR__ . '/data/vocabularies/oa.ttl',
-                'format' => 'turtle',
-            ],
-        ];
-        foreach ($vocabularies as $key => $vocabulary) {
-            if ($installResources->checkVocabulary($vocabulary)) {
-                unset($vocabularies[$key]);
-            }
-        }
-
-        $customVocabPaths = [
-            __DIR__ . '/data/custom-vocabs/Annotation-oa-motivatedBy.json',
-            __DIR__ . '/data/custom-vocabs/Annotation-Body-oa-hasPurpose.json',
-            __DIR__ . '/data/custom-vocabs/Annotation-Target-dcterms-format.json',
-            __DIR__ . '/data/custom-vocabs/Annotation-Target-rdf-type.json',
-        ];
-        foreach ($customVocabPaths as $key => $filepath) {
-            if ($installResources->checkCustomVocab($filepath)) {
-                unset($customVocabPaths[$key]);
-            }
-        }
-
-        // TODO Replace the resource templates for annotations that are not items.
-        $resourceTemplatePaths = [
-            'Annotation' => __DIR__ . '/data/resource-templates/Annotation.json',
-        ];
-        $resourceTemplateSettings = [
-            'Annotation' => [
-                'oa:motivatedBy' => 'oa:Annotation',
-                'rdf:value' => 'oa:hasBody',
-                'oa:hasPurpose' => 'oa:hasBody',
-                'dcterms:language' => 'oa:hasBody',
-                'oa:hasSource' => 'oa:hasTarget',
-                'rdf:type' => 'oa:hasTarget',
-                'dcterms:format' => 'oa:hasTarget',
-            ],
-        ];
-        foreach ($resourceTemplatePaths as $key => $filepath) {
-            if ($installResources->checkResourceTemplate($filepath)) {
-                unset($resourceTemplatePaths[$key]);
-            }
-        }
-
-        // Checks are ok, so process the install.
-        foreach ($vocabularies as $vocabulary) {
-            $installResources->createVocabulary($vocabulary);
-        }
-
-        foreach ($customVocabPaths as $filepath) {
-            $installResources->createCustomVocab($filepath);
-        }
-
-        $settings = $services->get('Omeka\Settings');
-
-        $resourceTemplateData = $settings->get('annotate_resource_template_data', []);
-        foreach ($resourceTemplatePaths as $key => $filepath) {
-            $resourceTemplate = $installResources->createResourceTemplate($filepath);
-            // Add the special resource template settings.
-            $resourceTemplateData[$resourceTemplate->id()] = $resourceTemplateSettings[$key];
-        }
-        $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 }
