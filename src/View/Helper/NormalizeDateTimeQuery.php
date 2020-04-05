@@ -65,7 +65,7 @@ class NormalizeDateTimeQuery extends AbstractHelper
         $query = $query + $defaults;
 
         // Clean query and manage default values.
-        $query = array_map('strtolower', array_map('trim', $query));
+        $query = array_map('mb_strtolower', array_map('trim', $query));
         if (!in_array($query['joiner'], ['and', 'or'])) {
             $query['joiner'] = 'and';
         }
