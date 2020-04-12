@@ -119,7 +119,7 @@ class InstallResources
         // Custom vocabs.
         foreach ($this->listFilesInDir($filepathData . 'custom-vocabs') as $filepath) {
             if (!$this->checkCustomVocab($filepath)) {
-                $this->createCustomVocab($filepath);
+                $this->createOrUpdateCustomVocab($filepath);
             }
         }
 
@@ -235,16 +235,6 @@ class InstallResources
             );
         }
 
-        if (implode("\n", $data['o:terms']) !== $customVocab->terms()) {
-            throw new ModuleCannotInstallException(
-                sprintf(
-                    'A custom vocab named "%s" exists and has not the needed terms: rename it or remove it before installing this module.', // @translate
-                    $label,
-                    $data['o:terms']
-                )
-            );
-        }
-
         if ($data['o:lang'] != $customVocab->lang()) {
             throw new ModuleCannotInstallException(
                 sprintf(
@@ -253,6 +243,15 @@ class InstallResources
                     $data['o:lang']
                 )
             );
+        }
+
+        $newTerms = $data['o:terms'];
+        $existingTerms = explode("\n", $customVocab->terms());
+        sort($newTerms);
+        sort($existingTerms);
+        if ($newTerms !== $existingTerms) {
+            // To be completed.
+            return false;
         }
 
         return true;
@@ -386,6 +385,20 @@ class InstallResources
         // Process import.
         $resourceTemplate = $api->create('resource_templates', $data)->getContent();
         return $resourceTemplate;
+    }
+
+    /**
+     * Create or update a custom vocab.
+     *
+     * @param string $filepath
+     */
+    public function createOrUpdateCustomVocab($filepath)
+    {
+        try {
+            return $this->updateCustomVocab($filepath);
+        } catch (ModuleCannotInstallException $e) {
+            return $this->createCustomVocab($filepath);
+        }
     }
 
     /**
