@@ -390,7 +390,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         if (\Omeka\Module::VERSION < 2) {
-            return $this->buildPropertyQuery($qb, $query);
+            return $this->buildPropertyQueryOld($qb, $query);
         }
 
         $valuesJoin = 'omeka_root.values';
