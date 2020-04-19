@@ -359,6 +359,11 @@ class AnnotationController extends AbstractActionController
         }
 
         $data = $this->params()->fromPost();
+        if (isset($data['values_json']) && $valuesJson = json_decode($data['values_json'], true)) {
+            $data = array_merge_recursive($data, $valuesJson);
+            unset($data['values_json']);
+        }
+
         $form->setData($data);
         if (!$form->isValid()) {
             $this->messenger()->addFormErrors($form);
