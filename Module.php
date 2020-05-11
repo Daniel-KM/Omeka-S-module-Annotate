@@ -685,7 +685,8 @@ class Module extends AbstractModule
             ->getContent();
         if ($annotations) {
             $jsonLd = $event->getParam('jsonLd');
-            // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations.
+            // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
+            // Note: Omeka uses singular for "o:item_set".
             $jsonLd['o:annotations'] = $annotations;
             // @deprecated
             $jsonLd['oa:Annotation'] = $annotations;
