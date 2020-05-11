@@ -161,7 +161,7 @@ sociales [EHESS].
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
-[OSI]: http://opensource.org
+[OSI]: https://opensource.org
 [MIT]: https://github.com/sandywalker/webui-popover/blob/master/LICENSE.txt
 [`webui-popover`]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr

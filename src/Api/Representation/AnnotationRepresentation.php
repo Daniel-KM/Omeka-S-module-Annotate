@@ -3,13 +3,12 @@ namespace Annotate\Api\Representation;
 
 use Annotate\Api\Adapter\AnnotationBodyHydrator;
 use Annotate\Api\Adapter\AnnotationTargetHydrator;
-use Annotate\Entity\Annotation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 {
     /**
-     * @var Annotation
+     * @var \Annotate\Entity\Annotation
      */
     protected $resource;
 

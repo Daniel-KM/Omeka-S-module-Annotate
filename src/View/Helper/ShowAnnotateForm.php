@@ -33,9 +33,9 @@ class ShowAnnotateForm extends AbstractHelper
 
         /** @var \Annotate\Form\AnnotateForm $form */
         $form = $this->formElementManager->get(AnnotateForm::class);
+        $form->setOptions($options);
         $form->init();
         $form->setData($data);
-        $form->setOptions($options);
         $form->setAttributes($attributes);
         $view->vars()->offsetSet('annotateForm', $form);
         return $view->partial('common/annotate-form');

@@ -529,7 +529,7 @@ class Module extends AbstractModule
     {
         // Add the Open Annotation part to the representation.
         $representations = [
-            'user' => UserRepresentation::class,
+            'users' => UserRepresentation::class,
             'item_sets' => ItemSetRepresentation::class,
             'items' => ItemRepresentation::class,
             'media' => MediaRepresentation::class,
