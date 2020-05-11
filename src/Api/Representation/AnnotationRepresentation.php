@@ -160,10 +160,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 
     public function displayTitle($default = null)
     {
-        $title = $this->value('dcterms:title', [
-            'default' => null,
-        ]);
-
+        $title = $this->title();
         if ($title !== null) {
             return (string) $title;
         }
