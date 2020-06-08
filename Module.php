@@ -69,11 +69,11 @@ class Module extends AbstractModule
     public function install(ServiceLocatorInterface $services)
     {
         $module = $services->get('Omeka\ModuleManager')->getModule('Generic');
-        if ($module && version_compare($module->getIni('version'), '3.0.17', '<')) {
+        if ($module && version_compare($module->getIni('version'), '3.0.20', '<')) {
             $translator = $services->get('MvcTranslator');
             $message = new \Omeka\Stdlib\Message(
                 $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
-                'Generic', '3.0.17'
+                'Generic', '3.0.20'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException($message);
         }

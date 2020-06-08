@@ -80,7 +80,7 @@ class InstallResources
                 try {
                     $this->checkVocabulary($data);
                 } catch (RuntimeException $e) {
-                    throw new ModuleCannotInstallException($e);
+                    throw new ModuleCannotInstallException($e->getMessage());
                 }
             }
         }
@@ -90,7 +90,7 @@ class InstallResources
             try {
                 $this->checkCustomVocab($filepath);
             } catch (RuntimeException $e) {
-                throw new ModuleCannotInstallException($e);
+                throw new ModuleCannotInstallException($e->getMessage());
             }
         }
 
@@ -99,7 +99,7 @@ class InstallResources
             try {
                 $this->checkResourceTemplate($filepath);
             } catch (RuntimeException $e) {
-                throw new ModuleCannotInstallException($e);
+                throw new ModuleCannotInstallException($e->getMessage());
             }
         }
 
@@ -423,7 +423,7 @@ class InstallResources
     {
         try {
             return $this->updateCustomVocab($filepath);
-        } catch (ModuleCannotInstallException $e) {
+        } catch (RuntimeException $e) {
             return $this->createCustomVocab($filepath);
         }
     }
