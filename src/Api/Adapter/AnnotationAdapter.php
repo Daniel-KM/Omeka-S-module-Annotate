@@ -118,6 +118,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // The group is done on the annotation, not the id, so only annotations
         // are returned.
         $qb->groupBy("$alias.annotation");
+        // Useless, but avoid an issue on mysql with group by clause.
+        $qb->addSelect("$alias.id HIDDEN rid");
 
         // Trigger the search.query event.
         $event = new Event('api.search.query', $this, [
