@@ -224,7 +224,7 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
     }
 
     /**
-     * List tthe resources of the annotation target.
+     * List the resources of the annotation target.
      *
      * The selector is not listed (the media, if any, for an item).
      *
@@ -234,6 +234,7 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
      */
     public function sources()
     {
+        // TODO Manage other resource types.
         return array_map(function ($v) {
             return $v->valueResource();
         }, $this->value('oa:hasSource', ['type' => 'resource', 'all' => true, 'default' => []]));
