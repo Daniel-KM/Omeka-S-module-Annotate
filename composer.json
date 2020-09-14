@@ -24,6 +24,10 @@
         "tagging",
         "commenting"
     ],
+    "require": {
+        "grimmlink/webui-popover": "^1.2",
+        "slowprog/composer-copy-file": "^0.3.1"
+    },
     "require-dev": {
         "biblibre/omeka-s-test-helper": "dev-master",
         "friendsofphp/php-cs-fixer": "^2.0"
@@ -36,6 +40,19 @@
     "autoload-dev": {
         "psr-4": {
             "AnnotateTest\\": "test/AnnotateTest/"
+        }
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ],
+        "post-update-cmd": [
+            "SlowProg\\CopyFile\\ScriptHandler::copy"
+        ]
+    },
+    "extra": {
+        "copy-file": {
+            "vendor/grimmlink/webui-popover/dist/": "asset/vendor/webui-popover"
         }
     }
 }
