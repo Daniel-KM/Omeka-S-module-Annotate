@@ -13,14 +13,14 @@ and who can only annotate.
 Installation
 ------------
 
-The module uses an external library, [`webui-popover`], so use the release zip to
+The module uses an external library, [webui-popover], so use the release zip to
 install it, or use and init the source.
 
 See general end user documentation for [installing a module].
 
 * From the zip
 
-Download the last release [`Annotate.zip`] from the list of releases (the master
+Download the last release [Annotate.zip] from the list of releases (the master
 does not contain the dependency), and uncompress it in the `modules` directory.
 
 * From the source and for development
@@ -29,8 +29,7 @@ If the module was installed from the source, rename the name of the folder of
 the module to `Annotate`, go to the root of the module, and run:
 
 ```
-    npm install
-    gulp
+composer install --no-dev
 ```
 
 
@@ -154,7 +153,7 @@ sociales [EHESS].
 [Web Annotation Ontology]: https://www.w3.org/ns/oa
 [W3C]: https://www.w3.org
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
-[`Annotate.zip`]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/releases
+[Annotate.zip]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/issues
@@ -163,6 +162,6 @@ sociales [EHESS].
 [FSF]: https://www.fsf.org
 [OSI]: https://opensource.org
 [MIT]: https://github.com/sandywalker/webui-popover/blob/master/LICENSE.txt
-[`webui-popover`]: https://github.com/sandywalker/webui-popover
+[webui-popover]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr
 [Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
