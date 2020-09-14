@@ -217,7 +217,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $status = $services->get('Omeka\Status');
         if ($status->isAdminRequest()) {
             /** @var \Zend\Router\Http\RouteMatch $routeMatch */
-            $routeMatch = $services->get('Application')->getMvcEvent()->getRouteMatch();
+            $routeMatch = $status->getRouteMatch();
             if (!in_array($routeMatch->getParam('controller'), ['Omeka\Controller\Admin\User', 'user'])) {
                 return;
             }
@@ -627,15 +627,15 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     /**
      * Check if a module is active.
      *
-     * @param string $moduleClass
+     * @param string $module
      * @return bool
      */
-    protected function isModuleActive($moduleClass)
+    protected function isModuleActive($module)
     {
         $services = $this->getServiceLocator();
         /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $services->get('Omeka\ModuleManager');
-        $module = $moduleManager->getModule($moduleClass);
+        $module = $moduleManager->getModule($module);
         return $module
             && $module->getState() === \Omeka\Module\Manager::STATE_ACTIVE;
     }
@@ -643,16 +643,16 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     /**
      * Check if a list of modules are active.
      *
-     * @param array $moduleClasses
+     * @param array $modules
      * @return bool
      */
-    protected function areModulesActive(array $moduleClasses)
+    protected function areModulesActive(array $modules)
     {
         $services = $this->getServiceLocator();
         /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $services->get('Omeka\ModuleManager');
-        foreach ($moduleClasses as $moduleClass) {
-            $module = $moduleManager->getModule($moduleClass);
+        foreach ($modules as $module) {
+            $module = $moduleManager->getModule($module);
             if (!$module || $module->getState() !== \Omeka\Module\Manager::STATE_ACTIVE) {
                 return false;
             }
@@ -663,12 +663,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     /**
      * Disable a module.
      *
-     * @param string $moduleClass
+     * @param string $module
      */
-    protected function disableModule($moduleClass)
+    protected function disableModule($module)
     {
         // Check if the module is enabled first to avoid an exception.
-        if (!$this->isModuleActive($moduleClass)) {
+        if (!$this->isModuleActive($module)) {
             return;
         }
 
@@ -681,13 +681,13 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
         /** @var \Omeka\Module\Manager $moduleManager */
         $moduleManager = $services->get('Omeka\ModuleManager');
-        $module = $moduleManager->getModule($moduleClass);
-        $moduleManager->deactivate($module);
+        $managedModule = $moduleManager->getModule($module);
+        $moduleManager->deactivate($managedModule);
 
         $translator = $services->get('MvcTranslator');
         $message = new \Omeka\Stdlib\Message(
             $translator->translate('The module "%s" was automatically deactivated because the dependencies are unavailable.'), // @translate
-            $moduleClass
+            $module
         );
         $messenger = new \Omeka\Mvc\Controller\Plugin\Messenger();
         $messenger->addWarning($message);
