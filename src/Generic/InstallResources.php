@@ -1,6 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 /*
- * Copyright Daniel Berthereau, 2018-2020
+ * Copyright Daniel Berthereau, 2018-2021
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -28,23 +28,30 @@
 
 namespace Generic;
 
+use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Exception\NotFoundException;
 use Omeka\Api\Exception\RuntimeException;
+use Omeka\Api\Representation\ResourceTemplateRepresentation;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
-use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class InstallResources
 {
     /**
-     * @var ServiceLocatorInterface
+     * @var \Laminas\ServiceManager\ServiceLocatorInterface
      */
     protected $services;
+
+    /**
+     * @var \Omeka\Api\Manager
+     */
+    protected $api;
 
     public function __construct(ServiceLocatorInterface $services)
     {
         $this->services = $services;
+        $this->api = $services->get('Omeka\ApiManager');
     }
 
     /**
@@ -65,7 +72,7 @@ class InstallResources
      * @throws \Omeka\Module\Exception\ModuleCannotInstallException
      * @return bool
      */
-    public function checkAllResources($module)
+    public function checkAllResources(string $module): bool
     {
         $filepathData = OMEKA_PATH . '/modules/' . $module . '/data/';
 
@@ -74,9 +81,7 @@ class InstallResources
             $data = file_get_contents($filepath);
             $data = json_decode($data, true);
             if ($data) {
-                if ($data['file'] && strpos($data['file'], 'https://') === false && strpos($data['file'], 'http://') === false) {
-                    $data['file'] = dirname($filepath) . '/' . $data['file'];
-                }
+                $data['file'] = $this->canonicalFileOrUrl($data['file'], $module, 'vocabularies', $filepath);
                 try {
                     $this->checkVocabulary($data);
                 } catch (RuntimeException $e) {
@@ -97,7 +102,14 @@ class InstallResources
         // Resource templates.
         foreach ($this->listFilesInDir($filepathData . 'resource-templates') as $filepath) {
             try {
-                $this->checkResourceTemplate($filepath);
+                if ($this->checkResourceTemplate($filepath)) {
+                    throw new RuntimeException(
+                        sprintf(
+                            'A resource template named exists for %s: rename it or remove it before installing this module.', // @translate
+                            pathinfo($filepath, PATHINFO_FILENAME)
+                        )
+                    );
+                }
             } catch (RuntimeException $e) {
                 throw new ModuleCannotInstallException($e->getMessage());
             }
@@ -110,8 +122,9 @@ class InstallResources
      * Install all resources that are in the path data/ of a module.
      *
      * @param string $module
+     * @return self
      */
-    public function createAllResources($module)
+    public function createAllResources(string $module): self
     {
         $filepathData = OMEKA_PATH . '/modules/' . $module . '/data/';
 
@@ -120,9 +133,7 @@ class InstallResources
             $data = file_get_contents($filepath);
             $data = json_decode($data, true);
             if ($data) {
-                if ($data['file'] && strpos($data['file'], 'https://') === false && strpos($data['file'], 'http://') === false) {
-                    $data['file'] = dirname($filepath) . '/' . $data['file'];
-                }
+                $data['file'] = $this->canonicalFileOrUrl($data['file'], $module, 'vocabularies', $filepath);
                 if (!$this->checkVocabulary($data)) {
                     $this->createVocabulary($data);
                 }
@@ -142,6 +153,8 @@ class InstallResources
                 $this->createResourceTemplate($filepath);
             }
         }
+
+        return $this;
     }
 
     /**
@@ -151,17 +164,14 @@ class InstallResources
      * @throws \Omeka\Api\Exception\RuntimeException
      * @return bool False if not found, true if exists.
      */
-    public function checkVocabulary(array $vocabulary)
+    public function checkVocabulary(array $vocabulary): bool
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
-
-        $filepath = $vocabulary['file'];
-        if (!file_exists($filepath) || !is_readable($filepath)) {
+        $filepath = (string) $vocabulary['file'];
+        if (!$filepath || !file_exists($filepath) || !filesize($filepath) || !is_readable($filepath)) {
             throw new RuntimeException(
                 sprintf(
-                    'The file "%s" cannot be read. Check your file system.', // @translate
-                    '/data/vocabularies/' . basename($vocabulary['file'])
+                    'The file "%s" cannot be read. Check your file system or the url.', // @translate
+                    strpos($filepath, '/') === 0 ? basename($filepath) : $filepath
                 )
             );
         }
@@ -171,8 +181,7 @@ class InstallResources
 
         try {
             /** @var \Omeka\Api\Representation\VocabularyRepresentation $vocabularyRepresentation */
-            $vocabularyRepresentation = $api
-                ->read('vocabularies', ['prefix' => $prefix])->getContent();
+            $vocabularyRepresentation = $this->api->read('vocabularies', ['prefix' => $prefix])->getContent();
         } catch (NotFoundException $e) {
             return false;
         }
@@ -192,6 +201,37 @@ class InstallResources
         );
     }
 
+    protected function canonicalFileOrUrl($file, string $module, string $dataDirectory, string $mainFilepath): ?string
+    {
+        if (!$file) {
+            return null;
+        }
+
+        if (strpos((string) $file, 'https://') !== false || strpos((string) $file, 'http://') !== false) {
+            return $file;
+        }
+
+        $filepathData = OMEKA_PATH . '/modules/' . $module . '/data/';
+        $filepath = $filepathData . ($dataDirectory ? $dataDirectory . '/' : '') . $file;
+        if (file_exists($filepath)) {
+            return $filepath;
+        }
+
+        // For compatibility with old modules.
+
+        $filepath = dirname($mainFilepath) . '/' . $file;
+        if (file_exists($filepath)) {
+            return $filepath;
+        }
+
+        $filepath = OMEKA_PATH . '/modules/' . $module . '/' . $file;
+        if (file_exists($filepath)) {
+            return $filepath;
+        }
+
+        return null;
+    }
+
     /**
      * Check if a resource template exists.
      *
@@ -201,25 +241,19 @@ class InstallResources
      * @throws \Omeka\Api\Exception\RuntimeException
      * @return bool False if not found, true if exists.
      */
-    public function checkResourceTemplate($filepath)
+    public function checkResourceTemplate(string $filepath): bool
     {
-        $services = $this->getServiceLocator();
         $data = json_decode(file_get_contents($filepath), true);
-        $label = $data['o:label'];
-
-        $api = $services->get('Omeka\ApiManager');
-        try {
-            $api->read('resource_templates', ['label' => $label])->getContent();
-        } catch (NotFoundException $e) {
+        if (!$data || empty($data['label'])) {
             return false;
         }
 
-        throw new RuntimeException(
-            sprintf(
-                'A resource template named "%s" exists: rename it or remove it before installing this module.', // @translate
-                $label
-            )
-        );
+        try {
+            $this->api->read('resource_templates', ['label' => $data['label']]);
+        } catch (NotFoundException $e) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -229,17 +263,16 @@ class InstallResources
      * @throws \Omeka\Api\Exception\RuntimeException
      * @return bool False if not found, true if exists.
      */
-    public function checkCustomVocab($filepath)
+    public function checkCustomVocab(string $filepath): bool
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
-
         $data = json_decode(file_get_contents($filepath), true);
+        if (!$data || empty($data['label'])) {
+            return false;
+        }
 
         $label = $data['o:label'];
         try {
-            $customVocab = $api
-                ->read('custom_vocabs', ['label' => $label])->getContent();
+            $customVocab = $this->api->read('custom_vocabs', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
             return false;
         } catch (\Omeka\Api\Exception\BadRequestException $e) {
@@ -278,18 +311,14 @@ class InstallResources
      * @return bool True if the vocabulary has been created, false if it exists
      * already, so it is not created twice.
      */
-    public function createVocabulary(array $vocabulary)
+    public function createVocabulary(array $vocabulary): bool
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
-
         // Check if the vocabulary have been already imported.
         $prefix = $vocabulary['vocabulary']['o:prefix'];
 
         try {
             /** @var \Omeka\Api\Representation\VocabularyRepresentation $vocabularyRepresentation */
-            $vocabularyRepresentation = $api
-                ->read('vocabularies', ['prefix' => $prefix])->getContent();
+            $vocabularyRepresentation = $this->api->read('vocabularies', ['prefix' => $prefix])->getContent();
         } catch (NotFoundException $e) {
             $vocabularyRepresentation = null;
         }
@@ -309,7 +338,7 @@ class InstallResources
 
             // It is another vocabulary with the same prefix.
             throw new RuntimeException(
-                new Message(
+                (string) new Message(
                     'An error occured when adding the prefix "%s": another vocabulary exists with the same prefix. Resolve the conflict before installing this module.', // @translate
                     $vocabulary['vocabulary']['o:prefix']
                 )
@@ -317,7 +346,7 @@ class InstallResources
         }
 
         /** @var \Omeka\Stdlib\RdfImporter $rdfImporter */
-        $rdfImporter = $services->get('Omeka\RdfImporter');
+        $rdfImporter = $this->services->get('Omeka\RdfImporter');
         try {
             $rdfImporter->import(
                 $vocabulary['strategy'],
@@ -329,7 +358,7 @@ class InstallResources
             );
         } catch (\Omeka\Api\Exception\ValidationException $e) {
             throw new RuntimeException(
-                new Message(
+                (string) new Message(
                     'An error occured when adding the prefix "%s" and the associated properties: %s', // @translate
                     $vocabulary['vocabulary']['o:prefix'],
                     $e->getMessage()
@@ -346,19 +375,17 @@ class InstallResources
      * @todo Some checks of the resource termplate controller are skipped currently.
      *
      * @param string $filepath
-     * @return \Omeka\Api\Representation\ResourceTemplateRepresentation
      * @throws \Omeka\Api\Exception\RuntimeException
+     * @return \Omeka\Api\Representation\ResourceTemplateRepresentation
      */
-    public function createResourceTemplate($filepath)
+    public function createResourceTemplate(string $filepath): ResourceTemplateRepresentation
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('ControllerPluginManager')->get('api');
         $data = json_decode(file_get_contents($filepath), true);
 
         // Check if the resource template exists, so it is not replaced.
         $label = $data['o:label'];
         try {
-            $resourceTemplate = $api->read('resource_templates', ['label' => $label])->getContent();
+            $resourceTemplate = $this->api->read('resource_templates', ['label' => $label])->getContent();
             $message = new Message(
                 'The resource template named "%s" is already available and is skipped.', // @translate
                 $label
@@ -369,57 +396,22 @@ class InstallResources
         } catch (NotFoundException $e) {
         }
 
-        // Set the iinternal ids of classes, properties and data types.
-        // TODO Check if the output is valid (else an error will be thrown during import).
+        // The check sets the internal ids of classes, properties and data types
+        // and converts old data types into multiple data types and prepare
+        // other data types (mainly custom vocabs).
         $data = $this->flagValid($data);
 
-        // Manage the custom vocabs that may be set inside the template.
-        foreach ($data['o:resource_template_property'] as &$templateProperty) {
-            if (strpos($templateProperty['data_type_name'], 'customvocab:') !== 0) {
-                continue;
-            }
-            $label = $templateProperty['data_type_label'] ?: $templateProperty['label'];
-            try {
-                $customVocab = $api
-                    ->read('custom_vocabs', ['label' => $label])->getContent();
-            } catch (NotFoundException $e) {
-                throw new RuntimeException(
-                    new Message(
-                        'The custom vocab named "%s" is not available.', // @translate
-                        $label
-                    )
-                );
-            }
-            $templateProperty['data_type_name'] = 'customvocab:' . $customVocab->id();
-            $templateProperty['o:data_type'] = 'customvocab:' . $customVocab->id();
-        }
-        unset($templateProperty);
-
-        // Check if there are title and description.
-        foreach (['o:title_property', 'o:description_property'] as $property) {
-            if (!empty($data[$property]['vocabulary_namespace_uri'])
-                && !empty($data[$property]['local_name'])
-            ) {
-                $prop = $api->searchOne('properties', $data[$property])->getContent();
-                if ($prop) {
-                    $data[$property]['o:id'] = $prop->id();
-                }
-            }
-        }
-
         // Process import.
-        /** \Omeka\Api\Representation\ResourceTemplateRepresentation $resourceTemplate */
-        $resourceTemplate = $api->create('resource_templates', $data)->getContent();
-
-        return $resourceTemplate;
+        return $this->api->create('resource_templates', $data)->getContent();
     }
 
     /**
      * Create or update a custom vocab.
      *
      * @param string $filepath
+     * @return ?\CustomVocab\Api\Representation\CustomVocabRepresentation|null
      */
-    public function createOrUpdateCustomVocab($filepath)
+    public function createOrUpdateCustomVocab(string $filepath): ?\CustomVocab\Api\Representation\CustomVocabRepresentation
     {
         try {
             return $this->updateCustomVocab($filepath);
@@ -432,25 +424,26 @@ class InstallResources
      * Create a custom vocab.
      *
      * @param string $filepath
+     * @return \CustomVocab\Api\Representation\CustomVocabRepresentation|null
      */
-    public function createCustomVocab($filepath)
+    public function createCustomVocab(string $filepath): ?\CustomVocab\Api\Representation\CustomVocabRepresentation
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
         $data = json_decode(file_get_contents($filepath), true);
         $data['o:terms'] = implode(PHP_EOL, $data['o:terms']);
         try {
-            $api->create('custom_vocabs', $data);
+            return $this->api->create('custom_vocabs', $data)->getContent();
         } catch (\Exception $e) {
+            return null;
         }
     }
 
     /**
      * Flag members and data types as valid.
      *
-     * Copy of the method of the resource template controller (with services).
+     * Copy of the method of the resource template controller (with services)
+     * and remove of keys "data_types" inside "o:data".
      *
-     * @see \Omeka\Controller\Admin\ResourceTemplateController::flagValid()
+     * @see \AdvancedResourceTemplate\Controller\Admin\ResourceTemplateControllerDelegator::flagValid()
      *
      * All members start as invalid until we determine whether the corresponding
      * vocabulary and member exists in this installation. All data types start
@@ -463,23 +456,17 @@ class InstallResources
      * the property. By design, the API will only hydrate members and data types
      * that are flagged as valid.
      *
+     * @todo Manage direct import of data types from Value Suggest and other modules.
+     *
      * @param array $import
-     * @return array
+     * @return array|false
      */
-    protected function flagValid(array $import)
+    protected function flagValid(iterable $import)
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('ControllerPluginManager')->get('api');
-
         $vocabs = [];
-        $dataTypes = [
-            'literal',
-            'uri',
-            'resource',
-            'resource:item',
-            'resource:itemset',
-            'resource:media',
-        ];
+
+        // The controller plugin Api is used to allow to search one resource.
+        $api = $this->services->get('ControllerPluginManager')->get('api');
 
         $getVocab = function ($namespaceUri) use (&$vocabs, $api) {
             if (isset($vocabs[$namespaceUri])) {
@@ -495,7 +482,56 @@ class InstallResources
             return false;
         };
 
-        if (!empty($import['o:resource_class'])) {
+        $getDataTypesByName = function ($dataTypesNameLabels) {
+            $result = [];
+            foreach ($dataTypesNameLabels as $dataType) {
+                $result[$dataType['name']] = $dataType;
+            }
+            return $result;
+        };
+
+        // Manage core data types and common modules ones.
+        $getKnownDataType = function ($dataTypeNameLabel) use ($api): ?string {
+            if (in_array($dataTypeNameLabel['name'], [
+                'literal',
+                'resource',
+                'resource:item',
+                'resource:itemset',
+                'resource:media',
+                'uri',
+                // DataTypeGeometry
+                'geometry:geography',
+                'geometry:geometry',
+                // DataTypeRdf.
+                'boolean',
+                'html',
+                'xml',
+                // DataTypePlace.
+                'place',
+                // NumericDataTypes
+                'numeric:timestamp',
+                'numeric:integer',
+                'numeric:duration',
+                'numeric:interval',
+            ])
+                || mb_substr((string) $dataTypeNameLabel['name'], 0, 13) === 'valuesuggest:'
+                || mb_substr((string) $dataTypeNameLabel['name'], 0, 16) === 'valuesuggestall:'
+            ) {
+                return $dataTypeNameLabel['name'];
+            }
+
+            if (mb_substr((string) $dataTypeNameLabel['name'], 0, 12) === 'customvocab:') {
+                try {
+                    $customVocab = $api->read('custom_vocabs', ['label' => $dataTypeNameLabel['label']])->getContent();
+                    return 'customvocab:' . $customVocab->id();
+                } catch (\Omeka\Api\Exception\NotFoundException $e) {
+                    return null;
+                }
+            }
+            return null;
+        };
+
+        if (isset($import['o:resource_class'])) {
             if ($vocab = $getVocab($import['o:resource_class']['vocabulary_namespace_uri'])) {
                 $import['o:resource_class']['vocabulary_prefix'] = $vocab->prefix();
                 $class = $api->searchOne('resource_classes', [
@@ -504,6 +540,21 @@ class InstallResources
                 ])->getContent();
                 if ($class) {
                     $import['o:resource_class']['o:id'] = $class->id();
+                }
+            }
+        }
+
+        foreach (['o:title_property', 'o:description_property'] as $property) {
+            if (isset($import[$property])) {
+                if ($vocab = $getVocab($import[$property]['vocabulary_namespace_uri'])) {
+                    $import[$property]['vocabulary_prefix'] = $vocab->prefix();
+                    $prop = $api->searchOne('properties', [
+                        'vocabulary_namespace_uri' => $import[$property]['vocabulary_namespace_uri'],
+                        'local_name' => $import[$property]['local_name'],
+                    ])->getContent();
+                    if ($prop) {
+                        $import[$property]['o:id'] = $prop->id();
+                    }
                 }
             }
         }
@@ -517,8 +568,62 @@ class InstallResources
                 ])->getContent();
                 if ($prop) {
                     $import['o:resource_template_property'][$key]['o:property'] = ['o:id' => $prop->id()];
-                    if (in_array($import['o:resource_template_property'][$key]['data_type_name'], $dataTypes)) {
-                        $import['o:resource_template_property'][$key]['o:data_type'] = $import['o:resource_template_property'][$key]['data_type_name'];
+                    // Check the deprecated "data_type_name" if needed and
+                    // normalize it.
+                    if (!array_key_exists('data_types', $import['o:resource_template_property'][$key])) {
+                        if (!empty($import['o:resource_template_property'][$key]['data_type_name'])
+                            && !empty($import['o:resource_template_property'][$key]['data_type_label'])
+                        ) {
+                            $import['o:resource_template_property'][$key]['data_types'] = [[
+                                'name' => $import['o:resource_template_property'][$key]['data_type_name'],
+                                'label' => $import['o:resource_template_property'][$key]['data_type_label'],
+                            ]];
+                        } else {
+                            $import['o:resource_template_property'][$key]['data_types'] = [];
+                        }
+                    }
+                    unset($import['o:resource_template_property'][$key]['data_type_name']);
+                    unset($import['o:resource_template_property'][$key]['data_type_label']);
+                    $import['o:resource_template_property'][$key]['data_types'] = $getDataTypesByName($import['o:resource_template_property'][$key]['data_types']);
+                    // Prepare the list of standard data types.
+                    $import['o:resource_template_property'][$key]['o:data_type'] = [];
+                    foreach ($import['o:resource_template_property'][$key]['data_types'] as $name => $dataTypeNameLabel) {
+                        $known = $getKnownDataType($dataTypeNameLabel);
+                        if ($known) {
+                            $import['o:resource_template_property'][$key]['o:data_type'][] = $known;
+                            $import['o:resource_template_property'][$key]['data_types'][$name]['name'] = $known;
+                        }
+                    }
+                    $import['o:resource_template_property'][$key]['o:data_type'] = array_unique($import['o:resource_template_property'][$key]['o:data_type']);
+                    // Prepare the list of standard data types for duplicated
+                    // properties (only one most of the time, that is the main).
+                    $import['o:resource_template_property'][$key]['o:data'] = array_values($import['o:resource_template_property'][$key]['o:data']);
+                    $import['o:resource_template_property'][$key]['o:data'][0]['data_types'] = $import['o:resource_template_property'][$key]['data_types'];
+                    $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'];
+                    $first = true;
+                    foreach ($import['o:resource_template_property'][$key]['o:data'] as $k => $rtpData) {
+                        if ($first) {
+                            $first = false;
+                            // Specific to the installer.
+                            unset($import['o:resource_template_property'][$key]['o:data'][$k]['data_types']);
+                            continue;
+                        }
+                        // Prepare the list of standard data types if any.
+                        $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'] = [];
+                        if (empty($rtpData['data_types'])) {
+                            continue;
+                        }
+                        $import['o:resource_template_property'][$key]['o:data'][$k]['data_types'] = $getDataTypesByName($import['o:resource_template_property'][$key]['o:data'][$k]['data_types']);
+                        foreach ($import['o:resource_template_property'][$key]['o:data'][$k]['data_types'] as $name => $dataTypeNameLabel) {
+                            $known = $getKnownDataType($dataTypeNameLabel);
+                            if ($known) {
+                                $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'][] = $known;
+                                $import['o:resource_template_property'][$key]['o:data'][$k]['data_types'][$name]['name'] = $known;
+                            }
+                        }
+                        $import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type'] = array_unique($import['o:resource_template_property'][$key]['o:data'][$k]['o:data_type']);
+                        // Specific to the installer.
+                        unset($import['o:resource_template_property'][$key]['o:data'][$k]['data_types']);
                     }
                 }
             }
@@ -532,20 +637,18 @@ class InstallResources
      *
      * @param string $filepath
      * @throws \Omeka\Api\Exception\RuntimeException
+     * @return \CustomVocab\Api\Representation\CustomVocabRepresentation
      */
-    public function updateCustomVocab($filepath)
+    public function updateCustomVocab(string $filepath): \CustomVocab\Api\Representation\CustomVocabRepresentation
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
         $data = json_decode(file_get_contents($filepath), true);
 
         $label = $data['o:label'];
         try {
-            $customVocab = $api
-                ->read('custom_vocabs', ['label' => $label])->getContent();
+            $customVocab = $this->api->read('custom_vocabs', ['label' => $label])->getContent();
         } catch (NotFoundException $e) {
             throw new RuntimeException(
-                new Message(
+                (string) new Message(
                     'The custom vocab named "%s" is not available.', // @translate
                     $label
                 )
@@ -554,69 +657,63 @@ class InstallResources
 
         $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
         $terms = array_merge($terms, $data['o:terms']);
-        $api->update('custom_vocabs', $customVocab->id(), [
+        $this->api->update('custom_vocabs', $customVocab->id(), [
             'o:label' => $label,
             'o:terms' => implode(PHP_EOL, $terms),
         ], [], ['isPartial' => true]);
+
+        return $customVocab;
     }
 
     /**
      * Remove a vocabulary by its prefix.
      *
      * @param string $prefix
+     * @return self
      */
-    public function removeVocabulary($prefix)
+    public function removeVocabulary(string $prefix): self
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
         // The vocabulary may have been removed manually before.
         try {
-            $resource = $api->read('vocabularies', ['prefix' => $prefix])->getContent();
-            $api->delete('vocabularies', $resource->id())->getContent();
+            $resource = $this->api->read('vocabularies', ['prefix' => $prefix])->getContent();
+            $this->api->delete('vocabularies', $resource->id());
         } catch (NotFoundException $e) {
         }
+        return $this;
     }
 
     /**
      * Remove a resource template by its label.
      *
      * @param string $label
+     * @return self
      */
-    public function removeResourceTemplate($label)
+    public function removeResourceTemplate(string $label): self
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
         // The resource template may be renamed or removed manually before.
         try {
-            $resource = $api->read('resource_templates', ['label' => $label])->getContent();
-            $api->delete('resource_templates', $resource->id())->getContent();
+            $resource = $this->api->read('resource_templates', ['label' => $label])->getContent();
+            $this->api->delete('resource_templates', $resource->id());
         } catch (NotFoundException $e) {
         }
+        return $this;
     }
 
     /**
      * Remove a custom vocab by its label.
      *
      * @param string $label
+     * @return self
      */
-    public function removeCustomVocab($label)
+    public function removeCustomVocab(string $label): self
     {
-        $services = $this->getServiceLocator();
-        $api = $services->get('Omeka\ApiManager');
         // The custom vocab may be renamed or removed manually before.
         try {
-            $resource = $api->read('custom_vocabs', ['label' => $label])->getContent();
-            $api->delete('custom_vocabs', $resource->id())->getContent();
+            $resource = $this->api->read('custom_vocabs', ['label' => $label])->getContent();
+            $this->api->delete('custom_vocabs', $resource->id());
         } catch (NotFoundException $e) {
         }
-    }
-
-    /**
-     * @return \Laminas\ServiceManager\ServiceLocatorInterface
-     */
-    public function getServiceLocator()
-    {
-        return $this->services;
+        return $this;
     }
 
     /**
@@ -628,7 +725,7 @@ class InstallResources
      * @param array $extensions
      * @return array
      */
-    protected function listFilesInDir($dirpath, array $extensions = [])
+    protected function listFilesInDir($dirpath, iterable $extensions = []): array
     {
         if (empty($dirpath) || !file_exists($dirpath) || !is_dir($dirpath) || !is_readable($dirpath)) {
             return [];
