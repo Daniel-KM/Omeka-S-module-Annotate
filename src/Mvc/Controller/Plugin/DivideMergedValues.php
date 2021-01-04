@@ -252,7 +252,7 @@ class DivideMergedValues extends AbstractPlugin
      */
     protected function isHtml($string)
     {
-        return $string != strip_tags($string);
+        return $string != strip_tags((string) $string);
     }
 
     /**
@@ -268,7 +268,7 @@ class DivideMergedValues extends AbstractPlugin
      */
     protected function determineMediaType($string)
     {
-        $string = trim($string);
+        $string = trim((string) $string);
         if (strlen($string) == 0) {
             return;
         }

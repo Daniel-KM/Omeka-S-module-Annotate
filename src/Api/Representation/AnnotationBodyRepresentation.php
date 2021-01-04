@@ -26,7 +26,7 @@ class AnnotationBodyRepresentation extends AbstractValueResourceEntityRepresenta
         ]);
 
         if ($title !== null) {
-            return (string) strip_tags($title);
+            return strip_tags((string) $title);
         }
 
         // TODO Add a specific title from the metadata of the body (motivation)?

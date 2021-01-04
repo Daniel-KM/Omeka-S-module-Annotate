@@ -82,7 +82,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             'sort_order' => null,
         ];
         $query += $defaultQuery;
-        $query['sort_order'] = strtoupper($query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
+        $query['sort_order'] = strtoupper((string) $query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
 
         // Begin building the search query.
         $entityClass = $this->getEntityClass();
@@ -401,7 +401,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $expr = $qb->expr();
 
         $escape = function ($string) {
-            return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $string);
+            return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $string);
         };
 
         foreach ($query['property'] as $queryRow) {
@@ -417,7 +417,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $joiner = $queryRow['joiner'] ?? null;
             $value = $queryRow['text'] ?? null;
 
-            if (!mb_strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
+            $value = $value;
+            if (!mb_strlen((string) $value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
             }
 
@@ -465,7 +466,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $positive = false;
                     // no break.
                 case 'list':
-                    $list = is_array($value) ? $value : explode("\n", $value);
+                    $list = is_array($value) ? $value : explode("\n", (string) $value);
                     $list = array_filter(array_map('trim', $list), 'strlen');
                     if (empty($list)) {
                         continue 2;

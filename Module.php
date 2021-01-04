@@ -75,7 +75,7 @@ class Module extends AbstractModule
                 $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
                 'Generic', '3.0.20'
             );
-            throw new \Omeka\Module\Exception\ModuleCannotInstallException($message);
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
 
         parent::install($services);
@@ -713,13 +713,10 @@ class Module extends AbstractModule
         /** @var \Omeka\Api\Adapter\ResourceTemplateAdapter $adapter */
         $adapter = $event->getTarget();
 
-        $isOldOmeka = \Omeka\Module::VERSION < 2;
-        $resourceTemplateAlias = $isOldOmeka ? $adapter->getEntityClass() : 'omeka_root';
-
         $expr = $qb->expr();
         $resourceClassAlias = $adapter->createAlias();
         $qb->innerJoin(
-            $resourceTemplateAlias . '.resourceClass',
+            'omeka_root.resourceClass',
             $resourceClassAlias
         );
         $vocabularyAlias = $adapter->createAlias();

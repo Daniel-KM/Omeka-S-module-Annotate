@@ -32,7 +32,7 @@ class AnnotationMapping extends AbstractResourceMapping
         $data = &$this->data;
 
         if (isset($this->map['resourceType'][$index])) {
-            $resourceType = reset($values);
+            $resourceType = (string) reset($values);
             // Add some heuristic to avoid common issues.
             $resourceType = str_replace([' ', '_'], '', strtolower($resourceType));
             $resourceTypes = [
