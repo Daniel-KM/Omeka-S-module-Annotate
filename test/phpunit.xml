@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/6.3/phpunit.xsd"
+    backupGlobals="false"
+    bootstrap="./bootstrap.php"
+    colors="true"
+    verbose="false"
+>
+    <testsuites>
+        <testsuite name="Annotate">
+            <directory>./AnnotateTest</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <server name="HTTP_HOST" value="phpunit"/>
+        <server name="HTTP_USER_AGENT" value="phpunit"/>
+        <server name="REMOTE_ADDR" value="127.0.0.1"/>
+        <server name="REQUEST_URI" value="/index"/>
+        <server name="SERVER_NAME" value="phpunit"/>
+    </php>
+</phpunit>

@@ -1,10 +1,13 @@
 <?php declare(strict_types=1);
 
-require dirname(__DIR__) . '/vendor/autoload.php';
+$genericDir = file_exists(dirname(__DIR__, 2) . '/Generic/ModuleTester.php')
+    ? dirname(__DIR__, 2)
+    : __DIR__;
+require_once $genericDir . '/Generic/TesterTrait.php';
+require_once $genericDir . '/Generic/ModuleTester.php';
 
-use OmekaTestHelper\Bootstrap;
+$moduleName = basename(dirname(__DIR__));
+$tester = new \Generic\ModuleTester($moduleName);
+$tester->initModule();
 
-Bootstrap::bootstrap(__DIR__);
-Bootstrap::loginAsAdmin();
-Bootstrap::enableModule('CustomVocab');
-Bootstrap::enableModule('Annotate');
+file_put_contents('php://stdout', sprintf("%s: Running tests…\n\n", $moduleName));
