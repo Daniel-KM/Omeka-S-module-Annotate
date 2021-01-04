@@ -729,11 +729,23 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     /**
      * Normalize an annotation request (move properties in bodies and targets).
      *
+     * So, move:
+     * - oa:hasSource[] into oa:hasTarget[][oa:hasSource][]
+     * - dcterms:format[] into oa:hasTarget[][dcterms:format][]
+     * - oa:hasPurpose[] into oa:hasBody[]oa:hasPurpose[]
+     * - oa:styleClass for cartography
+     * - rdf:value for multiple target or one body
+     *
+     * When there are multiple sources, the key is used.
+     *
      * This process is required as long as the standard Omeka resource methods
-     * are used. Anyway, this is not a full implementation, but a quick tool for
-     * common tasks (cartography, folksonomy, commenting, rating, quiz…).
+     * are used and the default form, that is not multi-level.
+     * Anyway, this is not a full implementation, but a quick tool for common
+     * tasks (cartography, folksonomy, commenting, rating, quiz…).
      * Some heuristic is needed for the value "rdf:value", according to
      * motivation/purpose, type and format.
+     *
+     * @deprecated Since 3.3.3.6. The form or source must send well formed annotations (no move, only basic default completion).
      *
      * @param Request $request
      * @param EntityInterface $entity
@@ -761,80 +773,99 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             return;
         }
 
-        $mainValue = null;
-        $mainValueIsTarget = false;
+        $mainValueIsTargets = [];
 
-        //  Targets (single).
+        // Targets (single or multiple).
 
-        if (isset($data['oa:hasSource'])) {
-            // The source should be a resource.
-            $value = reset($data['oa:hasSource']);
-            if ($value['type'] !== 'resource') {
-                // TODO Check if the resource id exists. If not, keep value.
-                // $resource = $api->searchOne('resources', ['id' => $value['@value']])->getContent();
-                // if ($resource) {
-                $value['type'] = 'resource';
-                $value['value_resource_id'] = $value['@value'];
-                unset($value['@language']);
-                unset($value['@value']);
-                // }
-            }
-            $data['oa:hasTarget'][0]['oa:hasSource'][] = $value;
-            unset($data['oa:hasSource']);
+        // Normally, an annotation has only one target and a target has only one
+        // source. An annotation with multiple targets has not an intuitive
+        // meaning: it means that the bodies apply independantly on each target.
+        // @see https://www.w3.org/TR/annotation-model/#sets-of-bodies-and-targets
+
+        // Anyway, multiple targets are created here, with one source by target.
+        // No check is done on the type of the source, so it is possible to
+        // create annotation from an external party.
+        $data['oa:hasTarget'] = [];
+        foreach ($data['oa:hasSource'] ?? [] as $value) {
+            $data['oa:hasTarget'][] = [
+                'oa:hasSource' => [$value],
+            ];
         }
+        unset($data['oa:hasSource']);
 
-        if (isset($data['dcterms:format'])) {
-            $value = reset($data['dcterms:format']);
-            $value = $value['@value'];
-            switch ($value) {
+        // FIXME Manage cartography in module Cartography.
+        $index = 0;
+        foreach ($data['dcterms:format'] ?? [] as $key => $value) {
+            $valueValue = $value['@value'];
+            switch ($valueValue) {
                 case 'application/wkt':
-                    $data['oa:hasTarget'][0]['rdf:type'][] = [
+                    $data['oa:hasTarget'][$index]['rdf:type'][] = [
                         'property_id' => $this->propertyId('rdf:type'),
                         'type' => 'customvocab:' . $this->customVocabId('Annotation Target rdf:type'),
                         '@value' => 'oa:Selector',
                     ];
-                    $data['oa:hasTarget'][0]['dcterms:format'] = $data['dcterms:format'];
-                    $data['oa:hasTarget'][0]['dcterms:format'][0]['@language'] = null;
-                    unset($data['dcterms:format']);
-                    $mainValueIsTarget = true;
+                    $value['@language'] = null;
+                    $data['oa:hasTarget'][$index]['dcterms:format'][] = $value;
+                    unset($data['dcterms:format'][$key]);
+                    $mainValueIsTargets[$key] = $index;
+                    ++$index;
                     break;
             }
         }
+        if (empty($data['dcterms:format'])) {
+            unset($data['dcterms:format']);
+        }
 
-        if (isset($data['oa:styleClass'])) {
-            $data['oa:hasTarget'][0]['oa:styleClass'] = $data['oa:styleClass'];
+        foreach ($data['oa:styleClass'] ?? [] as $key => $value) {
+            if (isset($mainValueIsTargets[$key])) {
+                $value['@language'] = null;
+                $data['oa:hasTarget'][$mainValueIsTargets[$key]]['oa:styleClass'][] = $value;
+                unset($data['oa:styleClass'][$key]);
+            }
+        }
+        if (empty($data['oa:styleClass'])) {
             unset($data['oa:styleClass']);
         }
 
-        if ($mainValueIsTarget) {
-            $mainValue = reset($data['rdf:value']);
-            $mainValue = $mainValue['@value'];
-            $data['oa:hasTarget'][0]['rdf:value'] = $data['rdf:value'];
-            $data['oa:hasTarget'][0]['rdf:value'][0]['@language'] = null;
+        foreach ($data['rdf:value'] ?? [] as $key => $value) {
+            // A rdf value can be a target or a body in the old process.
+            if (isset($mainValueIsTargets[$key])) {
+                $value['@language'] = null;
+                $data['oa:hasTarget'][$mainValueIsTargets[$key]]['rdf:value'][] = $value;
+                unset($data['rdf:value'][$key]);
+            }
+        }
+        if (empty($data['rdf:value'])) {
             unset($data['rdf:value']);
         }
 
         // Bodies (single).
 
-        if (isset($data['oa:hasPurpose'])) {
+        if (!empty($data['oa:hasPurpose'])) {
             $data['oa:hasBody'][0]['oa:hasPurpose'] = $data['oa:hasPurpose'];
-            unset($data['oa:hasPurpose']);
         }
+        unset($data['oa:hasPurpose']);
 
-        if (!$mainValueIsTarget && isset($data['rdf:value'])) {
-            $mainValue = reset($data['rdf:value']);
-            $mainValue = $mainValue['@value'];
-            $data['oa:hasBody'][0]['rdf:value'] = $data['rdf:value'];
-            unset($data['rdf:value']);
-
-            $format = $this->isHtml($data['oa:hasBody'][0]['rdf:value']) ? 'text/html' : null;
-            if ($format) {
-                $data['oa:hasBody'][0]['dcterms:format'][] = [
-                    'property_id' => $this->propertyId('dcterms:format'),
-                    'type' => 'customvocab:' . $this->customVocabId('Annotation Body dcterms:format'),
-                    '@value' => $format,
-                ];
+        $index = 0;
+        foreach ($data['rdf:value'] ?? [] as $key => $value) {
+            // A rdf value can be a target or a body in the old process.
+            // In the case of a body, there is only one body.
+            if (!isset($mainValueIsTargets[$key])) {
+                $value['@language'] = null;
+                $data['oa:hasBody'][0]['rdf:value'][] = $value;
+                unset($data['rdf:value'][$key]);
+                $format = $this->isHtml($value['@value'] ?? '') ? 'text/html' : null;
+                if ($format) {
+                    $data['oa:hasBody'][0]['dcterms:format'][] = [
+                        'property_id' => $this->propertyId('dcterms:format'),
+                        'type' => 'customvocab:' . $this->customVocabId('Annotation Body dcterms:format'),
+                        '@value' => $format,
+                    ];
+                }
             }
+        }
+        if (empty($data['rdf:value'])) {
+            unset($data['rdf:value']);
         }
 
         $request->setContent($data);
@@ -974,11 +1005,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
     /**
      * Detect if a string is html or not.
-     *
-     * @see \Annotate\Api\Representation\AnnotationRepresentation::isHtml()
      */
     protected function isHtml($string): bool
     {
-        return $string != strip_tags((string) $string);
+        return (string) $string !== strip_tags((string) $string);
     }
 }
