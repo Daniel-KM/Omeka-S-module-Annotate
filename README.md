@@ -32,7 +32,7 @@ does not contain the dependency), and uncompress it in the `modules` directory.
 If the module was installed from the source, rename the name of the folder of
 the module to `Annotate`, go to the root of the module, and run:
 
-```
+```sh
 composer install --no-dev
 ```
 
@@ -77,21 +77,34 @@ Development
 - Internally, targets and bodies are managed like Omeka resources, but they
   aren’t rdf classes.
 - In the json-ld of the resources, the key `oa:Annotation` is deprecated and
-  will removed in a future release. Use the key `o:annotation`.
+  has been removed since version 3.3.3.6. Use the key `o:annotation`.
+
+### Api endpoint
+
+You can create annotations in a standard way on the api. To simplify process, it
+is possible to skip some keys in the payload, for example:
+
+```sh
+curl -X POST -H 'Accept: application/json' -i 'https://example.org/api/annotations?key_identity=xxx&key_credential=yyy&pretty_print=1' -F 'data={"oa:motivatedBy":[{"@value":"commenting"}],"oa:hasBody":[{"rdf:value":[{"@value":"My comment"}]}],"oa:hasTarget":[{"oa:hasSource":[{"value_resource_id":1}]}]}'
+```
+
+This shortcut is available only when there is one and only one motivation and
+only for "commenting" for now.
 
 
 TODO
 ----
 
-- Improve the core or the custom vocab module to keep "literal" as value type
+- [ ] Improve the core or the custom vocab module to keep "literal" as value type
   (new column in value table or new one to one table?) (cf https://github.com/omeka/omeka-s/pull/1262).
-- Does the annotation need to be in the same json of the item? An item doesn't
+- [ ] Does the annotation need to be in the same json of the item? An item doesn't
   know annotations about itself, they are independant, so to be removed.
-- Check the validity of multiple contexts omeka + annotation inside jsonld of
+- [ ] Check the validity of multiple contexts omeka + annotation inside jsonld of
   annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
-- Targets and bodies should not have rest api access (they are created with the
+- [ ] Targets and bodies should not have rest api access (they are created with the
   annotation). Upgrade them like value hydrator.
-- Make compatible with module Group (user page).
+- [ ] Make compatible with module Group (user page).
+- [ ] Remove dependency with CustomVocab.
 
 
 Warning
@@ -144,12 +157,12 @@ of the CeCILL license and that you accept its terms.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2017-2018 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2017-2021 (see [Daniel-KM] on GitLab)
 
 * Library [webui-popover]: Sandy Walker
 
 This module was built first for the French École des hautes études en sciences
-sociales [EHESS].
+sociales [EHESS]. It was upgraded and improved for [Enssib].
 
 
 [Annotate]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate
@@ -168,5 +181,6 @@ sociales [EHESS].
 [MIT]: https://github.com/sandywalker/webui-popover/blob/master/LICENSE.txt
 [webui-popover]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr
+[Enssib]: https://www.enssib.fr
 [GitLab]: https://gitlab.com/Daniel-KM
 [Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
