@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
@@ -111,6 +112,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 // allows to manage derivated queries easily.
                 'omeka_root'
             );
+        $this->buildBaseQuery($qb, $query);
         $this->buildQuery($qb, $query);
         // The group is done on the annotation, not the id, so only annotations
         // are returned.
@@ -135,23 +137,28 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $countQb->select('1')->resetDQLPart('orderBy');
         $countPaginator = new Paginator($countQb, false);
 
-        // Finish building the search query. In addition to any sorting the
-        // adapters add, always sort by entity ID.
+        // Add the ORDER BY clause. Always sort by entity ID in addition to any
+        // sorting the adapters add.
         $this->sortQuery($qb, $query);
         $qb->addOrderBy('omeka_root.annotation', $query['sort_order']);
 
         $scalarField = $request->getOption('returnScalar');
         if ($scalarField) {
-            $fieldNames = $this->getEntityManager()->getClassMetadata($entityClass)->getFieldNames();
+            $classMetadata = $this->getEntityManager()->getClassMetadata($entityClass);
+            $fieldNames = $classMetadata->getFieldNames();
             if (!in_array($scalarField, $fieldNames)) {
-                throw new Exception\BadRequestException(sprintf(
-                    $this->getTranslator()->translate('The "%s" field is not available in the %s entity class.'),
-                    $scalarField,
-                    $entityClass
-                ));
+                $associationNames = $classMetadata->getAssociationNames();
+                if (!in_array($scalarField, $associationNames)) {
+                    throw new Exception\BadRequestException(sprintf(
+                        $this->getTranslator()->translate('The "%1$s" field is not available in the %2$s entity class.'),
+                        $scalarField, $entityClass
+                    ));
+                }
+                $qb->select(['omeka_root.id', "IDENTITY(omeka_root.$scalarField) AS $scalarField"]);
+            } else {
+                $qb->select(['omeka_root.id', 'omeka_root.' . $scalarField]);
             }
-            $qb->select('omeka_root.' . $scalarField);
-            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField);
+            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField, 'id');
             $response = new Response($content);
             $response->setTotalResults(count($content));
             return $response;
@@ -175,28 +182,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $response = new Response($entities);
         $response->setTotalResults($countPaginator->count());
         return $response;
-    }
-
-    /**
-     * Set sort_by and sort_order conditions to the query builder.
-     *
-     * Note about random sorting: There is no random query in doctrine and no
-     * standard query in the sql standard, because it is too hard to implement
-     * efficiently. So this order should be used only for small bases.
-     *
-     * @param QueryBuilder $qb
-     * @param array $query
-     */
-    public function sortQuery(QueryBuilder $qb, array $query): void
-    {
-        if (isset($query['sort_by']) && is_string($query['sort_by'])) {
-            if (array_key_exists($query['sort_by'], $this->sortFields)) {
-                $sortBy = $this->sortFields[$query['sort_by']];
-                $qb->addOrderBy('omeka_root.' . $sortBy, $query['sort_order']);
-            } elseif ($query['sort_by'] === 'random') {
-                $qb->orderBy('RAND()');
-            }
-        }
     }
 
     /**
@@ -271,6 +256,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // TODO Make the limit to a site working for item sets and media too.
         if (!empty($query['site_id'])) {
             try {
+                // FIXME Upgrade for item sites.
                 // See \Omeka\Api\Adapter\ItemAdapter::buildQuery().
                 $siteAdapter = $this->getAdapter('sites');
                 $site = $siteAdapter->findEntity($query['site_id']);

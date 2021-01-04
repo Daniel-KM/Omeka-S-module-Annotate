@@ -95,13 +95,8 @@ class AnnotationTargetHydrator extends AbstractResourceEntityAdapter
     {
         parent::buildQuery($qb, $query);
 
-        // TODO Check for Omeka 3.
-        if (isset($query['id'])) {
-            $qb->andWhere($qb->expr()->eq('Annotate\Entity\AnnotationTarget.id', $query['id']));
-        }
-
         if (isset($query['annotation_id'])) {
-            $qb->andWhere($qb->expr()->eq('Annotate\Entity\AnnotationTarget.annotation', $query['annotation_id']));
+            $qb->andWhere($qb->expr()->eq('omeka_root.annotation', $query['annotation_id']));
         }
     }
 }
