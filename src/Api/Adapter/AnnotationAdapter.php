@@ -574,8 +574,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             if (is_numeric($query['resource_class'])) {
                 $resourceClass = (int) $query['resource_class'];
             } else {
-                $resourceClass = $this->getResourceClassByTerm($query['resource_class']);
-                $resourceClass = $resourceClass ? $resourceClass->getId() : 0;
+                $resourceClass = $this->resourceClassId($query['resource_class']);
             }
             $resourceClassAlias = $this->createAlias();
             $qb->innerJoin(
@@ -753,6 +752,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         if (isset($data['oa:hasTarget'])
             || isset($data['oa:hasBody'])
         ) {
+            $this->completeRequest($request, $entity, $errorStore);
             return;
         }
 
@@ -840,58 +840,145 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $request->setContent($data);
     }
 
-    protected function propertyId($term)
-    {
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        $result = $api->searchOne('properties', ['term' => $term])->getContent();
-        return $result ? $result->id() : null;
+    /**
+     * To simplify sub-modules or third-party clients, the annotations can be
+     * created simpler.
+     *
+     * Currently, the fields that are checked are adapted to a comment:
+     * - oa:motivatedBy: when it contains only one value, it is a simple
+     *   annotation.
+     * - oa:hasBody for each each rdf:value,
+     * - oa:hasTarget for each each rdf:hasSource,
+     *
+     * @param \Omeka\Api\Request $request
+     * @param \Omeka\Entity\EntityInterface $entity
+     * @param \Omeka\Stdlib\ErrorStore $errorStore
+     */
+    protected function completeRequest(
+        Request $request,
+        EntityInterface $entity,
+        ErrorStore $errorStore
+    ): void {
+        $data = $request->getContent();
+
+        $mapSimples = [
+            'commenting',
+        ];
+
+        $isSimple = !empty($data['oa:motivatedBy'])
+            && count($data['oa:motivatedBy']) === 1
+            && count($data['oa:motivatedBy'][0]) === 1
+            && !empty($data['oa:motivatedBy'][0]['@value'])
+            && in_array($data['oa:motivatedBy'][0]['@value'], $mapSimples)
+            && !empty($data['oa:hasBody'][0]['rdf:value'])
+            && !empty($data['oa:hasTarget'][0]['oa:hasSource'])
+        ;
+        if (!$isSimple) {
+            return;
+        }
+
+        $resourceTemplateId = $this->resourceTemplateId('Annotation');
+        $resourceClassId =  $this->resourceClassId('oa:Annotation');
+        $data['o:resource_template'] = $resourceTemplateId ? ['o:id' => $resourceTemplateId] : null;
+        $data['o:resource_class'] = $resourceClassId ? ['o:id' => $resourceClassId] : null;
+
+        $customVocabMotivatedById = $this->customVocabId('Annotation oa:motivatedBy');
+        $customVocabHasPurposeId = $this->customVocabId('Annotation Body oa:hasPurpose');
+        $oaMotivatedById = $this->propertyId('oa:motivatedBy');
+        $oaHasPurposeId = $this->propertyId('oa:hasPurpose');
+        $oaHasSourceId = $this->propertyId('oa:hasSource');
+        $rdfValueId = $this->propertyId('rdf:value');
+
+        switch ($data['oa:motivatedBy'][0]['@value']) {
+            case 'commenting':
+                $data['oa:motivatedBy'] = [[
+                    '@value' => 'commenting',
+                    'property_id' => $oaMotivatedById,
+                    'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
+                    // No language, no visibility.
+                ]];
+                foreach ($data['oa:hasBody'] as &$hasBody) {
+                    foreach ($hasBody['rdf:value'] as &$value) {
+                        $value = [
+                            '@value' => $value['@value'],
+                            'property_id' => $rdfValueId,
+                            'type' => 'literal',
+                            // No language, no visibility.
+                        ];
+                    }
+                    unset($value);
+                    // At least one purpose.
+                    $hasBody['oa:hasPurpose'] = [[
+                        '@value' => 'commenting',
+                        'property_id' => $oaHasPurposeId,
+                        'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
+                        // No language, no visibility.
+                    ]];
+                }
+                foreach ($data['oa:hasTarget'] as &$hasTarget) {
+                    foreach ($hasTarget['oa:hasSource'] as &$value) {
+                        $resource = $this->getEntityManager()->getRepository(\Omeka\Entity\Resource::class)->find($value['value_resource_id']);
+                        if (!$resource) {
+                            continue;
+                        }
+                        $value = [
+                            'value_resource_id' => $value['value_resource_id'],
+                            'property_id' => $oaHasSourceId,
+                            'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
+                            // No language, no visibility.
+                        ];
+                    }
+                    unset($value);
+                    // No subpart.
+                    unset($hasTarget['rdf:type']);
+                    unset($hasTarget['rdf:value']);
+                }
+                break;
+            default:
+                break;
+        }
+
+        $request->setContent($data);
     }
 
-    protected function customVocabId($label)
+    protected function propertyId($term): ?int
     {
         $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        $result = $api->read('custom_vocabs', ['label' => $label])->getContent();
-        return $result ? $result->id() : null;
+        $result = $api->searchOne('properties', ['term' => $term], ['initialize' => false, 'finalize' => false])->getContent();
+        return $result ? $result->getId() : null;
+    }
+
+    protected function resourceClassId($term): ?int
+    {
+        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
+        $result = $api->searchOne('resource_classes', ['term' => $term], ['initialize' => false, 'finalize' => false])->getContent();
+        return $result ? $result->getId() : null;
+    }
+
+    protected function resourceTemplateId($label): ?int
+    {
+        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
+        $result = $api->searchOne('resource_templates', ['label' => $label], ['initialize' => false, 'finalize' => false])->getContent();
+        return $result ? $result->getId() : null;
+    }
+
+    protected function customVocabId($label): ?int
+    {
+        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
+        try {
+            return $api->read('custom_vocabs', ['label' => $label], [], ['responseContent' => 'resource'])->getContent()->getId();
+        } catch (Exception $e) {
+            return null;
+        }
     }
 
     /**
      * Detect if a string is html or not.
      *
      * @see \Annotate\Api\Representation\AnnotationRepresentation::isHtml()
-     *
-     * @param string $string
-     * @return bool
      */
-    protected function isHtml($string)
+    protected function isHtml($string): bool
     {
-        return $string != strip_tags($string);
-    }
-
-    /**
-     * Get a resource class entity by JSON-LD term.
-     *
-     * @param string $term
-     * @return \Omeka\Entity\ResourceClass
-     */
-    public function getResourceClassByTerm($term)
-    {
-        if (!$this->isTerm($term)) {
-            return null;
-        }
-        list($prefix, $localName) = explode(':', $term);
-        $dql = <<<DQL
-SELECT r
-FROM Omeka\Entity\ResourceClass r
-JOIN r.vocabulary v
-WHERE r.localName = :localName
-AND v.prefix = :prefix
-DQL;
-        return $this->getEntityManager()
-            ->createQuery($dql)
-            ->setParameters([
-                'localName' => $localName,
-                'prefix' => $prefix,
-            ])
-            ->getOneOrNullResult();
+        return $string != strip_tags((string) $string);
     }
 }
