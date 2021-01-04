@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Entity;
 
 use Omeka\Entity\Resource;
@@ -36,6 +37,7 @@ abstract class AnnotationPart extends Resource
      * @see Annotation::annotation.
      *
      * @var Annotation
+     *
      * @ManyToOne(
      *     targetEntity="Annotation",
      *     inversedBy="annotation"
@@ -49,6 +51,7 @@ abstract class AnnotationPart extends Resource
 
     /**
      * @var string
+     *
      * @Column(
      *     type="string",
      *     nullable=false,
@@ -57,18 +60,13 @@ abstract class AnnotationPart extends Resource
      */
     protected $part;
 
-    /**
-     * @param Annotation $annotation
-     */
-    public function setAnnotation(Annotation $annotation): void
+    public function setAnnotation(Annotation $annotation): \Annotate\Entity\AnnotationPart
     {
         $this->annotation = $annotation;
+        return $this;
     }
 
-    /**
-     * @return \Annotate\Entity\Annotation
-     */
-    public function getAnnotation()
+    public function getAnnotation(): ?\Annotate\Entity\Annotation
     {
         return $this->annotation;
     }
@@ -82,7 +80,7 @@ abstract class AnnotationPart extends Resource
      *
      * @return string
      */
-    public function getPart()
+    public function getPart(): string
     {
         return $this->part;
     }

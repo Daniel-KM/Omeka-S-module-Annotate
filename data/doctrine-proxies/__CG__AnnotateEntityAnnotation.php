@@ -12,14 +12,14 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
      *      three parameters, being respectively the proxy object to be initialized, the method that triggered the
      *      initialization process and an array of ordered parameters that were passed to that method.
      *
-     * @see \Doctrine\Common\Persistence\Proxy::__setInitializer
+     * @see \Doctrine\Common\Proxy\Proxy::__setInitializer
      */
     public $__initializer__;
 
     /**
      * @var \Closure the callback responsible of loading properties that need to be copied in the cloned object
      *
-     * @see \Doctrine\Common\Persistence\Proxy::__setCloner
+     * @see \Doctrine\Common\Proxy\Proxy::__setCloner
      */
     public $__cloner__;
 
@@ -31,20 +31,22 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     public $__isInitialized__ = false;
 
     /**
-     * @var array properties to be lazy loaded, with keys being the property
-     *            names and values being their default values
-     *
-     * @see \Doctrine\Common\Persistence\Proxy::__getLazyProperties
+     * @var array<string, null> properties to be lazy loaded, indexed by property name
      */
-    public static $lazyPropertiesDefaults = [];
-
-
+    public static $lazyPropertiesNames = array (
+);
 
     /**
-     * @param \Closure $initializer
-     * @param \Closure $cloner
+     * @var array<string, mixed> default values of properties to be lazy loaded, with keys being the property names
+     *
+     * @see \Doctrine\Common\Proxy\Proxy::__getLazyProperties
      */
-    public function __construct($initializer = null, $cloner = null)
+    public static $lazyPropertiesDefaults = array (
+);
+
+
+
+    public function __construct(?\Closure $initializer = null, ?\Closure $cloner = null)
     {
 
         $this->__initializer__ = $initializer;
@@ -64,10 +66,10 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     public function __sleep()
     {
         if ($this->__isInitialized__) {
-            return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'isPublic', 'created', 'modified', 'values'];
+            return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'title', 'isPublic', 'created', 'modified', 'values'];
         }
 
-        return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'isPublic', 'created', 'modified', 'values'];
+        return ['__isInitialized__', 'annotation', 'part', 'targets', 'bodies', 'id', 'owner', 'resourceClass', 'resourceTemplate', 'thumbnail', 'title', 'isPublic', 'created', 'modified', 'values'];
     }
 
     /**
@@ -82,7 +84,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
 
                 $existingProperties = get_object_vars($proxy);
 
-                foreach ($proxy->__getLazyProperties() as $property => $defaultValue) {
+                foreach ($proxy::$lazyPropertiesDefaults as $property => $defaultValue) {
                     if ( ! array_key_exists($property, $existingProperties)) {
                         $proxy->$property = $defaultValue;
                     }
@@ -165,6 +167,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      * @internal generated method: use only when explicitly handling proxy specific loading logic
+     * @deprecated no longer in use - generated code now relies on internal components rather than generated public API
      * @static
      */
     public function __getLazyProperties()
@@ -187,7 +190,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function getTargets()
+    public function getTargets(): ?\Doctrine\Common\Collections\Collection
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getTargets', []);
@@ -198,7 +201,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function getBodies()
+    public function getBodies(): ?\Doctrine\Common\Collections\Collection
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getBodies', []);
@@ -209,7 +212,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function setAnnotation(\Annotate\Entity\Annotation $annotation)
+    public function setAnnotation(\Annotate\Entity\Annotation $annotation): \Annotate\Entity\AnnotationPart
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'setAnnotation', [$annotation]);
@@ -220,7 +223,7 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function getAnnotation()
+    public function getAnnotation(): ?\Annotate\Entity\Annotation
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getAnnotation', []);
@@ -231,18 +234,18 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
     /**
      * {@inheritDoc}
      */
-    public function postPersist(\Doctrine\ORM\Event\LifecycleEventArgs $eventArgs)
+    public function postPersist(\Doctrine\ORM\Event\LifecycleEventArgs $eventArgs): void
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'postPersist', [$eventArgs]);
 
-        return parent::postPersist($eventArgs);
+        parent::postPersist($eventArgs);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getPart()
+    public function getPart(): string
     {
 
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getPart', []);
@@ -351,6 +354,28 @@ class Annotation extends \Annotate\Entity\Annotation implements \Doctrine\ORM\Pr
         $this->__initializer__ && $this->__initializer__->__invoke($this, 'getThumbnail', []);
 
         return parent::getThumbnail();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setTitle($title)
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'setTitle', [$title]);
+
+        return parent::setTitle($title);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getTitle()
+    {
+
+        $this->__initializer__ && $this->__initializer__->__invoke($this, 'getTitle', []);
+
+        return parent::getTitle();
     }
 
     /**

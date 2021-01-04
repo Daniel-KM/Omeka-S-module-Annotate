@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Entity;
 
 /**
@@ -8,6 +9,7 @@ class AnnotationTarget extends AnnotationPart
 {
     /**
      * @var Annotation
+     *
      * @ManyToOne(
      *     targetEntity="Annotation",
      *     inversedBy="annotationTarget"

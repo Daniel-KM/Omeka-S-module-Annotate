@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 /**
@@ -35,6 +37,7 @@ class Annotation extends AnnotationPart
 
     /**
      * @var AnnotationTarget[]
+     *
      * @OneToMany(
      *     targetEntity="AnnotationTarget",
      *     mappedBy="annotation",
@@ -48,6 +51,7 @@ class Annotation extends AnnotationPart
 
     /**
      * @var AnnotationBody[]
+     *
      * @OneToMany(
      *     targetEntity="AnnotationBody",
      *     mappedBy="annotation",
@@ -75,7 +79,7 @@ class Annotation extends AnnotationPart
     /**
      * @return \Annotate\Entity\AnnotationTarget[]
      */
-    public function getTargets()
+    public function getTargets(): ?Collection
     {
         return $this->targets;
     }
@@ -83,20 +87,27 @@ class Annotation extends AnnotationPart
     /**
      * @return \Annotate\Entity\AnnotationBody[]
      */
-    public function getBodies()
+    public function getBodies(): ?Collection
     {
         return $this->bodies;
     }
 
-    public function setAnnotation(Annotation $annotation): void
+    /**
+     * @return self, but this is AnnotationPart for inheritance issue.
+     *
+     * {@inheritDoc}
+     * @see \Annotate\Entity\AnnotationPart::setAnnotation()
+     */
+    public function setAnnotation(Annotation $annotation): \Annotate\Entity\AnnotationPart
     {
         // Don't set annotation: it must be the current one.
+        return $this;
     }
 
     /**
      * @return self
      */
-    public function getAnnotation()
+    public function getAnnotation(): ?\Annotate\Entity\Annotation
     {
         return $this;
     }
