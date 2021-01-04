@@ -3,7 +3,7 @@ namespace Annotate\Service\Form;
 
 use Interop\Container\ContainerInterface;
 use Annotate\Form\QuickSearchForm;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class QuickSearchFormFactory implements FactoryInterface
 {

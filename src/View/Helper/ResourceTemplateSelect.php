@@ -4,9 +4,9 @@
 namespace Annotate\View\Helper;
 
 use Annotate\Form\Element\ResourceTemplateSelect as Select;
-use Zend\Form\Factory;
-use Zend\View\Helper\AbstractHelper;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\Form\Factory;
+use Laminas\View\Helper\AbstractHelper;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 /**
  * View helper for rendering a select menu containing all resource templates.

@@ -4,8 +4,10 @@
 /language/debug.mo
 /language/chef.po
 /language/chef.mo
-node_modules
+/node_modules
 /vendor
+.sass-cache/
+.bundle
 .DS_Store
 .php_cs.cache
 composer.phar

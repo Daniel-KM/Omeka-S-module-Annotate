@@ -2,7 +2,7 @@
 namespace Annotate\Mvc\Controller\Plugin;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class IsAnnotable extends AbstractPlugin
 {

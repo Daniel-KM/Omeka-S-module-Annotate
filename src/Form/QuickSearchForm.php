@@ -3,11 +3,11 @@
 namespace Annotate\Form;
 
 use Omeka\Form\Element\ResourceSelect;
-use Zend\EventManager\Event;
-use Zend\EventManager\EventManagerAwareTrait;
-use Zend\Form\Element;
-use Zend\Form\Form;
-use Zend\View\Helper\Url;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\EventManagerAwareTrait;
+use Laminas\Form\Element;
+use Laminas\Form\Form;
+use Laminas\View\Helper\Url;
 
 class QuickSearchForm extends Form
 {
@@ -83,7 +83,7 @@ class QuickSearchForm extends Form
     }
 
     /**
-     * @return \Zend\View\Helper\Url
+     * @return \Laminas\View\Helper\Url
      */
     public function getUrlHelper()
     {

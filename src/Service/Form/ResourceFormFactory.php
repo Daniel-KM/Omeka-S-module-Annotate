@@ -2,7 +2,7 @@
 namespace Annotate\Service\Form;
 
 use Annotate\Form\ResourceForm;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
 
 class ResourceFormFactory implements FactoryInterface

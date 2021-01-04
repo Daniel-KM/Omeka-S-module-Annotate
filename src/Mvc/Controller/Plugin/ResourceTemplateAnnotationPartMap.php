@@ -2,7 +2,7 @@
 namespace Annotate\Mvc\Controller\Plugin;
 
 use Omeka\Mvc\Controller\Plugin\Settings;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class ResourceTemplateAnnotationPartMap extends AbstractPlugin
 {

@@ -3,7 +3,7 @@ namespace Annotate\Service\ControllerPlugin;
 
 use Annotate\Mvc\Controller\Plugin\DivideMergedValues;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class DivideMergedValuesFactory implements FactoryInterface
 {

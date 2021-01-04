@@ -3,7 +3,7 @@ namespace Annotate\View\Helper;
 
 use Annotate\Mvc\Controller\Plugin\ResourceAnnotations;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class Annotations extends AbstractHelper
 {

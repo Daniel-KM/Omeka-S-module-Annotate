@@ -12,8 +12,8 @@ use Omeka\File\Validator;
 // use Omeka\Media\Ingester\MutableIngesterInterface;
 use Omeka\Media\Ingester\IngesterInterface;
 use Omeka\Stdlib\ErrorStore;
-use Zend\ServiceManager\ServiceLocatorInterface as FormElementManager;
-use Zend\View\Renderer\PhpRenderer;
+use Laminas\ServiceManager\ServiceLocatorInterface as FormElementManager;
+use Laminas\View\Renderer\PhpRenderer;
 
 // class AnnotationBody implements MutableIngesterInterface
 class AnnotationBody implements IngesterInterface

@@ -2,7 +2,7 @@
 namespace Annotate\Mvc\Controller\Plugin;
 
 use Omeka\Mvc\Controller\Plugin\Api;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 /**
  * @deprecated Will be replaced by a new resource form, on the resource template base.

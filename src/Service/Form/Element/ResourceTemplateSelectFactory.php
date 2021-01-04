@@ -5,7 +5,7 @@ namespace Annotate\Service\Form\Element;
 
 use Annotate\Form\Element\ResourceTemplateSelect;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ResourceTemplateSelectFactory implements FactoryInterface
 {

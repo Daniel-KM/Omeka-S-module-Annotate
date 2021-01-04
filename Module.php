@@ -45,11 +45,11 @@ use Omeka\Api\Representation\ItemSetRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\UserRepresentation;
 use Omeka\Entity\AbstractEntity;
-use Zend\EventManager\Event;
-use Zend\EventManager\SharedEventManagerInterface;
-use Zend\Mvc\MvcEvent;
-use Zend\Permissions\Acl\Acl as ZendAcl;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Permissions\Acl\Acl as LaminasAcl;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class Module extends AbstractModule
 {
@@ -264,9 +264,9 @@ class Module extends AbstractModule
      *
      * @todo Add rights to update annotation (flag only).
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForVisitors(ZendAcl $acl)
+    protected function addRulesForVisitors(LaminasAcl $acl)
     {
         $acl
             ->allow(
@@ -289,9 +289,9 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for annotator visitors.
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForVisitorAnnotators(ZendAcl $acl)
+    protected function addRulesForVisitorAnnotators(LaminasAcl $acl)
     {
         $acl
             ->allow(
@@ -314,9 +314,9 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for annotator.
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForAnnotator(ZendAcl $acl)
+    protected function addRulesForAnnotator(LaminasAcl $acl)
     {
         // The annotator has less rights than Researcher for core resources, but
         // similar rights for annotations that Author has for core resources.
@@ -391,9 +391,9 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for annotators (not visitor).
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForAnnotators(ZendAcl $acl)
+    protected function addRulesForAnnotators(LaminasAcl $acl)
     {
         $annotators = [
             \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
@@ -431,9 +431,9 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for approbators.
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForApprobators(ZendAcl $acl)
+    protected function addRulesForApprobators(LaminasAcl $acl)
     {
         // Admin are approbators too, but rights are set below globally.
         $approbators = [
@@ -505,9 +505,9 @@ class Module extends AbstractModule
     /**
      * Add ACL rules for approbators.
      *
-     * @param ZendAcl $acl
+     * @param LaminasAcl $acl
      */
-    protected function addRulesForAdmins(ZendAcl $acl)
+    protected function addRulesForAdmins(LaminasAcl $acl)
     {
         $admins = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,

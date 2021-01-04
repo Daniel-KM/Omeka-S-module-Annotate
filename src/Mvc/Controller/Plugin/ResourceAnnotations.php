@@ -3,7 +3,7 @@ namespace Annotate\Mvc\Controller\Plugin;
 
 use Annotate\Api\Representation\AnnotationRepresentation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
-use Zend\Mvc\Controller\Plugin\AbstractPlugin;
+use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
 
 class ResourceAnnotations extends AbstractPlugin
 {

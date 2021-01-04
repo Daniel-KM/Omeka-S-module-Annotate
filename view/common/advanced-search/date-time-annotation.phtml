@@ -1,6 +1,6 @@
 <?php
 /**
- * @var \Zend\View\Renderer\PhpRenderer $this
+ * @var \Laminas\View\Renderer\PhpRenderer $this
  * @var array $query
  */
 
@@ -60,7 +60,7 @@ $queryInputText = function(array $search, $index) {
                 <?php echo $querySelectOption('or', $datetime, 'joiner', $translate('Or')); ?>
             </select>
             <?php
-            $select = (new \Zend\Form\Element\Select())
+            $select = (new \Laminas\Form\Element\Select())
                 ->setName($stem . '[field]')
                 ->setValueOptions([
                     'created' => 'Created', // @translate

@@ -4,7 +4,7 @@ namespace Annotate\View\Helper;
 use Annotate\Form\AnnotateForm;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Entity\Item;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class ShowAnnotateForm extends AbstractHelper
 {

@@ -3,7 +3,7 @@ namespace Annotate\Service\ViewHelper;
 
 use Annotate\View\Helper\ShowAnnotateForm;
 use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ShowAnnotateFormFactory implements FactoryInterface
 {

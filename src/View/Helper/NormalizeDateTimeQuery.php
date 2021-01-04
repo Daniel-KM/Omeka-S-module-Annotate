@@ -2,7 +2,7 @@
 namespace Annotate\View\Helper;
 
 use Doctrine\ORM\Query\Expr\Comparison;
-use Zend\View\Helper\AbstractHelper;
+use Laminas\View\Helper\AbstractHelper;
 
 class NormalizeDateTimeQuery extends AbstractHelper
 {

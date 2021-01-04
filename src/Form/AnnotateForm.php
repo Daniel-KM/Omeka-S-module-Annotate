@@ -2,8 +2,8 @@
 namespace Annotate\Form;
 
 use Omeka\View\Helper\Api;
-use Zend\Form\Element;
-use Zend\Form\Form;
+use Laminas\Form\Element;
+use Laminas\Form\Form;
 
 class AnnotateForm extends Form
 {

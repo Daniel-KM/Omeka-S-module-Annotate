@@ -13,7 +13,7 @@ use Omeka\Api\ResourceInterface;
 use Omeka\Api\Response;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
-use Zend\EventManager\Event;
+use Laminas\EventManager\Event;
 
 /**
  * The Annotation adapter use the body and the target hydrators.

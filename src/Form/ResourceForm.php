@@ -3,7 +3,7 @@ namespace Annotate\Form;
 
 use Annotate\Form\Element\ResourceTemplateSelect;
 use Omeka\View\Helper\Api;
-use Zend\Form\Element;
+use Laminas\Form\Element;
 
 class ResourceForm extends \Omeka\Form\ResourceForm
 {
