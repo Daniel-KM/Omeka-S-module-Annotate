@@ -95,6 +95,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
     {
         parent::buildQuery($qb, $query);
 
+        // TODO Check for Omeka 3.
         if (isset($query['id'])) {
             $qb->andWhere($qb->expr()->eq('Annotate\Entity\AnnotationBody.id', $query['id']));
         }

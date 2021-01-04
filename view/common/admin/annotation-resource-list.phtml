@@ -36,7 +36,7 @@ $this->headScript()
     <?php if (!$annotation->isPublic()): ?>
     <span class="o-icon-private" aria-label="Private"></span>
     <?php endif; ?>
-    <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true, 'default' => []]); ?>
+    <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true]); ?>
     <?php foreach ($motivatedByValues as $value): ?>
     <span class="oa-motivated-by">
         <?php echo $escape($value); ?>
@@ -91,8 +91,8 @@ $annotationBodies = $annotation->bodies();
     // not separated). Implies a string value only [w3c av 2.2.2], and the same
     // purposes, if any.
     /** @var \Omeka\Api\Representation\ValueRepresentation[] $bodyValues */
-    $bodyValues = $annotation->value('oa:bodyValue', ['type' => 'literal', 'all' => true, 'default' => []]);
-    $hasPurposeValues = $annotation->value('oa:hasPurpose', ['all' => true, 'default' => []]);
+    $bodyValues = $annotation->value('oa:bodyValue', ['type' => 'literal', 'all' => true]);
+    $hasPurposeValues = $annotation->value('oa:hasPurpose', ['all' => true]);
     $hasPurposeHtml = '';
     foreach ($hasPurposeValues as $value):
         $hasPurposeHtml .= '<span class="oa-has-purpose">' . $escape($value) . '</span>';
@@ -113,7 +113,7 @@ $annotationBodies = $annotation->bodies();
     <tr class="annotation-body">
         <td class="webui-popover-parent">
             <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
-            <?php $values = $annotationBody->value('rdf:value', ['all' => true, 'default' => []]); ?>
+            <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
@@ -142,7 +142,7 @@ $annotationBodies = $annotation->bodies();
             <?php endforeach;?>
         </td>
         <td>
-            <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true, 'default' => []]); ?>
+            <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="oa-has-purpose">
                 <?php echo $escape($value); ?>
@@ -186,7 +186,7 @@ $annotationTargets = $annotation->targets();
 // Check if there are data to display too (there is at least one target, but may be just the source).
 $hasTargetData = false;
 foreach ($annotationTargets as $annotationTarget) {
-    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => '']) || $annotationTarget->value('rdf:type', ['all' => true, 'default' => []])) {
+    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => '']) || $annotationTarget->value('rdf:type', ['all' => true])) {
         $hasTargetData = true;
         break;
     }
@@ -205,7 +205,7 @@ foreach ($annotationTargets as $annotationTarget) {
     <?php foreach ($annotationTargets as $annotationTarget): ?>
     <tr class="annotation-target">
         <td class="webui-popover-parent">
-            <?php $values = $annotationTarget->value('rdf:value', ['all' => true, 'default' => []]); ?>
+            <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
@@ -234,7 +234,7 @@ foreach ($annotationTargets as $annotationTarget) {
             <?php endforeach; ?>
         </td>
         <td>
-            <?php $values = $annotationTarget->value('rdf:type', ['all' => true, 'default' => []]); ?>
+            <?php $values = $annotationTarget->value('rdf:type', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="rdf-type">
                 <?php echo $escape($value); ?>

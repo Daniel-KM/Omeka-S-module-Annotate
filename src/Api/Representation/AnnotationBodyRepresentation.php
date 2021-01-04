@@ -21,9 +21,7 @@ class AnnotationBodyRepresentation extends AbstractValueResourceEntityRepresenta
     public function displayTitle($default = null)
     {
         // TODO Check if this is a textual value or not before setting the title.
-        $title = $this->value('rdf:value', [
-            'default' => null,
-        ]);
+        $title = $this->value('rdf:value', ['default' => null]);
 
         if ($title !== null) {
             return strip_tags((string) $title);

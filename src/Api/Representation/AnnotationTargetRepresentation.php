@@ -237,6 +237,6 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
         // TODO Manage other resource types.
         return array_map(function ($v) {
             return $v->valueResource();
-        }, $this->value('oa:hasSource', ['type' => 'resource', 'all' => true, 'default' => []]));
+        }, $this->value('oa:hasSource', ['type' => ['resource', 'resource:item', 'resource:media', 'resource:itemset', 'resource:annotation'], 'all' => true]));
     }
 }

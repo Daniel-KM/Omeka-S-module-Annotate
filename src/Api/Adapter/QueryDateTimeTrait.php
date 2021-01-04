@@ -46,11 +46,6 @@ trait QueryDateTimeTrait
             return;
         }
 
-        $resourceClass = $this->getEntityClass();
-
-        $isOldOmeka = \Omeka\Module::VERSION < 2;
-        $alias = $isOldOmeka ? $resourceClass : 'omeka_root';
-
         $where = '';
         $expr = $qb->expr();
 
@@ -76,14 +71,14 @@ trait QueryDateTimeTrait
                         $value = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->gt($alias . '.' . $field, $param);
+                    $predicateExpr = $expr->gt('omeka_root.' . $field, $param);
                     break;
                 case Comparison::GTE:
                     if (mb_strlen($value) < 19) {
                         $value = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->gte($alias . '.' . $field, $param);
+                    $predicateExpr = $expr->gte('omeka_root.' . $field, $param);
                     break;
                 case Comparison::EQ:
                     if (mb_strlen($value) < 19) {
@@ -91,10 +86,10 @@ trait QueryDateTimeTrait
                         $valueTo = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
-                        $predicateExpr = $expr->between($alias . '.' . $field, $paramFrom, $paramTo);
+                        $predicateExpr = $expr->between('omeka_root.' . $field, $paramFrom, $paramTo);
                     } else {
                         $param = $this->createNamedParameter($qb, $value);
-                        $predicateExpr = $expr->eq($alias . '.' . $field, $param);
+                        $predicateExpr = $expr->eq('omeka_root.' . $field, $param);
                     }
                     break;
                 case Comparison::NEQ:
@@ -104,11 +99,11 @@ trait QueryDateTimeTrait
                         $paramFrom = $this->createNamedParameter($qb, $valueFrom);
                         $paramTo = $this->createNamedParameter($qb, $valueTo);
                         $predicateExpr = $expr->not(
-                            $expr->between($alias . '.' . $field, $paramFrom, $paramTo)
+                            $expr->between('omeka_root.' . $field, $paramFrom, $paramTo)
                             );
                     } else {
                         $param = $this->createNamedParameter($qb, $value);
-                        $predicateExpr = $expr->neq($alias . '.' . $field, $param);
+                        $predicateExpr = $expr->neq('omeka_root.' . $field, $param);
                     }
                     break;
                 case Comparison::LTE:
@@ -116,20 +111,20 @@ trait QueryDateTimeTrait
                         $value = substr_replace('9999-12-31 23:59:59', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->lte($alias . '.' . $field, $param);
+                    $predicateExpr = $expr->lte('omeka_root.' . $field, $param);
                     break;
                 case Comparison::LT:
                     if (mb_strlen($value) < 19) {
                         $value = substr_replace('0000-01-01 00:00:00', $value, 0, mb_strlen($value) - 19);
                     }
                     $param = $this->createNamedParameter($qb, $value);
-                    $predicateExpr = $expr->lt($alias . '.' . $field, $param);
+                    $predicateExpr = $expr->lt('omeka_root.' . $field, $param);
                     break;
                 case 'ex':
-                    $predicateExpr = $expr->isNotNull($alias . '.' . $field);
+                    $predicateExpr = $expr->isNotNull('omeka_root.' . $field);
                     break;
                 case 'nex':
-                    $predicateExpr = $expr->isNull($alias . '.' . $field);
+                    $predicateExpr = $expr->isNull('omeka_root.' . $field);
                     break;
                 default:
                     continue 2;
