@@ -354,27 +354,28 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * Similar than parent method with more query types.
      *
      * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildPropertyQuery()
+     * @see \AdvancedSearchPlus\Module::buildPropertyQuery()
      *
      * Query format:
      *
-     *   - property[{index}][joiner]: "and" OR "or" joiner with previous query
-     *   - property[{index}][property]: property ID
-     *   - property[{index}][text]: search text
-     *   - property[{index}][type]: search type
-     *     - eq: is exactly
-     *     - neq: is not exactly
-     *     - in: contains
-     *     - nin: does not contain
-     *     - ex: has any value
-     *     - nex: has no value
-     *     - list: is in list
-     *     - nlist: is not in list
-     *     - sw: starts with
-     *     - nsw: does not start with
-     *     - ew: ends with
-     *     - new: does not end with
-     *     - res: has resource
-     *     - nres: has no resource
+     * - property[{index}][joiner]: "and" OR "or" joiner with previous query
+     * - property[{index}][property]: property ID
+     * - property[{index}][text]: search text
+     * - property[{index}][type]: search type
+     *   - eq: is exactly (core)
+     *   - neq: is not exactly (core)
+     *   - in: contains (core)
+     *   - nin: does not contain (core)
+     *   - ex: has any value (core)
+     *   - nex: has no value (core)
+     *   - list: is in list
+     *   - nlist: is not in list
+     *   - sw: starts with
+     *   - nsw: does not start with
+     *   - ew: ends with
+     *   - new: does not end with
+     *   - res: has resource
+     *   - nres: has no resource
      *
      * @param QueryBuilder $qb
      * @param array $query
@@ -387,7 +388,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         $valuesJoin = 'omeka_root.values';
         $where = '';
-        // @see \Doctrine\ORM\QueryBuilder::expr().
         $expr = $qb->expr();
 
         $escape = function ($string) {
@@ -404,11 +404,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
             $propertyId = $queryRow['property'];
             $queryType = $queryRow['type'];
-            $joiner = $queryRow['joiner'] ?? null;
-            $value = $queryRow['text'] ?? null;
+            $joiner = $queryRow['joiner'] ?? '';
+            $value = $queryRow['text'] ?? '';
 
-            $value = $value;
-            if (!mb_strlen((string) $value) && $queryType !== 'nex' && $queryType !== 'ex') {
+            if (!strlen((string) $value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
             }
 
@@ -456,8 +455,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $positive = false;
                     // no break.
                 case 'list':
-                    $list = is_array($value) ? $value : explode("\n", (string) $value);
-                    $list = array_filter(array_map('trim', $list), 'strlen');
+                    $list = is_array($value) ? $value : explode("\n", $value);
+                    $list = array_filter(array_map('trim', array_map('strval', $list)), 'strlen');
                     if (empty($list)) {
                         continue 2;
                     }

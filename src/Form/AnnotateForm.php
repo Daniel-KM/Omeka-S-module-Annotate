@@ -20,9 +20,11 @@ class AnnotateForm extends Form
 
         $api = $this->api;
 
-        $resourceTemplateId = $api->read('resource_templates', ['label' => 'Annotation'])->getContent()->id();
+        $resourceTemplate = $api->searchOne('resource_templates', ['label' => 'Annotation'])->getContent();
+        $resourceTemplateId = $resourceTemplate ? $resourceTemplate->id() : null;
         $vocabulary = $api->read('vocabularies', ['prefix' => 'oa'])->getContent();
-        $resourceClassId = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Annotation'])->getContent()->id();
+        $resourceClass = $api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Annotation'])->getContent();
+        $resourceClassId =  $resourceClass ? $resourceClass->id() : null;
         $this->add([
             'type' => Element\Hidden::class,
             'name' => 'o:resource_template[o:id]',
