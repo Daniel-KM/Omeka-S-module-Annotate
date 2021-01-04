@@ -9,7 +9,7 @@
 $translate = $this->plugin('translate');
 
 // Prepare the resource template query.
-$ids = isset($query['resource_template_id']) ? $query['resource_template_id'] : [];
+$ids = $query['resource_template_id'] ?? [];
 if (!is_array($ids)) {
     $ids = [$ids];
 }
@@ -38,7 +38,7 @@ if (!$ids) {
                 ],
                 'attributes' => [
                     'value' => $id,
-                    'aria-labelledby' =>  'by-resource-template-label'
+                    'aria-labelledby' => 'by-resource-template-label',
                 ],
             ]); ?>
             <button type="button" class="o-icon-delete remove-value button"><?php echo $translate('Remove value'); ?></button>

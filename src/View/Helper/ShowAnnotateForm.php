@@ -1,10 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\View\Helper;
 
 use Annotate\Form\AnnotateForm;
+use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Entity\Item;
-use Laminas\View\Helper\AbstractHelper;
 
 class ShowAnnotateForm extends AbstractHelper
 {

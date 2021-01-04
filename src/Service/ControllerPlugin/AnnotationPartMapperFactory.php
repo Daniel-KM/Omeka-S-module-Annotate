@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Service\ControllerPlugin;
 
 use Annotate\Mvc\Controller\Plugin\AnnotationPartMapper;
@@ -10,7 +10,7 @@ class AnnotationPartMapperFactory implements FactoryInterface
     public function __invoke(ContainerInterface $services, $requestedName, array $options = null)
     {
         $filepath = '/data/mappings/properties_to_annotation_parts.php';
-        $map = require dirname(dirname(dirname(__DIR__))) . $filepath;
+        $map = require dirname(__DIR__, 3) . $filepath;
         return new AnnotationPartMapper(
             $map
         );

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\View\Helper;
 
 use Doctrine\ORM\Query\Expr\Comparison;
@@ -52,9 +52,8 @@ class NormalizeDateTimeQuery extends AbstractHelper
                 $operator = Comparison::EQ;
             } else {
                 $operator = trim($matches[0]);
-                $operator = isset($operators[$operator])
-                    ? $operators[$operator]
-                    : Comparison::EQ;
+                $operator = $operators[$operator]
+                    ?? Comparison::EQ;
                 $value = mb_substr($value, mb_strlen($matches[0]));
             }
             $value = trim($value);

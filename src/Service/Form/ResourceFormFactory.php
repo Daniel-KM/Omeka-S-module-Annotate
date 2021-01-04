@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Service\Form;
 
 use Annotate\Form\ResourceForm;
-use Laminas\ServiceManager\Factory\FactoryInterface;
 use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ResourceFormFactory implements FactoryInterface
 {

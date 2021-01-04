@@ -18,7 +18,7 @@ $datetimes = array_filter($datetimes, function ($v) {
 // Allows to display one empty field.
 if (empty($datetimes)) $datetimes = [[]];
 
-$querySelectOption = function($value, array $search, $key, $text) {
+$querySelectOption = function ($value, array $search, $key, $text) {
     $selected = null;
     if (isset($search[$key]) && $value === $search[$key]) {
         $selected = ' selected';
@@ -27,8 +27,8 @@ $querySelectOption = function($value, array $search, $key, $text) {
 };
 
 // TODO Use a widget or a validator (but allow partial date/time: year only, date only, etc.).
-$queryInputText = function(array $search, $index) {
-    $value = isset($search['value']) ? $search['value'] : null;
+$queryInputText = function (array $search, $index) {
+    $value = $search['value'] ?? null;
     $translate = $this->plugin('translate');
     $escape = $this->plugin('escapeHtml');
     return sprintf('<input type="text" class="query-datetime query-text" name="%s" value="%s" aria-label="%s" placeholder="2017-11-07 17:21:17">',
@@ -68,7 +68,7 @@ $queryInputText = function(array $search, $index) {
                 ])
                 ->setAttributes([
                     'class' => 'query-datetime',
-                    'value' => isset($datetime['field']) ? $datetime['field'] : null,
+                    'value' => $datetime['field'] ?? null,
                     'aria-label' => $translate('Creation or modification date / time'),
                 ]);
             echo $this->formSelect($select);

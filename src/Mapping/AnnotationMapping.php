@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Mapping;
 
 use CSVImport\Mapping\AbstractResourceMapping;
@@ -9,7 +9,7 @@ class AnnotationMapping extends AbstractResourceMapping
     protected $label = 'Annotation data'; // @translate
     protected $resourceType = 'annotations';
 
-    protected function processGlobalArgs()
+    protected function processGlobalArgs(): void
     {
         parent::processGlobalArgs();
 
@@ -23,7 +23,7 @@ class AnnotationMapping extends AbstractResourceMapping
         }
     }
 
-    protected function processCell($index, array $values)
+    protected function processCell($index, array $values): void
     {
         parent::processCell($index, $values);
         $this->processCellAnnotation($index, $values);
@@ -48,7 +48,7 @@ class AnnotationMapping extends AbstractResourceMapping
         }
     }
 
-    protected function processCellAnnotation($index, array $values)
+    protected function processCellAnnotation($index, array $values): void
     {
         $data = &$this->data;
 

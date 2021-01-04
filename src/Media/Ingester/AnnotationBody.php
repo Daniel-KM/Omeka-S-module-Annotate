@@ -1,19 +1,19 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Media\Ingester;
 
 // use Annotate\Form\AnnotationBodyForm;
 use Annotate\Form\AnnotateForm as AnnotationBodyForm;
+use Laminas\ServiceManager\ServiceLocatorInterface as FormElementManager;
+use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Request;
 use Omeka\Entity\Media;
 use Omeka\Entity\User;
 use Omeka\File\Downloader;
+// use Omeka\Media\Ingester\MutableIngesterInterface;
 use Omeka\File\Uploader;
 use Omeka\File\Validator;
-// use Omeka\Media\Ingester\MutableIngesterInterface;
 use Omeka\Media\Ingester\IngesterInterface;
 use Omeka\Stdlib\ErrorStore;
-use Laminas\ServiceManager\ServiceLocatorInterface as FormElementManager;
-use Laminas\View\Renderer\PhpRenderer;
 
 // class AnnotationBody implements MutableIngesterInterface
 class AnnotationBody implements IngesterInterface
@@ -77,7 +77,7 @@ class AnnotationBody implements IngesterInterface
     //     return $this->getForm($view, $options);
     // }
 
-    public function ingest(Media $media, Request $request, ErrorStore $errorStore)
+    public function ingest(Media $media, Request $request, ErrorStore $errorStore): void
     {
         // All data are standard properties, so nothing to do.
     }
@@ -95,16 +95,14 @@ class AnnotationBody implements IngesterInterface
     {
         $data = $options;
 
-        $data['o:media[__index__][rdf:value][0][@value]'] = isset($options['rdf:value'][0]['@value']) ? $options['rdf:value'][0]['@value'] : '';
-        $data['o:media[__index__][oa:hasPurpose][0][@value]'] = isset($options['oa:hasPurpose'][0]['@value']) ? $options['oa:hasPurpose'][0]['@value'] : '';
-        $data['o:media[__index__][dcterms:format][0][@value]'] = isset($options['dcterms:format'][0]['@value']) ? $options['dcterms:format'][0]['@value'] : '';
+        $data['o:media[__index__][rdf:value][0][@value]'] = $options['rdf:value'][0]['@value'] ?? '';
+        $data['o:media[__index__][oa:hasPurpose][0][@value]'] = $options['oa:hasPurpose'][0]['@value'] ?? '';
+        $data['o:media[__index__][dcterms:format][0][@value]'] = $options['dcterms:format'][0]['@value'] ?? '';
 
-        $data['o:media[__index__][dcterms:creator][0][@value]'] = isset($options['dcterms:creator'][0]['@value'])
-            ? $options['dcterms:creator'][0]['@value']
-            : $this->user->getEmail();
-        $data['o:media[__index__][dcterms:created][0][@value]'] = isset($options['dcterms:created'][0]['@value'])
-            ? $options['dcterms:created'][0]['@value']
-            : gmdate("Y-m-d\TH:i:s\Z");
+        $data['o:media[__index__][dcterms:creator][0][@value]'] = $options['dcterms:creator'][0]['@value']
+            ?? $this->user->getEmail();
+        $data['o:media[__index__][dcterms:created][0][@value]'] = $options['dcterms:created'][0]['@value']
+            ?? gmdate("Y-m-d\TH:i:s\Z");
 
         $form = $this->formElementManager->get(AnnotationBodyForm::class);
         $form->setData($data);

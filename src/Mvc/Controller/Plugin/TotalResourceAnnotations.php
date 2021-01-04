@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Mvc\Controller\Plugin;
 
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class TotalResourceAnnotations extends AbstractPlugin
 {

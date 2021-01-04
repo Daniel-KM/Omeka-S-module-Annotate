@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Controller\Site;
 
 use Laminas\Mvc\Controller\AbstractActionController;

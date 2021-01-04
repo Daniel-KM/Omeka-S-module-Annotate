@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Api\Representation;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -167,7 +167,7 @@ abstract class AbstractValueResourceEntityRepresentation extends AbstractResourc
         return null;
     }
 
-    public function embeddedJsonLd()
+    public function embeddedJsonLd(): void
     {
     }
 }

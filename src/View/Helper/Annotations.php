@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\View\Helper;
 
 use Annotate\Mvc\Controller\Plugin\ResourceAnnotations;
-use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Laminas\View\Helper\AbstractHelper;
+use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class Annotations extends AbstractHelper
 {

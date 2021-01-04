@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Api\Representation;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -113,9 +113,8 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'item_sets' => 'o:ItemSet',
             'media' => 'o:Media',
         ];
-        return isset($mapResourceTypes[$type])
-            ? $mapResourceTypes[$type]
-            : null;
+        return $mapResourceTypes[$type]
+            ?? null;
     }
 
     /**

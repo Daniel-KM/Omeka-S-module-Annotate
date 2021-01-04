@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Media\Renderer;
 
+use Laminas\View\Renderer\PhpRenderer;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Media\Renderer\RendererInterface;
-use Laminas\View\Renderer\PhpRenderer;
 
 class AnnotationBody implements RendererInterface
 {

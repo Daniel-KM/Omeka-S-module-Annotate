@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * Copyright Daniel Berthereau, 2017-2019
@@ -38,6 +38,11 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 use Annotate\Entity\Annotation;
 use Annotate\Permissions\Acl;
 use Generic\AbstractModule;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\Mvc\MvcEvent;
+use Laminas\Permissions\Acl\Acl as LaminasAcl;
+use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -45,11 +50,6 @@ use Omeka\Api\Representation\ItemSetRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\UserRepresentation;
 use Omeka\Entity\AbstractEntity;
-use Laminas\EventManager\Event;
-use Laminas\EventManager\SharedEventManagerInterface;
-use Laminas\Mvc\MvcEvent;
-use Laminas\Permissions\Acl\Acl as LaminasAcl;
-use Laminas\ServiceManager\ServiceLocatorInterface;
 
 class Module extends AbstractModule
 {
@@ -57,7 +57,7 @@ class Module extends AbstractModule
 
     protected $dependency = 'CustomVocab';
 
-    public function onBootstrap(MvcEvent $event)
+    public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
         // TODO Add filters (don't display when resource is private, like media?).
@@ -66,7 +66,7 @@ class Module extends AbstractModule
         $this->addAclRoleAndRules();
     }
 
-    public function install(ServiceLocatorInterface $services)
+    public function install(ServiceLocatorInterface $services): void
     {
         $module = $services->get('Omeka\ModuleManager')->getModule('Generic');
         if ($module && version_compare($module->getIni('version'), '3.0.20', '<')) {
@@ -81,7 +81,7 @@ class Module extends AbstractModule
         parent::install($services);
     }
 
-    protected function postInstall()
+    protected function postInstall(): void
     {
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
@@ -119,7 +119,7 @@ class Module extends AbstractModule
         $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
+    public function uninstall(ServiceLocatorInterface $serviceLocator): void
     {
         $this->setServiceLocator($serviceLocator);
         $services = $serviceLocator;
@@ -159,7 +159,7 @@ class Module extends AbstractModule
         parent::uninstall($serviceLocator);
     }
 
-    public function warnUninstall(Event $event)
+    public function warnUninstall(Event $event): void
     {
         $view = $event->getTarget();
         $module = $view->vars()->module;
@@ -222,7 +222,7 @@ class Module extends AbstractModule
      *
      * @todo Keep rights for Annotation only (body and  target are internal classes).
      */
-    protected function addAclRoleAndRules()
+    protected function addAclRoleAndRules(): void
     {
         /** @var \Omeka\Permissions\Acl $acl */
         $services = $this->getServiceLocator();
@@ -266,7 +266,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForVisitors(LaminasAcl $acl)
+    protected function addRulesForVisitors(LaminasAcl $acl): void
     {
         $acl
             ->allow(
@@ -291,7 +291,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForVisitorAnnotators(LaminasAcl $acl)
+    protected function addRulesForVisitorAnnotators(LaminasAcl $acl): void
     {
         $acl
             ->allow(
@@ -316,7 +316,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForAnnotator(LaminasAcl $acl)
+    protected function addRulesForAnnotator(LaminasAcl $acl): void
     {
         // The annotator has less rights than Researcher for core resources, but
         // similar rights for annotations that Author has for core resources.
@@ -393,7 +393,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForAnnotators(LaminasAcl $acl)
+    protected function addRulesForAnnotators(LaminasAcl $acl): void
     {
         $annotators = [
             \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
@@ -433,7 +433,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForApprobators(LaminasAcl $acl)
+    protected function addRulesForApprobators(LaminasAcl $acl): void
     {
         // Admin are approbators too, but rights are set below globally.
         $approbators = [
@@ -507,7 +507,7 @@ class Module extends AbstractModule
      *
      * @param LaminasAcl $acl
      */
-    protected function addRulesForAdmins(LaminasAcl $acl)
+    protected function addRulesForAdmins(LaminasAcl $acl): void
     {
         $admins = [
             \Omeka\Permissions\Acl::ROLE_GLOBAL_ADMIN,
@@ -525,7 +525,7 @@ class Module extends AbstractModule
             );
     }
 
-    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
         // Add the Open Annotation part to the representation.
         $representations = [
@@ -671,7 +671,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function filterJsonLd(Event $event)
+    public function filterJsonLd(Event $event): void
     {
         if (!$this->userCanRead()) {
             return;
@@ -699,7 +699,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function searchQueryResourceTemplate(Event $event)
+    public function searchQueryResourceTemplate(Event $event): void
     {
         $query = $event->getParam('request')->getContent();
         if (empty($query['resource_class'])) {
@@ -748,10 +748,10 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function displayAdvancedSearchAnnotation(Event $event)
+    public function displayAdvancedSearchAnnotation(Event $event): void
     {
         $query = $event->getParam('query', []);
-        $query['datetime'] = isset($query['datetime']) ? $query['datetime'] : '';
+        $query['datetime'] = $query['datetime'] ?? '';
         $partials = $event->getParam('partials', []);
 
         // Remove the resource class field, since it is always "oa:Annotation".
@@ -782,7 +782,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function filterSearchFiltersAnnotation(Event $event)
+    public function filterSearchFiltersAnnotation(Event $event): void
     {
         $query = $event->getParam('query', []);
         $view = $event->getTarget();
@@ -862,7 +862,7 @@ class Module extends AbstractModule
         $event->setParam('filters', $filters);
     }
 
-    public function handleResourceTemplateCreateOrUpdatePost(Event $event)
+    public function handleResourceTemplateCreateOrUpdatePost(Event $event): void
     {
         // TODO Allow to require a value for body or target via the template.
 
@@ -876,7 +876,7 @@ class Module extends AbstractModule
 
         $result = [];
         $requestContent = $request->getContent();
-        $requestResourceProperties = isset($requestContent['o:resource_template_property']) ? $requestContent['o:resource_template_property'] : [];
+        $requestResourceProperties = $requestContent['o:resource_template_property'] ?? [];
         foreach ($requestResourceProperties as $propertyId => $requestResourceProperty) {
             if (!isset($requestResourceProperty['data']['annotation_part'])) {
                 continue;
@@ -898,7 +898,7 @@ class Module extends AbstractModule
         $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
-    public function handleResourceTemplateDeletePost(Event $event)
+    public function handleResourceTemplateDeletePost(Event $event): void
     {
         // The acl are already checked via the api.
         $id = $event->getParam('request')->getId();
@@ -909,7 +909,7 @@ class Module extends AbstractModule
         $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
-    public function addCsvImportFormElements(Event $event)
+    public function addCsvImportFormElements(Event $event): void
     {
         /** @var \CSVImport\Form\MappingForm $form */
         $form = $event->getTarget();
@@ -938,7 +938,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function addHeadersAdmin(Event $event)
+    public function addHeadersAdmin(Event $event): void
     {
         // Hacked, because the admin layout doesn't use a partial or a trigger
         // for the search engine.
@@ -960,7 +960,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function addTab(Event $event)
+    public function addTab(Event $event): void
     {
         $sectionNav = $event->getParam('section_nav');
         $sectionNav['annotate'] = 'Annotations'; // @translate
@@ -972,7 +972,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function displayListAndForm(Event $event)
+    public function displayListAndForm(Event $event): void
     {
         $resource = $event->getTarget()->resource;
         $acl = $this->getServiceLocator()->get('Omeka\Acl');
@@ -991,7 +991,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function displayList(Event $event)
+    public function displayList(Event $event): void
     {
         echo '<div id="annotate" class="section annotate">';
         $vars = $event->getTarget()->vars();
@@ -1017,7 +1017,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function viewDetails(Event $event)
+    public function viewDetails(Event $event): void
     {
         $representation = $event->getParam('entity');
         // TODO Use a paginator to limit and display all annotations dynamically in the details view (using api).
@@ -1029,7 +1029,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function displayForm(Event $event)
+    public function displayForm(Event $event): void
     {
         $view = $event->getTarget();
         /** @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource */
@@ -1077,7 +1077,7 @@ class Module extends AbstractModule
      *
      * @param Event $event
      */
-    public function displayPublic(Event $event)
+    public function displayPublic(Event $event): void
     {
         $serviceLocator = $this->getServiceLocator();
         $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
@@ -1108,7 +1108,7 @@ class Module extends AbstractModule
         AbstractResourceEntityRepresentation $resource,
         $listAsDiv = false,
         array $query = []
-    ) {
+    ): void {
         $services = $this->getServiceLocator();
         $controllerPlugins = $services->get('ControllerPluginManager');
         $resourceAnnotationsPlugin = $controllerPlugins->get('resourceAnnotations');

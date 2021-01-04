@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 // TODO Remove this copy of Omeka core used for compatibily with Omeka < 1.2.1.
 
 namespace Annotate\Service\ViewHelper;

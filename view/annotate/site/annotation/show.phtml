@@ -36,7 +36,7 @@ $this->htmlElement('body')->appendAttribute('class', 'annotations show');
             <?php $i = 0; ?>
             <?php foreach ($bodies as $body): ?>
                 <div class="value annotation-body">#<?php echo ++$i; ?></div>
-                <?php if ( $body->resourceClass()): ?>
+                <?php if ($body->resourceClass()): ?>
                     <div class="meta-group">
                         <h4><?php echo $translate('Class'); ?></h4>
                         <div class="value"><?php echo $escape($translate($body->resourceClass()->label())); ?></div>
@@ -58,7 +58,7 @@ $this->htmlElement('body')->appendAttribute('class', 'annotations show');
             <?php $i = 0; ?>
             <?php foreach ($targets as $target): ?>
                 <div class="value annotation-target">#<?php echo ++$i; ?></div>
-                <?php if ( $target->resourceClass()): ?>
+                <?php if ($target->resourceClass()): ?>
                     <div class="meta-group">
                         <h4><?php echo $translate('Class'); ?></h4>
                         <div class="value"><?php echo $escape($translate($target->resourceClass()->label())); ?></div>

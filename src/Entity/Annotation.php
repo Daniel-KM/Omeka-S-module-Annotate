@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
@@ -88,7 +88,7 @@ class Annotation extends AnnotationPart
         return $this->bodies;
     }
 
-    public function setAnnotation(Annotation $annotation)
+    public function setAnnotation(Annotation $annotation): void
     {
         // Don't set annotation: it must be the current one.
     }
@@ -104,7 +104,7 @@ class Annotation extends AnnotationPart
     /**
      * @PostPersist
      */
-    public function postPersist(LifecycleEventArgs $eventArgs)
+    public function postPersist(LifecycleEventArgs $eventArgs): void
     {
         // Nothing to do, since $this->annotation is already $this.
         // The post persist just needs to be triggered, so the auto-generated id

@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Api\Adapter;
 
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Query\Expr\Comparison;
+use Doctrine\ORM\QueryBuilder;
 
 /**
  * This trait must be used inside an adapter, because there are calls to the
@@ -39,7 +39,7 @@ trait QueryDateTimeTrait
      * @param QueryBuilder $qb
      * @param array $query
      */
-    public function searchDateTime(QueryBuilder $qb, array $query)
+    public function searchDateTime(QueryBuilder $qb, array $query): void
     {
         $query = $this->normalizeQueryDateTime($query);
         if (empty($query['datetime'])) {

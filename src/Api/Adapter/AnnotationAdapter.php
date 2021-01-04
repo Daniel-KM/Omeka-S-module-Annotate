@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
@@ -6,6 +6,7 @@ use Annotate\Entity\AnnotationTarget;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Laminas\EventManager\Event;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Exception;
 use Omeka\Api\Request;
@@ -13,7 +14,6 @@ use Omeka\Api\ResourceInterface;
 use Omeka\Api\Response;
 use Omeka\Entity\EntityInterface;
 use Omeka\Stdlib\ErrorStore;
-use Laminas\EventManager\Event;
 
 /**
  * The Annotation adapter use the body and the target hydrators.
@@ -190,7 +190,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * @param QueryBuilder $qb
      * @param array $query
      */
-    public function sortQuery(QueryBuilder $qb, array $query)
+    public function sortQuery(QueryBuilder $qb, array $query): void
     {
         if (isset($query['sort_by']) && is_string($query['sort_by'])) {
             if (array_key_exists($query['sort_by'], $this->sortFields)) {
@@ -210,7 +210,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * {@inheritDoc}
      * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildQuery()
      */
-    public function buildQuery(QueryBuilder $qb, array $query)
+    public function buildQuery(QueryBuilder $qb, array $query): void
     {
         $isOldOmeka = \Omeka\Module::VERSION < 2;
         $alias = $isOldOmeka ? $this->getEntityClass() : 'omeka_root';
@@ -414,8 +414,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
             $propertyId = $queryRow['property'];
             $queryType = $queryRow['type'];
-            $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
-            $value = isset($queryRow['text']) ? $queryRow['text'] : null;
+            $joiner = $queryRow['joiner'] ?? null;
+            $value = $queryRow['text'] ?? null;
 
             if (!mb_strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
@@ -590,7 +590,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * @param QueryBuilder $qb
      * @param array $query
      */
-    protected function buildPropertyQueryOld(QueryBuilder $qb, array $query)
+    protected function buildPropertyQueryOld(QueryBuilder $qb, array $query): void
     {
         $valuesJoin = $this->getEntityClass() . '.values';
         $where = '';
@@ -611,8 +611,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
             $propertyId = $queryRow['property'];
             $queryType = $queryRow['type'];
-            $joiner = isset($queryRow['joiner']) ? $queryRow['joiner'] : null;
-            $value = isset($queryRow['text']) ? $queryRow['text'] : null;
+            $joiner = $queryRow['joiner'] ?? null;
+            $value = $queryRow['text'] ?? null;
 
             if (!mb_strlen($value) && $queryType !== 'nex' && $queryType !== 'ex') {
                 continue;
@@ -752,7 +752,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * @param QueryBuilder $qb
      * @param array $query
      */
-    public function buildResourceClassQuery(QueryBuilder $qb, array $query)
+    public function buildResourceClassQuery(QueryBuilder $qb, array $query): void
     {
         if (isset($query['resource_class'])) {
             $isOldOmeka = \Omeka\Module::VERSION < 2;
@@ -783,7 +783,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         Request $request,
         EntityInterface $entity,
         ErrorStore $errorStore
-    ) {
+    ): void {
         $this->normalizeRequest($request, $entity, $errorStore);
 
         // Skip the bodies and the targets that are hydrated separately below.
@@ -896,7 +896,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
     }
 
-    public function validateRequest(Request $request, ErrorStore $errorStore)
+    public function validateRequest(Request $request, ErrorStore $errorStore): void
     {
         $data = $request->getContent();
 
@@ -932,7 +932,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         Request $request,
         EntityInterface $entity,
         ErrorStore $errorStore
-    ) {
+    ): void {
         $data = $request->getContent();
 
         // TODO Remove any language, since data model require to use a property.

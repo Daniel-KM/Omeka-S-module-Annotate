@@ -1,13 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Annotate\Form;
 
-use Omeka\Form\Element\ResourceSelect;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\EventManagerAwareTrait;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 use Laminas\View\Helper\Url;
+use Omeka\Form\Element\ResourceSelect;
 
 class QuickSearchForm extends Form
 {
@@ -18,7 +18,7 @@ class QuickSearchForm extends Form
      */
     protected $urlHelper;
 
-    public function init()
+    public function init(): void
     {
         $this->setAttribute('method', 'get');
 
@@ -77,7 +77,7 @@ class QuickSearchForm extends Form
     /**
      * @param Url $urlHelper
      */
-    public function setUrlHelper(Url $urlHelper)
+    public function setUrlHelper(Url $urlHelper): void
     {
         $this->urlHelper = $urlHelper;
     }

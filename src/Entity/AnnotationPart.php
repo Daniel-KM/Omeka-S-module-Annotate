@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Entity;
 
 use Omeka\Entity\Resource;
@@ -60,7 +60,7 @@ abstract class AnnotationPart extends Resource
     /**
      * @param Annotation $annotation
      */
-    public function setAnnotation(Annotation $annotation)
+    public function setAnnotation(Annotation $annotation): void
     {
         $this->annotation = $annotation;
     }

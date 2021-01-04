@@ -1,12 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 // TODO Remove this copy of Omeka core used for compatibily with Omeka < 1.2.1.
 
 namespace Annotate\View\Helper;
 
 use Annotate\Form\Element\ResourceTemplateSelect as Select;
 use Laminas\Form\Factory;
-use Laminas\View\Helper\AbstractHelper;
 use Laminas\ServiceManager\ServiceLocatorInterface;
+use Laminas\View\Helper\AbstractHelper;
 
 /**
  * View helper for rendering a select menu containing all resource templates.

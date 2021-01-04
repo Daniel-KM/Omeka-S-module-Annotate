@@ -1,9 +1,9 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Form;
 
-use Omeka\View\Helper\Api;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
+use Omeka\View\Helper\Api;
 
 class AnnotateForm extends Form
 {
@@ -12,7 +12,7 @@ class AnnotateForm extends Form
      */
     protected $api;
 
-    public function init()
+    public function init(): void
     {
         // TODO Move all static params into annotate controller?
         // TODO Improve the custom vocab module to keep "literal" as value type.
@@ -107,7 +107,7 @@ class AnnotateForm extends Form
         ]);
     }
 
-    protected function initAnnotationBody()
+    protected function initAnnotationBody(): void
     {
         $api = $this->api;
 
@@ -171,7 +171,7 @@ class AnnotateForm extends Form
         ]);
     }
 
-    protected function initAnnotationTarget()
+    protected function initAnnotationTarget(): void
     {
         $api = $this->api;
 
@@ -259,7 +259,7 @@ class AnnotateForm extends Form
     /**
      * @param Api $api
      */
-    public function setApi(Api $api)
+    public function setApi(Api $api): void
     {
         $this->api = $api;
     }

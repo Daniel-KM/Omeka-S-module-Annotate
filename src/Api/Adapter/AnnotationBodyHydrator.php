@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
@@ -20,7 +20,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
         'modified' => 'modified',
     ];
 
-    public function getResourceName()
+    public function getResourceName(): void
     {
         // return 'annotation_bodies';
     }
@@ -39,7 +39,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
         Request $request,
         EntityInterface $entity,
         ErrorStore $errorStore
-    ) {
+    ): void {
         // The annotation id may be set or not, it is not updated in any case.
         parent::hydrate($request, $entity, $errorStore);
 
@@ -67,7 +67,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
         return true;
     }
 
-    public function hydrateOwner(Request $request, EntityInterface $entity)
+    public function hydrateOwner(Request $request, EntityInterface $entity): void
     {
         $annotation = $entity->getAnnotation();
         if ($annotation instanceof Annotation) {
@@ -78,7 +78,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
     public function validateEntity(
         EntityInterface $entity,
         ErrorStore $errorStore
-    ) {
+    ): void {
         if (!($entity->getAnnotation() instanceof Annotation)) {
             $errorStore->addError('oa:Annotation', 'An annotation body must be attached to an Annotation.'); // @translate
         }
@@ -91,7 +91,7 @@ class AnnotationBodyHydrator extends AbstractResourceEntityAdapter
      * {@inheritDoc}
      * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildQuery()
      */
-    public function buildQuery(QueryBuilder $qb, array $query)
+    public function buildQuery(QueryBuilder $qb, array $query): void
     {
         parent::buildQuery($qb, $query);
 

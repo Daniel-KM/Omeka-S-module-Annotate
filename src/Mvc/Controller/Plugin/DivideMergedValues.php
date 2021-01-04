@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Mvc\Controller\Plugin;
 
-use Omeka\Mvc\Controller\Plugin\Api;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
+use Omeka\Mvc\Controller\Plugin\Api;
 
 /**
  * @deprecated Will be replaced by a new resource form, on the resource template base.

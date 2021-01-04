@@ -1,17 +1,17 @@
-<?php
+<?php declare(strict_types=1);
 namespace Annotate\Controller\Admin;
 
 use Annotate\Entity\Annotation;
 use Annotate\Form\AnnotateForm;
 use Annotate\Form\QuickSearchForm;
 use Annotate\Form\ResourceForm;
-use Omeka\Form\ConfirmForm;
-use Omeka\Mvc\Exception\NotFoundException;
-use Omeka\Stdlib\Message;
 use Laminas\Http\Response;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Omeka\Form\ConfirmForm;
+use Omeka\Mvc\Exception\NotFoundException;
+use Omeka\Stdlib\Message;
 
 class AnnotationController extends AbstractActionController
 {
