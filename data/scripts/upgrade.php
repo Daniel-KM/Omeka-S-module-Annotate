@@ -1,5 +1,9 @@
 <?php declare(strict_types=1);
+
 namespace Annotate;
+
+use Omeka\Mvc\Controller\Plugin\Messenger;
+use Omeka\Stdlib\Message;
 
 /**
  * @var Module $this
@@ -11,7 +15,6 @@ namespace Annotate;
  * @var \Doctrine\ORM\EntityManager $entityManager
  * @var \Omeka\Api\Manager $api
  */
-$services = $serviceLocator;
 $settings = $services->get('Omeka\Settings');
 $config = require dirname(__DIR__, 2) . '/config/module.config.php';
 $connection = $services->get('Omeka\Connection');
@@ -152,4 +155,21 @@ SQL;
     foreach (array_filter(explode(';', $sql)) as $sql) {
         $connection->exec($sql);
     }
+}
+
+if (version_compare($oldVersion, '3.3', '<')) {
+    $messenger = new Messenger();
+    $message = new Message(
+        'This release changed two features, so check your theme.'
+    );
+    $messenger->addWarning($message);
+    $message = new Message(
+        'In api, the key "oa:Annotation" is replaced by "o:annotation".'
+    );
+    $messenger->addWarning($message);
+
+    $sql = <<<'SQL'
+ALTER TABLE `annotation_part` CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL;
+SQL;
+    $connection->exec($sql);
 }

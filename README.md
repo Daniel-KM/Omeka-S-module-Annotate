@@ -77,7 +77,7 @@ Development
 - Internally, targets and bodies are managed like Omeka resources, but they
   aren’t rdf classes.
 - In the json-ld of the resources, the key `oa:Annotation` is deprecated and
-  will removed in a future release. Use the key `o:annotations`.
+  will removed in a future release. Use the key `o:annotation`.
 
 
 TODO

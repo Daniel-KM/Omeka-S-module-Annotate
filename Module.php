@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright Daniel Berthereau, 2017-2019
+ * Copyright Daniel Berthereau, 2017-2020
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -686,10 +686,9 @@ class Module extends AbstractModule
         if ($annotations) {
             $jsonLd = $event->getParam('jsonLd');
             // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
-            // Note: Omeka uses singular for "o:item_set".
-            $jsonLd['o:annotations'] = $annotations;
-            // @deprecated
-            $jsonLd['oa:Annotation'] = $annotations;
+            // Note: Omeka uses singular for "o:item_set", but plural for "o:items".
+            // Anyway, all other terms are singular (dublin core, etc.).
+            $jsonLd['o:annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
     }
