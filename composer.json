@@ -9,9 +9,9 @@
             "email": "Daniel.packagist@Berthereau.net"
         }
     ],
-    "homepage": "https://github.com/Daniel-KM/Omeka-S-module-Annotate",
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate",
     "support": {
-        "issues": "https://github.com/Daniel-KM/Omeka-S-module-Annotate/issues",
+        "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/issues",
         "forum": "https://forum.omeka.org/"
     },
     "keywords": [

@@ -106,7 +106,7 @@ your archives regularly so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on the [module issues] page on GitHub.
+See online issues on the [module issues] page on GitLab.
 
 
 License
@@ -144,7 +144,7 @@ of the CeCILL license and that you accept its terms.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2017-2018 (see [Daniel-KM] on GitHub)
+* Copyright Daniel Berthereau, 2017-2018 (see [Daniel-KM] on GitLab)
 
 * Library [webui-popover]: Sandy Walker
 
@@ -152,15 +152,15 @@ This module was built first for the French École des hautes études en sciences
 sociales [EHESS].
 
 
-[Annotate]: https://github.com/Daniel-KM/Omeka-S-module-Annotate
+[Annotate]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate
 [Omeka S]: https://omeka.org/s
 [Web Annotation Ontology]: https://www.w3.org/ns/oa
 [W3C]: https://www.w3.org
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
-[Annotate.zip]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/releases
+[Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-Annotate/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
@@ -169,4 +169,4 @@ sociales [EHESS].
 [webui-popover]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr
 [GitLab]: https://gitlab.com/Daniel-KM
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
