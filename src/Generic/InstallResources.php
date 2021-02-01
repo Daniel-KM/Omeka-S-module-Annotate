@@ -484,7 +484,7 @@ class InstallResources
 
         $getDataTypesByName = function ($dataTypesNameLabels) {
             $result = [];
-            foreach ($dataTypesNameLabels as $dataType) {
+            foreach ($dataTypesNameLabels ?? [] as $dataType) {
                 $result[$dataType['name']] = $dataType;
             }
             return $result;
@@ -597,9 +597,9 @@ class InstallResources
                     $import['o:resource_template_property'][$key]['o:data_type'] = array_unique($import['o:resource_template_property'][$key]['o:data_type']);
                     // Prepare the list of standard data types for duplicated
                     // properties (only one most of the time, that is the main).
-                    $import['o:resource_template_property'][$key]['o:data'] = array_values($import['o:resource_template_property'][$key]['o:data']);
-                    $import['o:resource_template_property'][$key]['o:data'][0]['data_types'] = $import['o:resource_template_property'][$key]['data_types'];
-                    $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'];
+                    $import['o:resource_template_property'][$key]['o:data'] = array_values($import['o:resource_template_property'][$key]['o:data'] ?? []);
+                    $import['o:resource_template_property'][$key]['o:data'][0]['data_types'] = $import['o:resource_template_property'][$key]['data_types'] ?? [];
+                    $import['o:resource_template_property'][$key]['o:data'][0]['o:data_type'] = $import['o:resource_template_property'][$key]['o:data_type'] ?? [];
                     $first = true;
                     foreach ($import['o:resource_template_property'][$key]['o:data'] as $k => $rtpData) {
                         if ($first) {
