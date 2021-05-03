@@ -66,8 +66,9 @@ class Module extends AbstractModule
         $this->addAclRoleAndRules();
     }
 
-    public function install(ServiceLocatorInterface $services): void
+    protected function preInstall(): void
     {
+        $services = $this->getServiceLocator();
         $module = $services->get('Omeka\ModuleManager')->getModule('Generic');
         if ($module && version_compare($module->getIni('version') ?? '', '3.3.28', '<')) {
             $translator = $services->get('MvcTranslator');
@@ -77,8 +78,6 @@ class Module extends AbstractModule
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
-
-        parent::install($services);
     }
 
     protected function postInstall(): void
