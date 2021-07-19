@@ -1,8 +1,9 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Form;
 
-use Annotate\Form\Element\ResourceTemplateSelect;
 use Laminas\Form\Element;
+use Omeka\Form\Element\ResourceTemplateSelect;
 use Omeka\View\Helper\Api;
 
 class ResourceForm extends \Omeka\Form\ResourceForm
