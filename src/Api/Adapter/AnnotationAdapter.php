@@ -63,8 +63,14 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     }
 
     /**
-     * Copy of the parent class, except that the "from" is AnnotationPart and
-     * the GroupBy is "Annotation".
+     * The process should be able to search in values of the properties of the
+     * annotation, the body and the target, but outputing only annotations.
+     * So it searches in annotation parts and filters only annotations with a
+     * "group by".
+     *
+     * Nevertheless, the "group by" fails with sql mode "only_full_group_by"
+     * (default on mysql), so a subquery is used, that should fix most of the
+     * cases.
      *
      * {@inheritDoc}
      * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
@@ -100,7 +106,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // annotations, bodies and targets are subparts of AnnotationPart. The
         // method getRepresentation() checks the part to return always the
         // annotation one. It avoids a "select from select unions" too.
-        $qb = $this->getEntityManager()
+        $entityManager = $this->getEntityManager();
+        $qb = $entityManager
             ->createQueryBuilder()
             ->select('omeka_root')
             // ->from($entityClass, $alias);
@@ -116,9 +123,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $this->buildQuery($qb, $query);
         // The group is done on the annotation, not the id, so only annotations
         // are returned.
-        $qb->groupBy('omeka_root.annotation');
+        // Nevertheless, sql mode "only_full_group_by" requires group on an id.
+        // $qb->groupBy('omeka_root.annotation');
         // Useless, but avoid an issue on mysql with group by clause.
-        $qb->addSelect('omeka_root.id HIDDEN rid');
+        // $qb->addSelect('omeka_root.id HIDDEN rid');
+        $qb->groupBy('omeka_root.id');
 
         // Trigger the search.query event.
         $event = new Event('api.search.query', $this, [
@@ -127,6 +136,22 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         ]);
         $this->getEventManager()->triggerEvent($event);
 
+        // To avoid issue with "only_full_group_by", a sub query is used.
+        // The main query needs only the id.
+        $qbSub = $qb;
+        $qbSub->select('omeka_root.id');
+        $parameters = $qbSub->getParameters();
+        $qb = $entityManager
+            ->createQueryBuilder()
+            ->select('_omeka_root')
+            ->from(
+                \Annotate\Entity\Annotation::class,
+                '_omeka_root'
+            )
+            ->where($qbSub->expr()->in('_omeka_root.id', $qbSub->getDQL()))
+            ->setParameters($parameters)
+        ;
+
         // Add the LIMIT clause.
         $this->limitQuery($qb, $query);
 
@@ -134,13 +159,18 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // getting the total count. This optimization excludes the ORDER BY
         // clause from the count query, greatly speeding up response time.
         $countQb = clone $qb;
-        $countQb->select('1')->resetDQLPart('orderBy');
+        // $countQb->select('1')->resetDQLPart('orderBy');
+        $countQb->resetDQLPart('orderBy');
         $countPaginator = new Paginator($countQb, false);
 
         // Add the ORDER BY clause. Always sort by entity ID in addition to any
         // sorting the adapters add.
-        $this->sortQuery($qb, $query);
-        $qb->addOrderBy('omeka_root.annotation', $query['sort_order']);
+        $this->sortQuery($qbSub, $query);
+        $qbSub->addOrderBy('omeka_root.annotation', $query['sort_order']);
+        $parameters = $qbSub->getParameters();
+        $qb
+            ->where($qbSub->expr()->in('_omeka_root.id', $qbSub->getDQL()))
+            ->setParameters($parameters);
 
         $scalarField = $request->getOption('returnScalar');
         if ($scalarField) {
@@ -154,10 +184,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                         $scalarField, $entityClass
                     ));
                 }
-                $qb->select(['omeka_root.id', "IDENTITY(omeka_root.$scalarField) AS $scalarField"]);
+                $qb->select(['_omeka_root.id', "IDENTITY(_omeka_root.$scalarField) AS $scalarField"]);
             } else {
-                $qb->select(['omeka_root.id', 'omeka_root.' . $scalarField]);
+                $qb->select(['_omeka_root.id', '_omeka_root.' . $scalarField]);
             }
+
             $content = array_column($qb->getQuery()->getScalarResult(), $scalarField, 'id');
             $response = new Response($content);
             $response->setTotalResults(count($content));
