@@ -122,7 +122,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $this->buildBaseQuery($qb, $query);
         $this->buildQuery($qb, $query);
         // The group is done on the annotation, not the id, so only annotations
-        // are returned.
+        // are returned. It works fine with mariadb (see previous version).
         // Nevertheless, sql mode "only_full_group_by" requires group on an id.
         // $qb->groupBy('omeka_root.annotation');
         // Useless, but avoid an issue on mysql with group by clause.
@@ -138,9 +138,15 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         // To avoid issue with "only_full_group_by", a sub query is used.
         // The main query needs only the id.
+        $expr = $qb->expr();
         $qbSub = $qb;
         $qbSub->select('omeka_root.id');
         $parameters = $qbSub->getParameters();
+
+        /*
+        // In pure sql: "select annotation from annotation inner join annotation_part on annotation_part.annotation_id in ($query) limit x;"
+        // But dql adds related joins, and the join is not possible with a
+        // discriminator, so a sub-sub-query is needed for current version.
         $qb = $entityManager
             ->createQueryBuilder()
             ->select('_omeka_root')
@@ -148,7 +154,37 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 \Annotate\Entity\Annotation::class,
                 '_omeka_root'
             )
-            ->where($qbSub->expr()->in('_omeka_root.id', $qbSub->getDQL()))
+            ->innerJoin(
+                \Annotate\Entity\AnnotationPart::class,
+                '_annotation_parts',
+                \Doctrine\ORM\Query\Expr\Join::ON,
+                $expr->in(
+                    'IDENTITY(_annotation_parts.annotation)',
+                    $qbSub->getDQL()
+                )
+            )
+            ->setParameters($parameters);
+        */
+
+        $qb = $entityManager
+            ->createQueryBuilder()
+            ->select('_omeka_root')
+            ->from(
+                \Annotate\Entity\Annotation::class,
+                '_omeka_root'
+            )
+            ->where($expr->in(
+                '_omeka_root.id',
+                $entityManager
+                    ->createQueryBuilder()
+                    ->select('DISTINCT IDENTITY(_annotation_parts.annotation)')
+                    ->from(
+                        \Annotate\Entity\AnnotationPart::class,
+                        '_annotation_parts'
+                    )
+                    ->where($expr->in('_annotation_parts.id', $qbSub->getDQL()))
+                    ->getDQL()
+            ))
             ->setParameters($parameters)
         ;
 
@@ -169,7 +205,18 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $qbSub->addOrderBy('omeka_root.annotation', $query['sort_order']);
         $parameters = $qbSub->getParameters();
         $qb
-            ->where($qbSub->expr()->in('_omeka_root.id', $qbSub->getDQL()))
+            ->where($expr->in(
+                '_omeka_root.id',
+                $entityManager
+                    ->createQueryBuilder()
+                    ->select('DISTINCT IDENTITY(_annotation_parts.annotation)')
+                    ->from(
+                        \Annotate\Entity\AnnotationPart::class,
+                        '_annotation_parts'
+                    )
+                    ->where($expr->in('_annotation_parts.id', $qbSub->getDQL()))
+                    ->getDQL()
+            ))
             ->setParameters($parameters);
 
         $scalarField = $request->getOption('returnScalar');
