@@ -20,10 +20,10 @@ $sectionNavs = [
 ];
 */
 ?>
-<?php echo $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')); ?>
+<?= $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')) ?>
 <div id="page-actions">
     <?php if ($annotation->userIsAllowed('update')): ?>
-    <?php echo $annotation->link($translate('Edit annotation'), 'edit', ['class' => 'button']); ?>
+    <?= $annotation->link($translate('Edit annotation'), 'edit', ['class' => 'button']) ?>
     <?php endif; ?>
 </div>
 
@@ -31,27 +31,27 @@ $sectionNavs = [
 <?php // echo $this->sectionNav($sectionNavs, 'view.show.section_nav', $annotation); ?>
 
 <div id="annotation-metadata" class="active section">
-    <?php echo $annotation->displayValues(); ?>
+    <?= $annotation->displayValues() ?>
 </div>
 
 <div id="annotation-bodies" class="active section">
     <?php $bodies = $annotation->bodies(); ?>
     <div class="meta-group">
-        <h4 class="annotation-caption"><?php echo $translate('Bodies'); ?></h4>
+        <h4 class="annotation-caption"><?= $translate('Bodies') ?></h4>
         <?php if (count($bodies)): ?>
             <?php $i = 0; ?>
             <?php foreach ($bodies as $body): ?>
-                <div class="value annotation-body">#<?php echo ++$i; ?></div>
+                <div class="value annotation-body">#<?= ++$i ?></div>
                 <?php if ($body->resourceClass()): ?>
                     <div class="meta-group">
-                        <h4><?php echo $translate('Class'); ?></h4>
-                        <div class="value"><?php echo $escape($translate($body->resourceClass()->label())); ?></div>
+                        <h4><?= $translate('Class') ?></h4>
+                        <div class="value"><?= $escape($translate($body->resourceClass()->label())) ?></div>
                     </div>
                 <?php endif; ?>
-                <?php echo $body->displayValues(); ?>
+                <?= $body->displayValues() ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="no-resources"><?php echo $translate('This annotation has no bodies.')?></p>
+            <p class="no-resources"><?= $translate('This annotation has no bodies.') ?></p>
         <?php endif; ?>
     </div>
 </div>
@@ -59,39 +59,39 @@ $sectionNavs = [
 <div id="annotation-targets" class="active section">
     <?php $targets = $annotation->targets(); ?>
     <div class="meta-group">
-        <h4 class="annotation-caption"><?php echo $translate('Targets'); ?></h4>
+        <h4 class="annotation-caption"><?= $translate('Targets') ?></h4>
         <?php if (count($targets)): ?>
             <?php $i = 0; ?>
             <?php foreach ($targets as $target): ?>
-                <div class="value annotation-target">#<?php echo ++$i; ?></div>
+                <div class="value annotation-target">#<?= ++$i ?></div>
                 <?php if ($target->resourceClass()): ?>
                     <div class="meta-group">
-                        <h4><?php echo $translate('Class'); ?></h4>
-                        <div class="value"><?php echo $escape($translate($target->resourceClass()->label())); ?></div>
+                        <h4><?= $translate('Class') ?></h4>
+                        <div class="value"><?= $escape($translate($target->resourceClass()->label())) ?></div>
                     </div>
                 <?php endif; ?>
                 <?php // Note: when type + value, it is a selector. ?>
-                <?php echo $target->displayValues(); ?>
+                <?= $target->displayValues() ?>
             <?php endforeach; ?>
         <?php else: ?>
-            <p class="no-resources"><?php echo $translate('This annotation has no targets.')?></p>
+            <p class="no-resources"><?= $translate('This annotation has no targets.') ?></p>
         <?php endif; ?>
     </div>
 </div>
 
 <div class="sidebar active">
-    <?php echo $this->thumbnail($annotation, 'square'); ?>
+    <?= $this->thumbnail($annotation, 'square') ?>
     <div class="meta-group">
-        <h4><?php echo $translate('Visibility'); ?></h4>
-        <div class="value"><?php echo ($annotation->isPublic()) ? $escape($translate('Public')) : $escape($translate('Private')); ?></div>
+        <h4><?= $translate('Visibility') ?></h4>
+        <div class="value"><?= ($annotation->isPublic()) ? $escape($translate('Public')) : $escape($translate('Private')) ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $translate('Created'); ?></h4>
-        <div class="value"><?php echo $escape($annotation->created()->format('Y-m-d H:i:s')); ?></div>
+        <h4><?= $translate('Created') ?></h4>
+        <div class="value"><?= $escape($annotation->created()->format('Y-m-d H:i:s')) ?></div>
     </div>
     <div class="meta-group">
-        <h4><?php echo $translate('Owner'); ?></h4>
-        <div class="value"><?php echo $annotation->linkAnnotator(); ?></div>
+        <h4><?= $translate('Owner') ?></h4>
+        <div class="value"><?= $annotation->linkAnnotator() ?></div>
     </div>
 
     <?php $this->trigger('view.show.sidebar'); ?>

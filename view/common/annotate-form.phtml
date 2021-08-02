@@ -15,12 +15,12 @@ $isAnnotation = $resourceClass && $resourceClass->localName() === 'Annotation';
 // endif;
 ?>
 <div class="property">
-    <h4><?php echo $translate('New annotation'); ?></h4>
+    <h4><?= $translate('New annotation') ?></h4>
     <?php if ($isAnnotation): ?>
     <p>
-    <?php echo $translate('Warning: the resource is already an annotation.'); ?>
-    <?php echo $translate('Go to the tab "Metadata" to find and to annotate the original target resource.'); ?>
+    <?= $translate('Warning: the resource is already an annotation.') ?>
+    <?= $translate('Go to the tab "Metadata" to find and to annotate the original target resource.') ?>
     </p>
     <?php endif; ?>
-    <?php echo $this->form($annotateForm); ?>
+    <?= $this->form($annotateForm) ?>
 </div>

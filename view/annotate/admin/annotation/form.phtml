@@ -24,42 +24,42 @@ $form->prepare();
 $formElement = $this->plugin('formElement');
 ?>
 
-<?php echo $this->form()->openTag($form); ?>
+<?= $this->form()->openTag($form) ?>
 
 <?php // Currently, the bodies and the targets are on the same tab. ?>
 <?php // echo $this->sectionNav($sectionNavs, $sectionNavEvent); ?>
 
 <?php $this->trigger("view.$action.form.before", ['form' => $form]); ?>
 
-<?php echo $this->partial('common/resource-fields.phtml', [
+<?= $this->partial('common/resource-fields.phtml', [
     'form' => $form,
     'resource' => $annotation,
-]); ?>
+]) ?>
 
 <div id="page-actions">
     <?php if ($annotation && $annotation->isPublic() || !isset($annotation)): ?>
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'o-icon-public button',
         'title' => $translate('Make private'),
-    ]); ?>
+    ]) ?>
     <input type="hidden" name="o:is_public" value="1">
     <?php else: ?>
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'o-icon-private button',
         'title' => $translate('Make public'),
-    ]); ?>
+    ]) ?>
     <input type="hidden" name="o:is_public" value="0">
     <?php endif; ?>
 
-    <?php echo (isset($deleteButton)) ? $deleteButton : ''; ?>
-    <?php echo $this->cancelButton(); ?>
-    <input type="submit" name="add-annotation-submit" value="<?php echo $translate('Save'); ?>">
+    <?= (isset($deleteButton)) ? $deleteButton : '' ?>
+    <?= $this->cancelButton() ?>
+    <input type="submit" name="add-annotation-submit" value="<?= $translate('Save') ?>">
 </div>
 
 <?php $this->trigger("view.$action.form.after", ['form' => $form]); ?>
 
-<?php echo $formElement($form->get('csrf')); ?>
+<?= $formElement($form->get('csrf')) ?>
 
-<?php echo $this->form()->closeTag(); ?>
+<?= $this->form()->closeTag() ?>
 
-<?php echo $this->partial('common/resource-form-templates.phtml'); ?>
+<?= $this->partial('common/resource-form-templates.phtml') ?>

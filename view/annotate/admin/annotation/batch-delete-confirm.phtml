@@ -7,7 +7,7 @@
 $translate = $this->plugin('translate');
 ?>
 <div id="sidebar-confirm">
-    <h3><?php echo $translate('Delete annotations'); ?></h3>
-    <p><?php echo $translate('Are you sure you would like to delete the selected annotations?'); ?></p>
-    <?php echo $this->form($this->form); ?>
+    <h3><?= $translate('Delete annotations') ?></h3>
+    <p><?= $translate('Are you sure you would like to delete the selected annotations?') ?></p>
+    <?= $this->form($this->form) ?>
 </div>

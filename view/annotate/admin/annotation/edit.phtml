@@ -18,10 +18,10 @@ $deleteButton = $annotation->userIsAllowed('delete')
 // properties, so the values are merged.
 // TODO Improve the form for complex and multiple targets.
 ?>
-var valuesJson = <?php echo json_encode($annotation->mergedValues()); ?>;
+var valuesJson = <?= json_encode($annotation->mergedValues()) ?>;
 </script>
 
-<?php echo $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations'), $translate('Edit')); ?>
+<?= $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations'), $translate('Edit')) ?>
 <?php $this->trigger('view.edit.before'); ?>
 <?php
 echo $this->partial('annotate/admin/annotation/form.phtml', [
@@ -34,6 +34,6 @@ echo $this->partial('annotate/admin/annotation/form.phtml', [
 ]);
 ?>
 
-<?php echo $this->deleteConfirm($annotation, 'annotation'); ?>
+<?= $this->deleteConfirm($annotation, 'annotation') ?>
 
 <?php $this->trigger('view.edit.after'); ?>

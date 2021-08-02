@@ -21,7 +21,7 @@ $this->headScript()
 <div id="annotations" class="annotations">
 <?php if (empty($annotations)): ?>
     <div class="no-resources">
-        <p><?php echo $translate('There are no annotations for this resource.'); ?></p>
+        <p><?= $translate('There are no annotations for this resource.') ?></p>
     </div>
 <?php else: ?>
     <?php foreach ($annotations as $annotation): ?>
@@ -30,28 +30,28 @@ $this->headScript()
 
 <table>
 <caption class="annotation-caption">
-    <?php echo $annotation->linkPretty(); ?>
-    <span class="annotation-created"><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></span>
-    <span class="annotation-owner"><?php echo $annotation->owner()->name(); ?></span>
+    <?= $annotation->linkPretty() ?>
+    <span class="annotation-created"><?= $annotation->created()->format('Y-m-d H:i:s') ?></span>
+    <span class="annotation-owner"><?= $annotation->owner()->name() ?></span>
     <?php if (!$annotation->isPublic()): ?>
     <span class="o-icon-private" aria-label="Private"></span>
     <?php endif; ?>
     <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true]); ?>
     <?php foreach ($motivatedByValues as $value): ?>
     <span class="oa-motivated-by">
-        <?php echo $escape($value); ?>
+        <?= $escape($value) ?>
     </span>
     <?php endforeach; ?>
     <ul class="actions">
         <li>
             <span>
-            <?php echo $annotation->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation')]); ?>
+            <?= $annotation->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation')]) ?>
             </span>
         </li>
         <?php if ($annotation->userIsAllowed('update')): ?>
         <li>
             <span>
-            <?php echo $annotation->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation')]); ?>
+            <?= $annotation->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation')]) ?>
             </span>
         </li>
         <?php endif; ?>
@@ -81,8 +81,8 @@ $annotationBodies = $annotation->bodies();
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
-        <th><?php echo $translate('Value'); ?></th>
-        <th><?php echo $translate('Purpose'); ?></th>
+        <th><?= $translate('Value') ?></th>
+        <th><?= $translate('Purpose') ?></th>
     </tr>
 </thead>
 <tbody>
@@ -101,10 +101,10 @@ $annotationBodies = $annotation->bodies();
     <?php foreach ($bodyValues as $bodyValue): ?>
     <tr class="annotation-body">
         <td>
-            <?php echo $bodyValue->asHtml(); ?>
+            <?= $bodyValue->asHtml() ?>
         </td>
         <td>
-            <?php echo $hasPurposeHtml; ?>
+            <?= $hasPurposeHtml ?>
         </td>
     </tr>
     <?php endforeach; ?>
@@ -118,24 +118,24 @@ $annotationBodies = $annotation->bodies();
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
                     <?php $isLong = false; ?>
-                    <?php echo $value->valueResource()->linkPretty(); ?>
+                    <?= $value->valueResource()->linkPretty() ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+                        <div class="annotation-body-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
                     <?php else: ?>
-                        <?php echo nl2br($escape($text)); ?>
+                        <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
             <ul class="actions">
                 <?php if ($isLong): ?>
-                <li><?php echo $hyperlink('', '#', [
+                <li><?= $hyperlink('', '#', [
                     'class' => 'o-icon- fa fa-expand popover',
                     'title' => $translate('Full value'),
-                ]); ?>
-                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
+                ]) ?>
+                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?= nl2br($escape($text)) ?></div>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -145,20 +145,20 @@ $annotationBodies = $annotation->bodies();
             <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="oa-has-purpose">
-                <?php echo $escape($value); ?>
+                <?= $escape($value) ?>
             </span>
             <?php endforeach; ?>
             <?php /*
             <ul class="actions">
                 <li>
                     <span>
-                    <?php echo $annotationBody->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation body')]); ?>
+                    <?= $annotationBody->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation body')]) ?>
                     </span>
                 </li>
                 <?php if ($annotation->userIsAllowed('update')): ?>
                 <li>
                     <span>
-                    <?php echo $annotationBody->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation body')]); ?>
+                    <?= $annotationBody->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation body')]) ?>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -167,7 +167,7 @@ $annotationBodies = $annotation->bodies();
                 <?php if ($annotation->userIsAllowed('delete')): ?>
                 <li>
                     <span class="single-action">
-                    <?php echo $annotationBody->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation body')]); ?>
+                    <?= $annotationBody->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation body')]) ?>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -197,8 +197,8 @@ foreach ($annotationTargets as $annotationTarget) {
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
-        <th><?php echo $translate('Target selector'); ?></th>
-        <th><?php echo $translate('Selector type'); ?></th>
+        <th><?= $translate('Target selector') ?></th>
+        <th><?= $translate('Selector type') ?></th>
     </tr>
 </thead>
 <tbody>
@@ -210,24 +210,24 @@ foreach ($annotationTargets as $annotationTarget) {
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
                     <?php $isLong = false; ?>
-                    <?php echo $value->valueResource()->linkPretty(); ?>
+                    <?= $value->valueResource()->linkPretty() ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-target-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+                        <div class="annotation-target-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
                     <?php else: ?>
-                        <?php echo nl2br($escape($text)); ?>
+                        <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
             <ul class="actions">
                 <?php if ($isLong): ?>
-                <li><?php echo $hyperlink('', '#', [
+                <li><?= $hyperlink('', '#', [
                     'class' => 'o-icon- fa fa-expand popover',
                     'title' => $translate('Full value'),
-                ]); ?>
-                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?php echo nl2br($escape($text)); ?></div>
+                ]) ?>
+                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?= nl2br($escape($text)) ?></div>
                 </li>
                 <?php endif; ?>
             </ul>
@@ -237,20 +237,20 @@ foreach ($annotationTargets as $annotationTarget) {
             <?php $values = $annotationTarget->value('rdf:type', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="rdf-type">
-                <?php echo $escape($value); ?>
+                <?= $escape($value) ?>
             </span>
             <?php endforeach; ?>
             <?php /*
             <ul class="actions">
                 <li>
                     <span>
-                    <?php echo $annotationTarget->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation target')]); ?>
+                    <?= $annotationTarget->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation target')]) ?>
                     </span>
                 </li>
                 <?php if ($annotation->userIsAllowed('update')): ?>
                 <li>
                     <span>
-                        <?php echo $annotationTarget->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation target')]); ?>
+                        <?= $annotationTarget->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation target')]) ?>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -259,7 +259,7 @@ foreach ($annotationTargets as $annotationTarget) {
                 <?php if ($annotation->userIsAllowed('delete')): ?>
                 <li>
                     <span class="single-action">
-                    <?php echo $annotationTarget->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation target')]); ?>
+                    <?= $annotationTarget->link('', 'confirm-delete', ['class' => 'o-icon-delete', 'title' => $translate('Delete annotation target')]) ?>
                     </span>
                 </li>
                 <?php endif; ?>
@@ -279,9 +279,9 @@ foreach ($annotationTargets as $annotationTarget) {
 </div>
 
 <div id="sidebar" class="sidebar">
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
-    ]); ?>
+    ]) ?>
     <div class="sidebar-content"></div>
 </div>

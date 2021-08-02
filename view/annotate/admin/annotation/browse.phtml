@@ -41,14 +41,14 @@ $sortHeadings = [
 ];
 ?>
 
-<?php echo $this->pageTitle('', 1, $translate('Annotations')); ?>
+<?= $this->pageTitle('', 1, $translate('Annotations')) ?>
 
-<?php echo $this->searchFilters(); ?>
+<?= $this->searchFilters() ?>
 
  <div class="browse-controls">
-    <?php echo $this->pagination(); ?>
-    <?php echo $hyperlink($translate('Quick Search'), '#', ['class' => 'search advanced-search']); ?>
-    <?php echo $this->sortSelector($sortHeadings); ?>
+    <?= $this->pagination() ?>
+    <?= $hyperlink($translate('Quick Search'), '#', ['class' => 'search advanced-search']) ?>
+    <?= $this->sortSelector($sortHeadings) ?>
 </div>
 
 <?php $this->trigger('view.browse.before'); ?>
@@ -56,27 +56,27 @@ $sortHeadings = [
 <form method="post" id="batch-form" class="disable-unsaved-warning">
     <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
     <div class="batch-inputs">
-        <select class="batch-actions-select" name="batch_action" aria-label="<?php echo $translate('Batch actions'); ?>">
-            <option value="default"><?php echo $translate('Batch actions'); ?></option>
+        <select class="batch-actions-select" name="batch_action" aria-label="<?= $translate('Batch actions') ?>">
+            <option value="default"><?= $translate('Batch actions') ?></option>
             <?php if ($userIsAllowedBatchUpdate): ?>
-            <option value="update-selected" class="batch-selected" disabled="disabled"><?php echo $translate('Edit selected'); ?></option>
-            <option value="update-all"><?php echo $translate('Edit all'); ?></option>
+            <option value="update-selected" class="batch-selected" disabled="disabled"><?= $translate('Edit selected') ?></option>
+            <option value="update-all"><?= $translate('Edit all') ?></option>
             <?php endif; ?>
             <?php if ($userIsAllowedBatchDelete): ?>
-            <option value="delete-selected" class="batch-selected" disabled="disabled"><?php echo $translate('Delete selected'); ?></option>
-            <option value="delete-all"><?php echo $translate('Delete all'); ?></option>
+            <option value="delete-selected" class="batch-selected" disabled="disabled"><?= $translate('Delete selected') ?></option>
+            <option value="delete-all"><?= $translate('Delete all') ?></option>
             <?php endif; ?>
         </select>
         <div class="batch-actions">
-            <button type="button" class="default active" disabled="disabled"><?php echo $translate('Go'); ?></button>
+            <button type="button" class="default active" disabled="disabled"><?= $translate('Go') ?></button>
             <?php if ($userIsAllowedBatchUpdate): ?>
-            <input type="submit" class="update-selected" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit'], true)); ?>">
-            <input type="submit" class="update-all" value="<?php echo $translate('Go'); ?>" formaction="<?php echo $escape($this->url(null, ['action' => 'batch-edit-all'], true)); ?>">
+            <input type="submit" class="update-selected" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit'], true)) ?>">
+            <input type="submit" class="update-all" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit-all'], true)) ?>">
             <?php endif; ?>
-            <input type="hidden" name="query" class="batch-query" value="<?php echo $escape(json_encode($this->params()->fromQuery())); ?>">
+            <input type="hidden" name="query" class="batch-query" value="<?= $escape(json_encode($this->params()->fromQuery())) ?>">
             <?php if ($userIsAllowedBatchDelete): ?>
-            <a class="delete button sidebar-content delete-selected" data-sidebar-selector="#sidebar-delete-selected"><?php echo $translate('Go'); ?></a>
-            <a class="delete button sidebar-content delete-all" data-sidebar-selector="#sidebar-delete-all"><?php echo $translate('Go'); ?></a>
+            <a class="delete button sidebar-content delete-selected" data-sidebar-selector="#sidebar-delete-selected"><?= $translate('Go') ?></a>
+            <a class="delete button sidebar-content delete-all" data-sidebar-selector="#sidebar-delete-all"><?= $translate('Go') ?></a>
             <?php endif; ?>
         </div>
     </div>
@@ -87,13 +87,13 @@ $sortHeadings = [
         <tr>
             <th>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" class="select-all" aria-label="<?php echo $translate('Select all'); ?>">
+                <input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>">
                 <?php endif; ?>
-                <?php echo $translate('Annotation'); ?>
+                <?= $translate('Annotation') ?>
             </th>
-            <th><?php echo $translate('Targets'); ?></th>
-            <th><?php echo $translate('Annotator'); ?></th>
-            <th><?php echo $translate('Date annotated'); ?></th>
+            <th><?= $translate('Targets') ?></th>
+            <th><?= $translate('Annotator') ?></th>
+            <th><?= $translate('Date annotated') ?></th>
         </tr>
     </thead>
     <tbody>
@@ -107,43 +107,43 @@ $sortHeadings = [
         <tr class="annotation">
             <td>
                 <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
-                <input type="checkbox" name="resource_ids[]" value="<?php echo $annotation->id(); ?>" aria-label="<?php echo $translate('Select item'); ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
+                <input type="checkbox" name="resource_ids[]" value="<?= $annotation->id() ?>" aria-label="<?= $translate('Select item') ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
                 <?php endif; ?>
-                <?php echo $annotation->linkPretty(); ?>
+                <?= $annotation->linkPretty() ?>
                 <?php if (!$annotation->isPublic()): ?>
-                    <span class="o-icon-private" aria-label="<?php echo $translate('Private'); ?>"></span>
+                    <span class="o-icon-private" aria-label="<?= $translate('Private') ?>"></span>
                 <?php endif; ?>
                 <ul class="actions">
                     <?php if ($userIsAllowedUpdate): ?>
-                    <li><?php echo $annotation->link('', 'edit', [
+                    <li><?= $annotation->link('', 'edit', [
                         'class' => 'o-icon-edit',
                         'title' => $translate('Edit'),
-                    ]); ?></li>
+                    ]) ?></li>
                     <?php endif; ?>
                     <?php if ($userIsAllowedDelete): ?>
-                    <li><?php echo $hyperlink('', '#', [
+                    <li><?= $hyperlink('', '#', [
                         'data-sidebar-selector' => '#sidebar',
                         'data-sidebar-content-url' => $annotation->url('delete-confirm'),
                         'class' => 'o-icon-delete sidebar-content',
                         'title' => $translate('Delete'),
-                    ]); ?></li>
+                    ]) ?></li>
                     <?php endif; ?>
-                    <li><?php echo $hyperlink('', '#', [
+                    <li><?= $hyperlink('', '#', [
                         'data-sidebar-selector' => '#sidebar',
                         'data-sidebar-content-url' => $annotation->url('show-details'),
                         'class' => 'o-icon-more sidebar-content',
                         'title' => $translate('Details'),
-                    ]); ?></li>
+                    ]) ?></li>
                 </ul>
             </td>
             <td>
                 <?php if ($resources): ?>
                     <?php foreach ($resources as $resource): ?>
-                    <?php echo $resource->linkPretty(); ?>
-                    <span class="resource-name <?php echo $resource->getControllerName(); ?>" aria-label="<?php echo $translate($resource->getControllerName()); ?>"></span>
+                    <?= $resource->linkPretty() ?>
+                    <span class="resource-name <?= $resource->getControllerName() ?>" aria-label="<?= $translate($resource->getControllerName()) ?>"></span>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    [<?php echo $translate('Removed'); ?>]
+                    [<?= $translate('Removed') ?>]
                 <span class="resource-name no-resource"></span>
                 <?php endif; ?>
             </td>
@@ -152,10 +152,10 @@ $sortHeadings = [
                     echo $annotation->linkAnnotator();
                 ?></span>
                 <?php if (!$owner): ?>
-                    <span class="o-icon-users" aria-label="<?php echo $translate('Public'); ?>"></span>
+                    <span class="o-icon-users" aria-label="<?= $translate('Public') ?>"></span>
                 <?php endif; ?>
             </td>
-            <td><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></td>
+            <td><?= $annotation->created()->format('Y-m-d H:i:s') ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
@@ -165,52 +165,52 @@ $sortHeadings = [
 
 <?php $this->trigger('view.browse.after'); ?>
 <div class="browse-controls">
-    <?php echo $this->pagination(); ?>
+    <?= $this->pagination() ?>
 </div>
 
 <div id="sidebar" class="sidebar">
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
-    ]); ?>
+    ]) ?>
     <div class="sidebar-content"></div>
 </div>
 
 <?php if ($userIsAllowedBatchDelete): ?>
 <div id="sidebar-delete-selected" class="sidebar">
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
-    ]); ?>
+    ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?php echo $translate('Delete annotations'); ?></h3>
-            <p><?php echo $translate('Are you sure you would like to delete the selected annotations?'); ?></p>
-            <p class="error"><?php echo sprintf(
+            <h3><?= $translate('Delete annotations') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete the selected annotations?') ?></p>
+            <p class="error"><?= sprintf(
                 $translate('%s: this action will permanently delete %s annotations and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 '<strong><span id="delete-selected-count"></span></strong>'
-            ); ?></p>
-            <?php echo $this->form($this->formDeleteSelected); ?>
+            ) ?></p>
+            <?= $this->form($this->formDeleteSelected) ?>
         </div>
     </div>
 </div>
 <div id="sidebar-delete-all" class="sidebar">
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
-    ]); ?>
+    ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-confirm">
-            <h3><?php echo $translate('Delete annotations'); ?></h3>
-            <p><?php echo $translate('Are you sure you would like to delete all annotations on all pages of this result?'); ?></p>
-            <p class="error"><?php echo sprintf(
+            <h3><?= $translate('Delete annotations') ?></h3>
+            <p><?= $translate('Are you sure you would like to delete all annotations on all pages of this result?') ?></p>
+            <p class="error"><?= sprintf(
                 $translate('%s: this action will permanently delete %s annotations and cannot be undone.'),
                 sprintf('<strong>%s</strong>', $translate('Warning')),
                 sprintf('<strong>%s</strong>', number_format($this->pagination()->getPaginator()->getTotalCount()))
-            ); ?></p>
-            <label><input type="checkbox" name="confirm-delete-all-check"> <?php echo $translate('Are you sure?'); ?></label>
-            <?php echo $this->form($this->formDeleteAll); ?>
+            ) ?></p>
+            <label><input type="checkbox" name="confirm-delete-all-check"> <?= $translate('Are you sure?') ?></label>
+            <?= $this->form($this->formDeleteAll) ?>
         </div>
     </div>
 </div>
@@ -244,21 +244,21 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
 <?php else: ?>
 
 <div class="no-resources">
-    <p><?php echo $translate('Your query returned no annotations.'); ?></p>
+    <p><?= $translate('Your query returned no annotations.') ?></p>
 </div>
 
 <?php endif; ?>
 
 <div id="sidebar-search" class="sidebar search">
-    <?php echo $hyperlink('', '#', [
+    <?= $hyperlink('', '#', [
         'class' => 'sidebar-close o-icon-close',
         'title' => $translate('Close'),
-    ]); ?>
+    ]) ?>
     <div class="sidebar-content">
         <div id="sidebar-search-form" class="disable-unsaved-warning">
-            <h3><?php echo $translate('Search annotations'); ?></h3>
-            <?php echo $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
-            <?php echo $this->form($formSearch); ?>
+            <h3><?= $translate('Search annotations') ?></h3>
+            <?= $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']) ?>
+            <?= $this->form($formSearch) ?>
         </div>
     </div>
 </div>

@@ -2,36 +2,36 @@
 $translate = $this->plugin('translate');
 ?>
 <div id='mapping-module' class='sidebar flags'>
-    <a href='#' class='sidebar-close o-icon-close'><span class='screen-reader-text'><?php echo $translate('Close Me'); ?></span></a>
-    <h3><?php echo $translate('Mapping Info'); ?></h3>
+    <a href='#' class='sidebar-close o-icon-close'><span class='screen-reader-text'><?= $translate('Close Me') ?></span></a>
+    <h3><?= $translate('Mapping Info') ?></h3>
     <ul>
         <li data-flag='column-map-lat' data-flag-type='mapping-module'>
-            <a href='#' class='button'><span><?php echo $translate('Latitude'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Latitude') ?></span></a>
         </li>
         <li data-flag='column-map-lng' data-flag-type='mapping-module'>
-            <a href='#' class='button'><span><?php echo $translate('Longitude'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Longitude') ?></span></a>
         </li>
         <li data-flag='column-map-latlng' data-flag-type='mapping-module'>
-            <a href='#' class='button'><span><?php echo $translate('Latitude/Longitude'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Latitude/Longitude') ?></span></a>
         </li>
     </ul>
 
-    <h4><?php echo $translate('Default View Settings'); ?></h4>
+    <h4><?= $translate('Default View Settings') ?></h4>
     <ul>
         <li data-flag='column-default-lat' data-flag-type='mapping-module-defaults'>
-            <a href='#' class='button'><span><?php echo $translate('Default Latitude'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Default Latitude') ?></span></a>
         </li>
         <li data-flag='column-default-lng' data-flag-type='mapping-module-defaults'>
-            <a href='#' class='button'><span><?php echo $translate('Default Longitude'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Default Longitude') ?></span></a>
         </li>
         <li data-flag='column-default-zoom' data-flag-type='mapping-module-defaults'>
-            <a href='#' class='button'><span><?php echo $translate('Default Zoom'); ?></span></a>
+            <a href='#' class='button'><span><?= $translate('Default Zoom') ?></span></a>
         </li>
     </ul>
 
     <div class='mapping-mapping options'>
-        <h4><?php echo $translate('Options'); ?></h4>
-        <a href='#' class='button column-multivalue'><span><?php echo $translate('Use multivalue separator'); ?></span></a>
-        <p><?php echo $translate('(Only applies to Latitude/Longitude)'); ?></p>
+        <h4><?= $translate('Options') ?></h4>
+        <a href='#' class='button column-multivalue'><span><?= $translate('Use multivalue separator') ?></span></a>
+        <p><?= $translate('(Only applies to Latitude/Longitude)') ?></p>
     </div>
 </div>

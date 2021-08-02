@@ -40,14 +40,14 @@ $sortHeadings = [
 ];
 ?>
 
-<?php echo $this->pageTitle('', 1, $translate('Annotations')); ?>
+<?= $this->pageTitle('', 1, $translate('Annotations')) ?>
 
-<?php echo $this->searchFilters(); ?>
+<?= $this->searchFilters() ?>
 
  <div class="browse-controls">
-    <?php echo $this->pagination(); ?>
+    <?= $this->pagination() ?>
     <?php // echo $this->hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']); ?>
-    <?php echo $this->sortSelector($sortHeadings); ?>
+    <?= $this->sortSelector($sortHeadings) ?>
 </div>
 
 <?php $this->trigger('view.browse.before'); ?>
@@ -56,11 +56,11 @@ $sortHeadings = [
     <thead>
         <tr>
             <th>
-                <?php echo $translate('Annotation'); ?>
+                <?= $translate('Annotation') ?>
             </th>
-            <th><?php echo $translate('Targets'); ?></th>
-            <th><?php echo $translate('Annotator'); ?></th>
-            <th><?php echo $translate('Date annotated'); ?></th>
+            <th><?= $translate('Targets') ?></th>
+            <th><?= $translate('Annotator') ?></th>
+            <th><?= $translate('Date annotated') ?></th>
         </tr>
     </thead>
     <tbody>
@@ -71,16 +71,16 @@ $sortHeadings = [
         ?>
         <tr class="annotation">
             <td>
-                <?php echo $annotation->linkPretty(); ?>
+                <?= $annotation->linkPretty() ?>
             </td>
             <td>
                 <?php if ($resources): ?>
                     <?php foreach ($resources as $resource): ?>
-                    <?php echo $resource->linkPretty(); ?>
-                    <span class="resource-name <?php echo $resource->getControllerName(); ?>" aria-label="<?php echo $translate($resource->getControllerName()); ?>"></span>
+                    <?= $resource->linkPretty() ?>
+                    <span class="resource-name <?= $resource->getControllerName() ?>" aria-label="<?= $translate($resource->getControllerName()) ?>"></span>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    [<?php echo $translate('Removed'); ?>]
+                    [<?= $translate('Removed') ?>]
                 <span class="resource-name no-resource"></span>
                 <?php endif; ?>
             </td>
@@ -89,7 +89,7 @@ $sortHeadings = [
                     echo $annotation->linkAnnotator();
                 ?></span>
             </td>
-            <td><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></td>
+            <td><?= $annotation->created()->format('Y-m-d H:i:s') ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>
@@ -97,13 +97,13 @@ $sortHeadings = [
 
 <?php $this->trigger('view.browse.after'); ?>
 <div class="browse-controls">
-    <?php echo $this->pagination(); ?>
+    <?= $this->pagination() ?>
 </div>
 
 <?php else: ?>
 
 <div class="no-resources">
-    <p><?php echo $translate('Your query returned no annotations.'); ?></p>
+    <p><?= $translate('Your query returned no annotations.') ?></p>
 </div>
 
 <?php endif; ?>

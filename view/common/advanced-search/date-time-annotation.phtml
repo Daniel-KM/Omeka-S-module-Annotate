@@ -40,11 +40,11 @@ $queryInputText = function (array $search, $index) {
 
 <div id="datetime-queries" class="field removable multi-value" role="group" aria-labelledby="by-datetime-label">
     <div class="field-meta">
-        <span id="by-datetime-label" class="label"><?php echo $translate('Search by date / time'); ?></span>
-        <a class="expand" title="<?php echo $translate('Expand'); ?>" href="#" aria-label="<?php echo $translate('Expand'); ?>"></a>
+        <span id="by-datetime-label" class="label"><?= $translate('Search by date / time') ?></span>
+        <a class="expand" title="<?= $translate('Expand') ?>" href="#" aria-label="<?= $translate('Expand') ?>"></a>
         <div class="collapsible">
             <div class="field-description">
-                <?php echo $translate('Date / time can be full like "2018-01-23 12:34:56", or partial like "2018-12-25" or "2017-11".'); ?>
+                <?= $translate('Date / time can be full like "2018-01-23 12:34:56", or partial like "2018-12-25" or "2017-11".') ?>
             </div>
         </div>
     </div>
@@ -55,9 +55,9 @@ $queryInputText = function (array $search, $index) {
         $stem = 'datetime[' . $index . ']';
         ?>
         <div class="value">
-            <select class="joiner" name="<?php echo $escape($stem . '[joiner]'); ?>">
-                <?php echo $querySelectOption('and', $datetime, 'joiner', $translate('And')); ?>
-                <?php echo $querySelectOption('or', $datetime, 'joiner', $translate('Or')); ?>
+            <select class="joiner" name="<?= $escape($stem . '[joiner]') ?>">
+                <?= $querySelectOption('and', $datetime, 'joiner', $translate('And')) ?>
+                <?= $querySelectOption('or', $datetime, 'joiner', $translate('Or')) ?>
             </select>
             <?php
             $select = (new \Laminas\Form\Element\Select())
@@ -73,18 +73,18 @@ $queryInputText = function (array $search, $index) {
                 ]);
             echo $this->formSelect($select);
             ?>
-            <select class="query-type" name="<?php echo $escape($stem . '[type]'); ?>" aria-label="<?php echo $translate('Query type'); ?>">
-                <?php echo $querySelectOption('gt', $datetime, 'type', $translate('after')); ?>
-                <?php echo $querySelectOption('gte', $datetime, 'type', $translate('after or on')); ?>
-                <?php echo $querySelectOption('eq', $datetime, 'type', $translate('on')); ?>
-                <?php echo $querySelectOption('neq', $datetime, 'type', $translate('not on')); ?>
-                <?php echo $querySelectOption('lte', $datetime, 'type', $translate('before or on')); ?>
-                <?php echo $querySelectOption('lt', $datetime, 'type', $translate('before')); ?>
-                <?php echo $querySelectOption('ex', $datetime, 'type', $translate('has any date / time')); ?>
-                <?php echo $querySelectOption('nex', $datetime, 'type', $translate('has no date / time')); ?>
+            <select class="query-type" name="<?= $escape($stem . '[type]') ?>" aria-label="<?= $translate('Query type') ?>">
+                <?= $querySelectOption('gt', $datetime, 'type', $translate('after')) ?>
+                <?= $querySelectOption('gte', $datetime, 'type', $translate('after or on')) ?>
+                <?= $querySelectOption('eq', $datetime, 'type', $translate('on')) ?>
+                <?= $querySelectOption('neq', $datetime, 'type', $translate('not on')) ?>
+                <?= $querySelectOption('lte', $datetime, 'type', $translate('before or on')) ?>
+                <?= $querySelectOption('lt', $datetime, 'type', $translate('before')) ?>
+                <?= $querySelectOption('ex', $datetime, 'type', $translate('has any date / time')) ?>
+                <?= $querySelectOption('nex', $datetime, 'type', $translate('has no date / time')) ?>
             </select>
-            <?php echo $queryInputText($datetime, $index); ?>
-            <button type="button" class="o-icon-delete remove-value button"><?php echo $translate('Remove date / time'); ?></button>
+            <?= $queryInputText($datetime, $index) ?>
+            <button type="button" class="o-icon-delete remove-value button"><?= $translate('Remove date / time') ?></button>
         </div>
         <?php
         ++$index;

@@ -9,14 +9,14 @@ $escapeAttr = $this->plugin('escapeHtmlAttr');
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->htmlElement('body')->appendAttribute('class', 'annotations search');
 ?>
-<?php echo $this->pageTitle($translate('Advanced search'), 1, $translate('Annotations')); ?>
-<form id="advanced-search" method="get" action="<?php echo $escapeAttr($this->url(null, ['action' => 'browse'], true)); ?>">
-<?php echo $this->partial(
+<?= $this->pageTitle($translate('Advanced search'), 1, $translate('Annotations')) ?>
+<form id="advanced-search" method="get" action="<?= $escapeAttr($this->url(null, ['action' => 'browse'], true)) ?>">
+<?= $this->partial(
     'common/advanced-search',
     ['query' => $query, 'resourceType' => 'annotation']
-); ?>
+) ?>
 <div id="page-actions">
-    <?php echo $this->hyperlink($translate('Reset'), $this->url(null, [], true), ['class' => 'button']); ?>
-    <input type="submit" name="submit" value="<?php echo $escapeAttr($translate('Search')); ?>">
+    <?= $this->hyperlink($translate('Reset'), $this->url(null, [], true), ['class' => 'button']) ?>
+    <input type="submit" name="submit" value="<?= $escapeAttr($translate('Search')) ?>">
 </div>
 </form>

@@ -22,10 +22,10 @@ $this->headScript()
 ?>
 
 <div id="annotations" class="annotations">
-<h3><?php echo $translate('Annotations'); ?></h3>
+<h3><?= $translate('Annotations') ?></h3>
 <?php if (empty($annotations)): ?>
     <div class="no-resources">
-        <p><?php echo $translate('There are no annotations for this resource.'); ?></p>
+        <p><?= $translate('There are no annotations for this resource.') ?></p>
     </div>
 <?php else: ?>
     <?php foreach ($annotations as $annotation): ?>
@@ -34,13 +34,13 @@ $this->headScript()
 
 <table>
 <caption class="annotation-caption">
-    <?php echo sprintf($translate('[Annotation #%d]'), $annotation->id()); ?>
-    <span class="annotation-created"><?php echo $annotation->created()->format('Y-m-d H:i:s'); ?></span>
-    <span class="annotation-owner"><?php echo $annotation->owner()->name(); ?></span>
+    <?= sprintf($translate('[Annotation #%d]'), $annotation->id()) ?>
+    <span class="annotation-created"><?= $annotation->created()->format('Y-m-d H:i:s') ?></span>
+    <span class="annotation-owner"><?= $annotation->owner()->name() ?></span>
     <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true]); ?>
     <?php foreach ($motivatedByValues as $value): ?>
     <span class="oa-motivated-by">
-        <?php echo $escape($value); ?>
+        <?= $escape($value) ?>
     </span>
     <?php endforeach; ?>
 </caption>
@@ -56,8 +56,8 @@ $annotationBodies = $annotation->bodies();
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
-        <th><?php echo $translate('Value'); ?></th>
-        <th><?php echo $translate('Purpose'); ?></th>
+        <th><?= $translate('Value') ?></th>
+        <th><?= $translate('Purpose') ?></th>
     </tr>
 </thead>
 <tbody>
@@ -76,10 +76,10 @@ $annotationBodies = $annotation->bodies();
     <?php foreach ($bodyValues as $bodyValue): ?>
     <tr class="annotation-body">
         <td>
-            <?php echo $bodyValue->asHtml(); ?>
+            <?= $bodyValue->asHtml() ?>
         </td>
         <td>
-            <?php echo $hasPurposeHtml; ?>
+            <?= $hasPurposeHtml ?>
         </td>
     </tr>
     <?php endforeach; ?>
@@ -93,14 +93,14 @@ $annotationBodies = $annotation->bodies();
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
                     <?php $isLong = false; ?>
-                    <?php echo $value->valueResource()->linkPretty(); ?>
+                    <?= $value->valueResource()->linkPretty() ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-body-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+                        <div class="annotation-body-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
                     <?php else: ?>
-                        <?php echo nl2br($escape($text)); ?>
+                        <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -110,7 +110,7 @@ $annotationBodies = $annotation->bodies();
             <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="oa-has-purpose">
-                <?php echo $escape($value); ?>
+                <?= $escape($value) ?>
             </span>
             <?php endforeach; ?>
         </td>
@@ -137,8 +137,8 @@ foreach ($annotationTargets as $annotationTarget) {
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
 <thead>
     <tr>
-        <th><?php echo $translate('Target selector'); ?></th>
-        <th><?php echo $translate('Selector type'); ?></th>
+        <th><?= $translate('Target selector') ?></th>
+        <th><?= $translate('Selector type') ?></th>
     </tr>
 </thead>
 <tbody>
@@ -150,14 +150,14 @@ foreach ($annotationTargets as $annotationTarget) {
             <div class="rdf-value">
                 <?php if ($value && $value->type() === 'resource'): ?>
                     <?php $isLong = false; ?>
-                    <?php echo $value->valueResource()->linkPretty(); ?>
+                    <?= $value->valueResource()->linkPretty() ?>
                 <?php else: ?>
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-target-truncated truncate"><?php echo nl2br($escape(substr($text, 0, 240))) . '…'; ?></div>
+                        <div class="annotation-target-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
                     <?php else: ?>
-                        <?php echo nl2br($escape($text)); ?>
+                        <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
@@ -167,7 +167,7 @@ foreach ($annotationTargets as $annotationTarget) {
             <?php $values = $annotationTarget->value('rdf:type', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <span class="rdf-type">
-                <?php echo $escape($value); ?>
+                <?= $escape($value) ?>
             </span>
             <?php endforeach; ?>
         </td>
