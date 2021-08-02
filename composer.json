@@ -24,26 +24,46 @@
         "tagging",
         "commenting"
     ],
-    "require": {
-        "grimmlink/webui-popover": "^1.2",
-        "slowprog/composer-copy-file": "^0.3.1"
-    },
     "autoload-dev": {
         "psr-4": {
             "AnnotateTest\\": "test/AnnotateTest/"
         }
     },
-    "scripts": {
-        "post-install-cmd": [
-            "SlowProg\\CopyFile\\ScriptHandler::copy"
-        ],
-        "post-update-cmd": [
-            "SlowProg\\CopyFile\\ScriptHandler::copy"
-        ]
+    "require": {
+        "grimmlink/webui-popover": "^1.2",
+        "oomphinc/composer-installers-extender": "^2.0"
     },
     "extra": {
-        "copy-file": {
-            "vendor/grimmlink/webui-popover/dist/": "asset/vendor/webui-popover"
+        "installer-types": ["omeka-addon-asset"],
+        "installer-paths": {
+            "asset/vendor/{$name}/": [
+                "type:omeka-addon-asset"
+            ]
         }
+    },
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "grimmlink/webui-popover",
+                "version": "1.2.18",
+                "type": "omeka-addon-asset",
+                "dist": {
+                    "type": "tar",
+                    "url": "https://github.com/grimmlink/webui-popover/archive/refs/heads/master.tar.gz"
+                },
+                "extra": {
+                    "installer-name": "webui-popover-full"
+                }
+            }
+        }
+    ],
+    "scripts": {
+        "post-install-cmd": "@build",
+        "post-update-cmd": "@build",
+        "build": [
+            "@php -r '@rename(__DIR__ . \"/asset/vendor/webui-popover-full/dist\", __DIR__ . \"/asset/vendor/webui-popover\");'",
+            "@php -r 'exec(sprintf(\"rm -rf %s\", escapeshellarg(__DIR__ . \"/asset/vendor/webui-popover-full\")));'"
+        ]
     }
 }
