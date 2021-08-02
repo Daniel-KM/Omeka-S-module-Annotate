@@ -987,7 +987,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         $resourceTemplateId = $this->resourceTemplateId('Annotation');
-        $resourceClassId =  $this->resourceClassId('oa:Annotation');
+        $resourceClassId = $this->resourceClassId('oa:Annotation');
         $data['o:resource_template'] = $resourceTemplateId ? ['o:id' => $resourceTemplateId] : null;
         $data['o:resource_class'] = $resourceClassId ? ['o:id' => $resourceClassId] : null;
 

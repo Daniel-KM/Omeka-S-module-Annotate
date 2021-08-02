@@ -28,7 +28,6 @@ class ResourceTemplateAnnotationPartMap extends AbstractPlugin
     {
         $settings = $this->settings;
         $mapping = $settings()->get('annotate_resource_template_data', []);
-        return $mapping[$resourceTemplateId]
-            ?? [];
+        return $mapping[$resourceTemplateId] ?? [];
     }
 }

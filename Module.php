@@ -673,9 +673,15 @@ class Module extends AbstractModule
             // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
             // Note: Omeka uses singular for "o:item_set" (array for item), but
             // plural for "o:items" (a link for item sets), but singular "o:item"
-            // for medias.
+            // for medias. "o:site" uses singular (array for items).
             // Anyway, all other terms are singular (dublin core, etc.).
             $jsonLd['o:annotation'] = $annotations;
+            /*
+            $jsonLd['o:annotations'] = [
+                '@id' => $this->getServiceLocator()->get('ViewHelperManager')->get('url')
+                    ->__invoke('api/default', ['resource' => 'annotations'], ['query' => ['resource_id' => $resource->id()], 'force_canonical' => true]),
+            ];
+            */
             $event->setParam('jsonLd', $jsonLd);
         }
     }
