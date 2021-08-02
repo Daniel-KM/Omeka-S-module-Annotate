@@ -262,8 +262,6 @@ class Module extends AbstractModule
      * Add ACL rules for visitors (read only).
      *
      * @todo Add rights to update annotation (flag only).
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForVisitors(LaminasAcl $acl): void
     {
@@ -287,8 +285,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL rules for annotator visitors.
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForVisitorAnnotators(LaminasAcl $acl): void
     {
@@ -312,8 +308,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL rules for annotator.
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForAnnotator(LaminasAcl $acl): void
     {
@@ -389,8 +383,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL rules for annotators (not visitor).
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForAnnotators(LaminasAcl $acl): void
     {
@@ -429,8 +421,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL rules for approbators.
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForApprobators(LaminasAcl $acl): void
     {
@@ -503,8 +493,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL rules for approbators.
-     *
-     * @param LaminasAcl $acl
      */
     protected function addRulesForAdmins(LaminasAcl $acl): void
     {
@@ -667,8 +655,6 @@ class Module extends AbstractModule
 
     /**
      * Add the annotation data to the resource JSON-LD.
-     *
-     * @param Event $event
      */
     public function filterJsonLd(Event $event): void
     {
@@ -685,7 +671,9 @@ class Module extends AbstractModule
         if ($annotations) {
             $jsonLd = $event->getParam('jsonLd');
             // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
-            // Note: Omeka uses singular for "o:item_set", but plural for "o:items".
+            // Note: Omeka uses singular for "o:item_set" (array for item), but
+            // plural for "o:items" (a link for item sets), but singular "o:item"
+            // for medias.
             // Anyway, all other terms are singular (dublin core, etc.).
             $jsonLd['o:annotation'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
@@ -694,8 +682,6 @@ class Module extends AbstractModule
 
     /**
      * Helper to filter search queries for resource templates.
-     *
-     * @param Event $event
      */
     public function searchQueryResourceTemplate(Event $event): void
     {
@@ -740,8 +726,6 @@ class Module extends AbstractModule
 
     /**
      * Display the advanced search form for annotations via partial.
-     *
-     * @param Event $event
      */
     public function displayAdvancedSearchAnnotation(Event $event): void
     {
@@ -774,8 +758,6 @@ class Module extends AbstractModule
 
     /**
      * Filter search filters of annotations for display.
-     *
-     * @param Event $event
      */
     public function filterSearchFiltersAnnotation(Event $event): void
     {
@@ -930,8 +912,6 @@ class Module extends AbstractModule
 
     /**
      * Add the headers for admin management.
-     *
-     * @param Event $event
      */
     public function addHeadersAdmin(Event $event): void
     {
@@ -952,8 +932,6 @@ class Module extends AbstractModule
 
     /**
      * Add a tab to section navigation.
-     *
-     * @param Event $event
      */
     public function addTab(Event $event): void
     {
@@ -964,8 +942,6 @@ class Module extends AbstractModule
 
     /**
      * Display a partial for a resource.
-     *
-     * @param Event $event
      */
     public function displayListAndForm(Event $event): void
     {
@@ -983,8 +959,6 @@ class Module extends AbstractModule
 
     /**
      * Display the list for a resource.
-     *
-     * @param Event $event
      */
     public function displayList(Event $event): void
     {
@@ -1009,8 +983,6 @@ class Module extends AbstractModule
 
     /**
      * Display the details for a resource.
-     *
-     * @param Event $event
      */
     public function viewDetails(Event $event): void
     {
@@ -1021,8 +993,6 @@ class Module extends AbstractModule
 
     /**
      * Display a form.
-     *
-     * @param Event $event
      */
     public function displayForm(Event $event): void
     {
@@ -1069,8 +1039,6 @@ class Module extends AbstractModule
 
     /**
      * Display a partial for a resource in public.
-     *
-     * @param Event $event
      */
     public function displayPublic(Event $event): void
     {
@@ -1094,14 +1062,12 @@ class Module extends AbstractModule
     /**
      * Helper to display a partial for a resource.
      *
-     * @param Event $event
-     * @param AbstractResourceEntityRepresentation $resource
      * @param bool $listAsDiv Return the list with div, not ul.
      */
     protected function displayResourceAnnotations(
         Event $event,
         AbstractResourceEntityRepresentation $resource,
-        $listAsDiv = false,
+        bool $listAsDiv = false,
         array $query = []
     ): void {
         $services = $this->getServiceLocator();
@@ -1129,40 +1095,18 @@ class Module extends AbstractModule
      * Check if a user can read annotations.
      *
      * @todo Is it really useful to check if user can read annotations?
-     *
-     * @return bool
      */
-    protected function userCanRead()
+    protected function userCanRead(): bool
     {
         $userIsAllowed = $this->getServiceLocator()->get('ViewHelperManager')
             ->get('userIsAllowed');
         return $userIsAllowed(Annotation::class, 'read');
     }
 
-    protected function isAnnotationEnabledForResource(AbstractEntityRepresentation $resource)
-    {
-        // TODO Some type of annotation may be removed for some annotation types.
-        return true;
-
-        if ($resource->getControllerName() === 'user') {
-            return true;
-        }
-        $settings = $this->getServiceLocator()->get('Omeka\Settings');
-        $commentResources = $settings->get('annotate_resources');
-        $resourceName = $resource->resourceName();
-        return in_array($resourceName, $commentResources);
-    }
-
     /**
      * Helper to get the column id of an entity.
-     *
-     * Note: Resource representation have method resourceName(), but site page
-     * and user don't. Site page has no getControllerName().
-     *
-     * @param AbstractEntity $resource
-     * @return string
      */
-    protected function columnNameOfEntity(AbstractEntity $resource)
+    protected function columnNameOfEntity(AbstractEntity $resource): ?string
     {
         $entityColumnNames = [
             \Omeka\Entity\ItemSet::class => 'resource_id',
@@ -1170,8 +1114,7 @@ class Module extends AbstractModule
             \Omeka\Entity\Media::class => 'resource_id',
             \Omeka\Entity\User::class => 'owner_id',
         ];
-        $entityColumnName = $entityColumnNames[$resource->getResourceId()];
-        return $entityColumnName;
+        return $entityColumnNames[$resource->getResourceId()] ?? null;
     }
 
     /**
@@ -1179,11 +1122,8 @@ class Module extends AbstractModule
      *
      * Note: Resource representation have method resourceName(), but site page
      * and user don't. Site page has no getControllerName().
-     *
-     * @param AbstractEntityRepresentation $representation
-     * @return string
      */
-    protected function columnNameOfRepresentation(AbstractEntityRepresentation $representation)
+    protected function columnNameOfRepresentation(AbstractEntityRepresentation $representation): ?string
     {
         $entityColumnNames = [
             'item-set' => 'resource_id',
@@ -1191,7 +1131,6 @@ class Module extends AbstractModule
             'media' => 'resource_id',
             'user' => 'owner_id',
         ];
-        $entityColumnName = $entityColumnNames[$representation->getControllerName()];
-        return $entityColumnName;
+        return $entityColumnNames[$representation->getControllerName()] ?? null;
     }
 }
