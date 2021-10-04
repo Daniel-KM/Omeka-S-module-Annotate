@@ -1030,11 +1030,11 @@ class Module extends AbstractModule
         // }
         $data = [];
         // TODO Make the property id of oa:hasTarget/oa:hasSource static or integrate it to avoid a double query.
-        $response = $api->searchOne('properties', ['term' => 'oa:hasSource']);
-        if (!$response) {
+        $property = $api->searchOne('properties', ['term' => 'oa:hasSource'])->getContent();
+        if (!$property) {
             return;
         }
-        $propertyId = $response->getContent()->id();
+        $propertyId = $property->id();
         // TODO Make the form use fieldset.
         $data['oa:hasTarget[0][oa:hasSource][0][property_id]'] = $propertyId;
         $data['oa:hasTarget[0][oa:hasSource][0][type]'] = 'resource';
