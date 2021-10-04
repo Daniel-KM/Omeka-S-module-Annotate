@@ -5,9 +5,10 @@ Annotate (module for Omeka S)
 > are available on [GitLab], which seems to respect users and privacy better
 > than the previous repository.__
 
-[Annotate] is a module for [Omeka S] that implements the [Web Annotation Ontology]
-of the World Wide Web consortium [W3C] and creates a resource template to allow
-users to annotate, tag, comment, rate, highlight, draw, etc. any target resource
+[Annotate] is a module for [Omeka S] that implements the backend to manage the
+[Web Annotation Ontology] of the World Wide Web consortium [W3C]. It has no end
+user friendly interface, that are provided by other modules or by a theme in
+order to annotate, tag, comment, rate, highlight, draw, etc. any target resource
 easily and in a normalized way.
 
 The module adds a role "Annotator" too, who has less rights than a Researcher
@@ -167,7 +168,7 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 
 [Annotate]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate
 [Omeka S]: https://omeka.org/s
-[Web Annotation Ontology]: https://www.w3.org/ns/oa
+[Web Annotation Ontology]: https://www.w3.org/annotation/
 [W3C]: https://www.w3.org
 [installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
