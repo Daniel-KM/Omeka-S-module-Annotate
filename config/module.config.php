@@ -69,9 +69,6 @@ return [
         ],
     ],
     'form_elements' => [
-        'invokables' => [
-            Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
-        ],
         'factories' => [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
             Form\QuickSearchForm::class => Service\Form\QuickSearchFormFactory::class,
@@ -242,11 +239,6 @@ return [
             'annotate_public_allow_view' => true,
             'annotate_public_allow_annotate' => false,
             'annotate_resource_template_data' => [],
-        ],
-        'site_settings' => [
-            'annotate_append_item_set_show' => false,
-            'annotate_append_item_show' => true,
-            'annotate_append_media_show' => false,
         ],
     ],
     'csvimport' => [

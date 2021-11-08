@@ -631,13 +631,6 @@ class Module extends AbstractModule
             [$this, 'handleResourceTemplateDeletePost']
         );
 
-        // Site settings.
-        $sharedEventManager->attach(
-            \Omeka\Form\SiteSettingsForm::class,
-            'form.add_elements',
-            [$this, 'handleSiteSettings']
-        );
-
         // Display a warn before uninstalling.
         $sharedEventManager->attach(
             'Omeka\Controller\Admin\Module',
@@ -1048,20 +1041,8 @@ class Module extends AbstractModule
      */
     public function displayPublic(Event $event): void
     {
-        $serviceLocator = $this->getServiceLocator();
-        $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
         $view = $event->getTarget();
         $resource = $view->resource;
-        $resourceName = $resource->resourceName();
-        $appendMap = [
-            'item_sets' => 'annotate_append_item_set_show',
-            'items' => 'annotate_append_item_show',
-            'media' => 'annotate_append_media_show',
-        ];
-        if (!$siteSettings->get($appendMap[$resourceName])) {
-            return;
-        }
-
         echo $view->annotations($resource);
     }
 

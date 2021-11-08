@@ -7,7 +7,7 @@ use Omeka\Stdlib\Message;
 
 /**
  * @var Module $this
- * @var \Laminas\ServiceManager\ServiceLocatorInterface $serviceLocator
+ * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
  * @var string $newVersion
  * @var string $oldVersion
  *
@@ -172,4 +172,30 @@ if (version_compare($oldVersion, '3.3', '<')) {
 ALTER TABLE `annotation_part` CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL;
 SQL;
     $connection->exec($sql);
+}
+
+if (version_compare($oldVersion, '3.3.3.6', '<')) {
+    $messenger = new Messenger();
+    if ($this->isModuleActive('AdvancedSearch')) {
+        // No need to update params when BlocksDisposition is present.
+        $message = new Message(
+            'This release moved the params for public display to module BlocksDisposition, so check your site settings.'
+        );
+    } else {
+        $message = new Message(
+            'This release moved the public display to module BlocksDisposition, so install it and check your site settings.'
+        );
+    }
+
+    $sql = <<<SQL
+DELETE FROM `site_setting`
+WHERE `id` IN (
+    "annotate_append_item_set_show",
+    "annotate_append_item_show",
+    "annotate_append_media_show"
+)
+SQL;
+    $connection->exec($sql);
+
+    $messenger->addWarning($message);
 }
