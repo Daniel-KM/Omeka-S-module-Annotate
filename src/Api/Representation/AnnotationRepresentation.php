@@ -157,7 +157,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         );
     }
 
-    public function displayTitle($default = null)
+    public function displayTitle($default = null, $lang = null)
     {
         $title = $this->title();
         if ($title !== null) {
