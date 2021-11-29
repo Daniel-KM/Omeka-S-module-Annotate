@@ -127,7 +127,8 @@ abstract class AbstractValueResourceEntityRepresentation extends AbstractResourc
         $thumbnailType = 'square',
         $titleDefault = null,
         $action = null,
-        array $attributes = null
+        ?array $attributes = null,
+        $lang = null
     ) {
         return null;
     }

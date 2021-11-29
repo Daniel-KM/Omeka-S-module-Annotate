@@ -204,7 +204,7 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
         return $values;
     }
 
-    public function displayTitle($default = null)
+    public function displayTitle($default = null, $lang = null)
     {
         $title = $this->value('oa:hasSource', [
             'default' => null,
