@@ -38,6 +38,10 @@ trait QueryDateTimeTrait
      *
      * @param QueryBuilder $qb
      * @param array $query
+     *
+     * @see \Annotate\Api\Adapter\QueryDateTimeTrait::searchDateTime()
+     * @see \Contribute\Api\Adapter\ContributionAdapter::buildQueryDateComparison()
+     * @see \Log\Api\Adapter\LogAdapter::buildQueryDateComparison()
      */
     public function searchDateTime(QueryBuilder $qb, array $query): void
     {

@@ -56,7 +56,8 @@ SQL;
             )
         );
     }
-    $terms = array_map('trim', explode(PHP_EOL, $customVocab->terms()));
+    $terms = $customVocab->terms();
+    $terms = is_array($terms) ? $terms : array_map('trim', explode(PHP_EOL, $customVocab->terms()));
     $terms = array_unique(array_merge($terms, [
         'o:Item',
         'o:ItemSet',

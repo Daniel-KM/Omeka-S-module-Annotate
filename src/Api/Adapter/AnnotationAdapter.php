@@ -1026,7 +1026,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 }
                 foreach ($data['oa:hasTarget'] as &$hasTarget) {
                     foreach ($hasTarget['oa:hasSource'] as &$value) {
-                        $resource = $this->getEntityManager()->getRepository(\Omeka\Entity\Resource::class)->find($value['value_resource_id']);
+                        $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
                         if (!$resource) {
                             continue;
                         }
@@ -1076,7 +1076,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
         try {
             return $api->read('custom_vocabs', ['label' => $label], [], ['responseContent' => 'resource'])->getContent()->getId();
-        } catch (Exception $e) {
+        } catch (Exception\NotFoundException $e) {
             return null;
         }
     }
