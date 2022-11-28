@@ -953,7 +953,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * To simplify sub-modules or third-party clients, the annotations can be
      * created simpler.
      *
-     * Currently, the fields that are checked are adapted to a comment:
+     * Currently, the fields that are checked are adapted to a assessment and
+     * comment:
      * - oa:motivatedBy: when it contains only one value, it is a simple
      *   annotation.
      * - oa:hasBody for each each rdf:value,
@@ -971,6 +972,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $data = $request->getContent();
 
         $mapSimples = [
+            'assessing',
             'commenting',
         ];
 
@@ -997,32 +999,62 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $oaHasPurposeId = $this->propertyId('oa:hasPurpose');
         $oaHasSourceId = $this->propertyId('oa:hasSource');
         $rdfValueId = $this->propertyId('rdf:value');
+        $dctermsFormatId = $this->propertyId('dcterms:format');
+
+        /** @var \Omeka\DataType\Manager $dataTypeManager */
+        $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
+        $hasNumericDataTypes = $dataTypeManager->has('numeric:integer');
 
         switch ($data['oa:motivatedBy'][0]['@value']) {
-            case 'commenting':
+            case 'assessing':
                 $data['oa:motivatedBy'] = [[
-                    '@value' => 'commenting',
+                    '@value' => 'assessing',
                     'property_id' => $oaMotivatedById,
                     'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
                     // No language, no visibility.
                 ]];
                 foreach ($data['oa:hasBody'] as &$hasBody) {
                     foreach ($hasBody['rdf:value'] as &$value) {
-                        $value = [
-                            '@value' => $value['@value'],
-                            'property_id' => $rdfValueId,
-                            'type' => 'literal',
-                            // No language, no visibility.
-                        ];
+                        if ($hasNumericDataTypes
+                            && is_numeric($value['@value'])
+                            && ctype_digit($value['@value'])
+                            && !empty($hasBody['dcterms:format'])
+                            && stripos($hasBody['dcterms:format'], 'integer') !== false
+                        ) {
+                            $value = [
+                                '@value' => $value['@value'],
+                                'property_id' => $rdfValueId,
+                                'type' => 'numeric:integer',
+                                // No language, no visibility.
+                            ];
+                        } else {
+                            $value = [
+                                '@value' => $value['@value'],
+                                'property_id' => $rdfValueId,
+                                'type' => 'literal',
+                                // No language, no visibility.
+                            ];
+                        }
+                        unset($value);
+                        foreach ($hasBody['dcterms:format'] ?? [] as &$value) {
+                            $value = [
+                                '@value' => $value['@value'],
+                                'property_id' => $dctermsFormatId,
+                                'type' => 'literal',
+                                // No language, no visibility.
+                            ];
+                        }
+                        unset($value);
+                        foreach ($hasBody['oa:hasPurpose'] ?? [] as &$value) {
+                            $value = [
+                                '@value' => $value['@value'],
+                                'property_id' => $oaHasPurposeId,
+                                'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
+                                // No language, no visibility.
+                            ];
+                        }
+                        unset($value);
                     }
-                    unset($value);
-                    // At least one purpose.
-                    $hasBody['oa:hasPurpose'] = [[
-                        '@value' => 'commenting',
-                        'property_id' => $oaHasPurposeId,
-                        'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
-                        // No language, no visibility.
-                    ]];
                 }
                 foreach ($data['oa:hasTarget'] as &$hasTarget) {
                     foreach ($hasTarget['oa:hasSource'] as &$value) {
@@ -1043,6 +1075,54 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     unset($hasTarget['rdf:value']);
                 }
                 break;
+
+            case 'commenting':
+                $data['oa:motivatedBy'] = [[
+                    '@value' => 'commenting',
+                    'property_id' => $oaMotivatedById,
+                    'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
+                    // No language, no visibility.
+                ]];
+                foreach ($data['oa:hasBody'] as &$hasBody) {
+                    foreach ($hasBody['rdf:value'] as &$value) {
+                        $value = [
+                            '@value' => $value['@value'],
+                            'property_id' => $rdfValueId,
+                            'type' => 'literal',
+                            // No language, no visibility.
+                        ];
+                    }
+                    unset($value);
+                    foreach ($hasBody['oa:hasPurpose'] ?? [] as &$value) {
+                        $value = [
+                            '@value' => $value['@value'],
+                            'property_id' => $oaHasPurposeId,
+                            'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
+                            // No language, no visibility.
+                        ];
+                    }
+                    unset($value);
+                }
+                foreach ($data['oa:hasTarget'] as &$hasTarget) {
+                    foreach ($hasTarget['oa:hasSource'] as &$value) {
+                        $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
+                        if (!$resource) {
+                            continue;
+                        }
+                        $value = [
+                            'value_resource_id' => $value['value_resource_id'],
+                            'property_id' => $oaHasSourceId,
+                            'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
+                            // No language, no visibility.
+                        ];
+                    }
+                    unset($value);
+                    // No subpart.
+                    unset($hasTarget['rdf:type']);
+                    unset($hasTarget['rdf:value']);
+                }
+                break;
+
             default:
                 break;
         }
