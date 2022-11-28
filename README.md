@@ -14,6 +14,55 @@ easily and in a normalized way.
 The module adds a role "Annotator" too, who has less rights than a Researcher
 and who can only annotate.
 
+### Difference between web annotation and value annotation
+
+This feature is not the same than the value annotations introduced in Omeka S
+version 3.2.
+
+A value annotation is a way for the librarian to annotate a value of the record,
+for example to indicate the role of the Dublin Core Creator, who can be an
+author, photograph, or a painter, or to indicate the quality of a value, for
+example a date may be certain or uncertain.
+
+A web annotation is a way for a user to annotate the resource itself, for
+example to highlight some parts of a pdf media, or to comment some zones of an
+image, or to rate the item as a whole. So the user may be the librarian or
+curator or not. The value annotations belong to the records but the web
+annotations are about the records.
+
+Of course, in some cases, the values are the same, for example the record may
+contain a Dublin Core Abstract that may have the same content than an assessment
+done by a specific user. And value annotations can be added to the abstract to
+indicate the user who wrote it, the date, etc., like for the web annotation. The
+fact that Omeka is semantic allows to record anything about anything. But
+precisely, in that case, the record strays from the logic of a record for a
+described entity.
+
+Besides, web annotations have some specific points not available as simple value
+annotations. They are designed to be recursive: it is possible to annotate an
+annotation, for example to reply to a comment. They are designed to be precise,
+and it is possible to annotate a portion of a text, unlike a record that is
+about a document as a whole, or to annotate a chapter of a book or a passage of
+a video or a zone of an image. For this point, the specification manages
+selectors and it makes a clear distinction between the target (the item or the
+media, or part of them) and the body (the annotation in the general sense).
+Furthermore, unlike the value or the value annotation of a record, an web
+annotation is static: it should not be updated or modified. For example, if a
+user comments an extract of a text, he should not be able to modify this first
+comment, but he should creates a second annotation motivated by an "edition" of
+it in order to track history. Nevertheless, the module let people to modify
+annotation records, because it's more common, but it can be controlled by a
+third party module.
+
+The main point is the fact that they are shareable through an open standard. On
+the web, there are multiple sites to rate a restaurant, to add a review on a
+book, etc. but they are generally not standard so each service keep its own
+data. The web annotations are a way to genericize all annotations on anything in
+a common way. And there are annotations servers than can be used to comment
+resource managed by another server. For example, a common annotation server
+used in universities is [Hypothes.is], that can be used to annotate Omeka
+resources, like in some projects.
+
 
 Installation
 ------------
@@ -57,10 +106,11 @@ not standard to annotations.
 
 - The Annotation data model is not fully implemented, only the most frequent
   properties are managed. Only one motivation, one body and one target are
-  generally managed.
-- According to the Annotation data model, only textual bodies can have a
-  purpose. So when the body is not a text, for example a link, the purpose is
-  cleared. Nevertheless, another body can contain a description and a purpose.
+  generally managed (but it is possible to have multiple annotations of course).
+- According to the Annotation data model, only textual bodies can have an
+  optional purpose. So when the body is not a text, for example a link, the
+  purpose is cleared. Nevertheless, another body can contain a description and a
+  purpose.
 - The name of the four custom vocabs `Annotation oa:Motivation`, `Annotation Body dcterms:format`,
   `Annotation Target dcterms:format`, and `Annotation Target rdf:type` are used
   internally and must not be changed for now.
@@ -70,6 +120,22 @@ not standard to annotations.
   model directly (`oa:ResourceSelection`, `oa:Selector`, `oa:State` and `oa:Style`)
   are not available by default (see the [Annotation vocabulary]). They can be
   added if really wanted, but it's better to extend the data model.
+
+An important point to understand when filling the form is the distinction
+between ["motivation" and "purpose"], because the list of the allowed values is
+the same. The motivation is required and is a way to declare the meaning of the
+annotation. It explains why the annotation is created. The purpose is optional
+and is a way to declare the meaning of the body. It explains why the body is
+what it is. For example, if a user adds a bookmark "readme" to a page of a text,
+the motivation is "bookmarking" but the purpose will be "tagging". For a
+comment, the motivation is "commenting", but the purpose may be "commenting",
+"replying", "editing" or even "questionning", "describing", etc. For a rating,
+the motivation is "assessment" and the purpose may be "classifying" when the
+rate is a symbol or a descriptor like "good", "very good", or nothing when it is
+a simple integer value (rendered, for example, as zero or one to five stars).
+
+In practice, for common cases or for simplicity, the purpose is the same than
+the motivation and can be skipped.
 
 
 Development
@@ -83,29 +149,82 @@ Development
 ### Api endpoint
 
 You can create annotations in a standard way on the api. To simplify process, it
-is possible to skip some keys in the payload, for example:
+is possible to skip some keys in the payload for some motivations.
+
+For a rating, that is an [assessment] with a value, generally numerical (that
+may be a float, a positive integer (from 1), a non negative integer (from 0),
+an enumeration, a range like here, etc., according to your needs), it can be
+for item #51:
 
 ```sh
-curl -X POST -H 'Accept: application/json' -i 'https://example.org/api/annotations?key_identity=xxx&key_credential=yyy&pretty_print=1' -F 'data={"oa:motivatedBy":[{"@value":"commenting"}],"oa:hasBody":[{"rdf:value":[{"@value":"My comment"}]}],"oa:hasTarget":[{"oa:hasSource":[{"value_resource_id":1}]}]}'
+curl -X POST -H 'Accept: application/json' -i 'https://example.org/api/annotations?key_identity=xxx&key_credential=yyy&pretty_print=1' -F 'data={
+    "oa:motivatedBy": [
+        {"@value": "assessing"}
+    ],
+    "oa:hasBody": [
+        {
+            "rdf:value": [
+                {"@value": 4}
+            ],
+            "dcterms:format": [
+                {"@value": "type: xs:positiveInteger, start: 1, end: 5"}
+            ]
+        }
+    ],
+    "oa:hasTarget": [
+        {
+            "oa:hasSource": [
+                {"value_resource_id": 51}
+            ]
+        }
+    ]
+}'
 ```
 
-This shortcut is available only when there is one and only one motivation and
-only for "commenting" for now.
+
+For a [comment] replying to the comment #52:
+
+```sh
+curl -X POST -H 'Accept: application/json' -i 'https://example.org/api/annotations?key_identity=xxx&key_credential=yyy&pretty_print=1' -F 'data={
+    "oa:motivatedBy": [
+        {"@value": "commenting"}
+    ],
+    "oa:hasBody": [
+        {
+            "oa:hasPurpose": [
+                {"@value": "replying"}
+            ],
+            "rdf:value": [
+                {"@value": "My comment replying to "}
+            ],
+        }
+    ],
+    "oa:hasTarget": [
+        {
+            "oa:hasSource": [
+                {"value_resource_id": 52}
+            ]
+        }
+    ]
+}'
+```
+
+These shortcuts are available only when there is one and only one motivation and
+only for "assessing" and "commenting" for now.
 
 
 TODO
 ----
 
-- [ ] Improve the core or the custom vocab module to keep "literal" as value type
-  (new column in value table or new one to one table?) (cf https://github.com/omeka/omeka-s/pull/1262).
+- [ ] Keep "literal" as value type instead of a custom vocab.
+- [ ] Remove dependency with CustomVocab.
 - [ ] Does the annotation need to be in the same json of the item? An item doesn't
-  know annotations about itself, they are independant, so to be removed.
+  know annotations about itself, they are independant, so to be removed: just keep a link.
 - [ ] Check the validity of multiple contexts omeka + annotation inside jsonld of
   annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
 - [ ] Targets and bodies should not have rest api access (they are created with the
   annotation). Upgrade them like value hydrator.
 - [ ] Make compatible with module Group (user page).
-- [ ] Remove dependency with CustomVocab.
 
 
 Warning
@@ -174,6 +293,10 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
+[Hypothes.is]: https://web.hypothes.is/
+["motivation" and "purpose"]: https://www.w3.org/TR/annotation-model/#motivation-and-purpose
+[comment]: https://www.w3.org/TR/annotation-vocab/#commenting
+[assessment]: https://www.w3.org/TR/annotation-vocab/#assessing
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
