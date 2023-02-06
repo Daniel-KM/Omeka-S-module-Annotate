@@ -1,5 +1,6 @@
 /asset/vendor
 /build
+/cache
 /language/debug.po
 /language/debug.mo
 /language/chef.po
@@ -10,5 +11,6 @@
 .bundle
 .DS_Store
 .php_cs.cache
+.php-cs-fixer.cache
 composer.phar
 debug.log
