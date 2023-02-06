@@ -6,6 +6,8 @@
         "o:comment": "The Web Annotation Vocabulary specifies the set of RDF classes, predicates and named entities that are used by the Web Annotation Data Model (http://www.w3.org/TR/annotation-model/)."
     },
     "strategy": "file",
-    "file": "oa.ttl",
-    "format": "turtle"
+    "options": {
+        "file": "oa.ttl",
+        "format": "turtle"
+    }
 }
