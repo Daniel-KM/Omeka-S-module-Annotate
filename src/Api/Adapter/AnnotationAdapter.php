@@ -975,14 +975,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
     /**
      * To simplify sub-modules or third-party clients, the annotations can be
-     * created simpler.
+     * created simpler, without property ids for main keys.
      *
-     * Currently, the fields that are checked are adapted to a assessment and
-     * comment:
-     * - oa:motivatedBy: when it contains only one value, it is a simple
-     *   annotation.
-     * - oa:hasBody for each each rdf:value,
-     * - oa:hasTarget for each each rdf:hasSource,
+     * There should be only for oa:motivatedBy and at least one target.
      *
      * @param \Omeka\Api\Request $request
      * @param \Omeka\Entity\EntityInterface $entity
@@ -995,17 +990,12 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     ): void {
         $data = $request->getContent();
 
-        $mapSimples = [
-            'assessing',
-            'commenting',
-        ];
-
         $isSimple = !empty($data['oa:motivatedBy'])
             && count($data['oa:motivatedBy']) === 1
             && count($data['oa:motivatedBy'][0]) === 1
             && !empty($data['oa:motivatedBy'][0]['@value'])
-            && in_array($data['oa:motivatedBy'][0]['@value'], $mapSimples)
-            && !empty($data['oa:hasBody'][0]['rdf:value'])
+            // Some motivations may have no body, for example bookmarking.
+            // && !empty($data['oa:hasBody'][0]['rdf:value'])
             && !empty($data['oa:hasTarget'][0]['oa:hasSource'])
         ;
         if (!$isSimple) {
@@ -1032,17 +1022,21 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
         $hasNumericDataTypes = $dataTypeManager->has('numeric:integer');
 
-        switch ($data['oa:motivatedBy'][0]['@value']) {
-            case 'assessing':
-                $data['oa:motivatedBy'] = [[
-                    '@value' => 'assessing',
-                    'property_id' => $oaMotivatedById,
-                    'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
-                    // No language, no visibility.
-                ]];
-                foreach ($data['oa:hasBody'] as &$hasBody) {
+        // TODO Add support for language and possibly for visibility (anyway, the full format manage them).
+
+        $motivation = $data['oa:motivatedBy'][0]['@value'];
+        $data['oa:motivatedBy'] = [[
+            '@value' => $motivation,
+            'property_id' => $oaMotivatedById,
+            'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
+        ]];
+
+        if (!empty($data['oa:hasBody'])) {
+            foreach ($data['oa:hasBody'] as &$hasBody) {
+                if (!empty($hasBody['rdf:value'])) {
                     foreach ($hasBody['rdf:value'] as &$value) {
-                        if ($hasNumericDataTypes
+                        if ($motivation === 'assessing'
+                            && $hasNumericDataTypes
                             && is_numeric($value['@value'])
                             && ctype_digit((string) $value['@value'])
                             && !empty($hasBody['dcterms:format'][0]['@value'])
@@ -1052,112 +1046,56 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                                 '@value' => (string) $value['@value'],
                                 'property_id' => $rdfValueId,
                                 'type' => 'numeric:integer',
-                                // No language, no visibility.
                             ];
                         } else {
                             $value = [
                                 '@value' => (string) $value['@value'],
                                 'property_id' => $rdfValueId,
                                 'type' => 'literal',
-                                // No language, no visibility.
                             ];
                         }
                     }
                     unset($value);
-                    if (!empty($hasBody['dcterms:format'])) {
-                        foreach ($hasBody['dcterms:format'] as &$value) {
-                            $value = [
-                                '@value' => (string) $value['@value'],
-                                'property_id' => $dctermsFormatId,
-                                'type' => 'literal',
-                                // No language, no visibility.
-                            ];
-                        }
-                        unset($value);
-                    }
-                    if (!empty($hasBody['oa:hasPurpose'])) {
-                        foreach ($hasBody['oa:hasPurpose'] as &$value) {
-                            $value = [
-                                '@value' => (string) $value['@value'],
-                                'property_id' => $oaHasPurposeId,
-                                'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
-                                // No language, no visibility.
-                            ];
-                        }
-                        unset($value);
-                    }
                 }
-                foreach ($data['oa:hasTarget'] as &$hasTarget) {
-                    foreach ($hasTarget['oa:hasSource'] as &$value) {
-                        $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
-                        if (!$resource) {
-                            continue;
-                        }
-                        $value = [
-                            'value_resource_id' => (int) $value['value_resource_id'],
-                            'property_id' => $oaHasSourceId,
-                            'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
-                            // No language, no visibility.
-                        ];
-                    }
-                    unset($value);
-                    // No subpart.
-                    unset($hasTarget['rdf:type']);
-                    unset($hasTarget['rdf:value']);
-                }
-                break;
-
-            case 'commenting':
-                $data['oa:motivatedBy'] = [[
-                    '@value' => 'commenting',
-                    'property_id' => $oaMotivatedById,
-                    'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
-                    // No language, no visibility.
-                ]];
-                foreach ($data['oa:hasBody'] as &$hasBody) {
-                    foreach ($hasBody['rdf:value'] as &$value) {
+                if (!empty($hasBody['dcterms:format'])) {
+                    foreach ($hasBody['dcterms:format'] as &$value) {
                         $value = [
                             '@value' => (string) $value['@value'],
-                            'property_id' => $rdfValueId,
+                            'property_id' => $dctermsFormatId,
                             'type' => 'literal',
-                            // No language, no visibility.
                         ];
                     }
                     unset($value);
-                    if (!empty($hasBody['oa:hasPurpose'])) {
-                        foreach ($hasBody['oa:hasPurpose'] as &$value) {
-                            $value = [
-                                '@value' => (string) $value['@value'],
-                                'property_id' => $oaHasPurposeId,
-                                'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
-                                // No language, no visibility.
-                            ];
-                        }
-                        unset($value);
-                    }
                 }
-                foreach ($data['oa:hasTarget'] as &$hasTarget) {
-                    foreach ($hasTarget['oa:hasSource'] as &$value) {
-                        $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
-                        if (!$resource) {
-                            continue;
-                        }
+                if (!empty($hasBody['oa:hasPurpose'])) {
+                    foreach ($hasBody['oa:hasPurpose'] as &$value) {
                         $value = [
-                            'value_resource_id' => (int) $value['value_resource_id'],
-                            'property_id' => $oaHasSourceId,
-                            'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
-                            // No language, no visibility.
+                            '@value' => (string) $value['@value'],
+                            'property_id' => $oaHasPurposeId,
+                            'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
                         ];
                     }
                     unset($value);
-                    // No subpart.
-                    unset($hasTarget['rdf:type']);
-                    unset($hasTarget['rdf:value']);
                 }
-                break;
+            }
+        }
 
-            default:
-                break;
+        foreach ($data['oa:hasTarget'] as &$hasTarget) {
+            foreach ($hasTarget['oa:hasSource'] as &$value) {
+                $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
+                if (!$resource) {
+                    continue;
+                }
+                $value = [
+                    'value_resource_id' => (int) $value['value_resource_id'],
+                    'property_id' => $oaHasSourceId,
+                    'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
+                ];
+            }
+            unset($value);
+            // No subpart.
+            unset($hasTarget['rdf:type']);
+            unset($hasTarget['rdf:value']);
         }
 
         $request->setContent($data);
