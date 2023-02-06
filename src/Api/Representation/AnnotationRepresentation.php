@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Api\Representation;
 
 use Annotate\Api\Adapter\AnnotationBodyHydrator;

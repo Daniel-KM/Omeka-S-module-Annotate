@@ -4,11 +4,14 @@
  * @var \Annotate\Api\Representation\AnnotationRepresentation $resource
  */
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
-$hyperlink = $this->plugin('hyperlink');
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
+
 $annotation = $resource;
 ?>
+
 <div class="resource-details" data-resource-values="<?php //echo $escape($values); ?>">
     <h3 class="o-module-annotation"><?= $annotation->linkPretty() ?></h3>
     <div class="meta-group">

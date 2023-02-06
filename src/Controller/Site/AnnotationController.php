@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Controller\Site;
 
 use Laminas\Mvc\Controller\AbstractActionController;
@@ -20,23 +21,23 @@ class AnnotationController extends AbstractActionController
 
         $resources = $response->getContent();
 
-        $view = new ViewModel;
-        $view->setVariable('site', $site);
-        $view->setVariable('resources', $resources);
-        $view->setVariable('annotations', $resources);
-        return $view;
+        return new ViewModel([
+            'site' => $site,
+            'resources' => $resources,
+            'annotations' => $resources,
+        ]);
     }
 
     public function showAction()
     {
         $site = $this->currentSite();
         $response = $this->api()->read('annotations', $this->params('id'));
-
-        $view = new ViewModel;
         $resource = $response->getContent();
-        $view->setVariable('site', $site);
-        $view->setVariable('resource', $resource);
-        $view->setVariable('annotation', $resource);
-        return $view;
+
+        return new ViewModel([
+            'site' => $site,
+            'resource' => $resource,
+            'annotation' => $resource,
+        ]);
     }
 }

@@ -6,16 +6,18 @@
 
 // TODO Use paginator like linked resources.
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
-$hyperlink = $this->plugin('hyperlink');
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()
-    ->appendStylesheet($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
-    ->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
+    ->appendStylesheet($assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
+    ->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()
-    ->appendFile($this->assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'), 'text/javascript', ['defer' => 'defer'])
-    ->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
+    ->appendFile($assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
 <div id="annotations" class="annotations">
@@ -74,7 +76,7 @@ $this->headScript()
 <?php
 // Manage full bodies. If there are embedded body values, there must not be a
 // body [w3c av 2.2.2].
-/** @var \Omeka\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
+/** @var \Annotate\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
 $annotationBodies = $annotation->bodies();
 ?>
 <?php if (count($annotationBodies)): ?>
@@ -181,7 +183,7 @@ $annotationBodies = $annotation->bodies();
 <?php endif; ?>
 
 <?php
-/** @var \Omeka\Api\Representation\AnnotationTargetRepresentation[] $annotationTargets */
+/** @var \Annotate\Api\Representation\AnnotationTargetRepresentation[] $annotationTargets */
 $annotationTargets = $annotation->targets();
 // Check if there are data to display too (there is at least one target, but may be just the source).
 $hasTargetData = false;

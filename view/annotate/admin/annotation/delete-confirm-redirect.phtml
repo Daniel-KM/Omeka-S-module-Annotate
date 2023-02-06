@@ -8,8 +8,10 @@
  */
 
 $translate = $this->plugin('translate');
+
 $this->form->setButtonLabel('Confirm delete'); // @translate
 ?>
+
 <?php if ($this->wrapSidebar): ?>
 <div id="delete" class="sidebar">
     <?= $this->hyperlink('', '#', ['class' => 'sidebar-close o-icon-close', 'title' => $translate('Close')]) ?>

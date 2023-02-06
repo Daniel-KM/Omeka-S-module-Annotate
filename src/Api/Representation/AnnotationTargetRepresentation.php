@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Api\Representation;
 
 use Annotate\Entity\AnnotationTarget;
@@ -38,7 +39,14 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
         // Standard or recommended properties from https://www.w3.org/TR/annotation-vocab.
         $map = [
             'oa:hasTarget' => [
-                'rdf:type' => ['oa:SpecificResource', 'dctype:DataSet', 'dctype:MovingImage', 'dctype:StillImage', 'dctype:Sound', 'dctype:Text'],
+                'rdf:type' => [
+                    'oa:SpecificResource',
+                    'dctype:DataSet',
+                    'dctype:MovingImage',
+                    'dctype:StillImage',
+                    'dctype:Sound',
+                    'dctype:Text',
+                ],
                 'oa:hasSource',
                 'oa:styleClass',
                 'oa:hasScope',
@@ -52,7 +60,16 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
                 'as:items',
             ],
             'oa:hasSelector' => [
-                'rdf:type' => ['oa:CssSelector', 'oa:DataPositionSelector', 'oa:FragmentSelector', 'oa:RangeSelector', 'oa:SvgSelector', 'oa:TextPositionSelector', 'oa:TextQuoteSelector', 'oa:XPathSelector'],
+                'rdf:type' => [
+                    'oa:CssSelector',
+                    'oa:DataPositionSelector',
+                    'oa:FragmentSelector',
+                    'oa:RangeSelector',
+                    'oa:SvgSelector',
+                    'oa:TextPositionSelector',
+                    'oa:TextQuoteSelector',
+                    'oa:XPathSelector',
+                ],
                 'rdf:value',
                 'oa:start',
                 'oa:end',
@@ -134,7 +151,7 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
             ],
         ];
 
-        // Manage some specifici properties.
+        // Manage some specific properties.
 
         $term = 'rdf:type';
         if (array_key_exists($term, $values)) {
@@ -165,7 +182,7 @@ class AnnotationTargetRepresentation extends AbstractValueResourceEntityRepresen
         }
 
         // Manage the sub value resource entities: if it's a resource, it should
-        // be the root (there should be only one in Cartography), and other the.
+        // be the root (there should be only one in Cartography), and the other
         // properties of this ResourceSelection. So it's the same than the
         // exception managed in parent::getJsonLd() and values().
         $subs = ['oa:hasSelector', 'oa:hasState', 'oa:renderedVia'];

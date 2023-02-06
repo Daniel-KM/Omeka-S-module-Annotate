@@ -4,11 +4,14 @@
  * @var array $query
  */
 
-$translate = $this->plugin('translate');
-$escapeAttr = $this->plugin('escapeHtmlAttr');
+$plugins = $this->getHelperPluginManager();
+$translate = $plugins->get('translate');
+$escapeAttr = $plugins->get('escapeHtmlAttr');
+
 $this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->htmlElement('body')->appendAttribute('class', 'annotations search');
 ?>
+
 <?= $this->pageTitle($translate('Advanced search'), 1, $translate('Annotations')) ?>
 <form id="advanced-search" method="get" action="<?= $escapeAttr($this->url(null, ['action' => 'browse'], true)) ?>">
 <?= $this->partial(

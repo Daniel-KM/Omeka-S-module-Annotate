@@ -2,7 +2,6 @@
 
 namespace Annotate;
 
-use Omeka\Mvc\Controller\Plugin\Messenger;
 use Omeka\Stdlib\Message;
 
 /**
@@ -14,14 +13,15 @@ use Omeka\Stdlib\Message;
  * @var \Doctrine\DBAL\Connection $connection
  * @var \Doctrine\ORM\EntityManager $entityManager
  * @var \Omeka\Api\Manager $api
+ * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
-$settings = $services->get('Omeka\Settings');
-$config = require dirname(__DIR__, 2) . '/config/module.config.php';
-$connection = $services->get('Omeka\Connection');
-$entityManager = $services->get('Omeka\EntityManager');
 $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
-$space = strtolower(__NAMESPACE__);
+// $config = require dirname(__DIR__, 2) . '/config/module.config.php';
+// $settings = $services->get('Omeka\Settings');
+$connection = $services->get('Omeka\Connection');
+$messenger = $plugins->get('messenger');
+$entityManager = $services->get('Omeka\EntityManager');
 
 if (version_compare($oldVersion, '3.0.1', '<')) {
     // The media-type is not standard, but application/wkt seems better.
@@ -159,7 +159,6 @@ SQL;
 }
 
 if (version_compare($oldVersion, '3.3', '<')) {
-    $messenger = new Messenger();
     $message = new Message(
         'This release changed two features, so check your theme.'
     );
@@ -176,7 +175,6 @@ SQL;
 }
 
 if (version_compare($oldVersion, '3.3.3.6', '<')) {
-    $messenger = new Messenger();
     if ($this->isModuleActive('AdvancedSearch')) {
         // No need to update params when BlocksDisposition is present.
         $message = new Message(

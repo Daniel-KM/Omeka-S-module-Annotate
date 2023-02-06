@@ -5,10 +5,11 @@
  * @var int $totalAnnotations
  */
 
-if ($annotations):
+if (!$annotations) return;
 
-$translate = $this->plugin('translate');
-$assetUrl = $this->plugin('assetUrl');
+$plugins = $this->getHelperPluginManager();
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
 
 $this->headLink()
     ->appendStylesheet($assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
@@ -34,5 +35,3 @@ $this->headScript()
     </div>
     <?php endforeach; ?>
 </div>
-
-<?php endif; ?>

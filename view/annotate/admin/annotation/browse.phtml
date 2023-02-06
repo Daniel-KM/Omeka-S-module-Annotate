@@ -10,12 +10,14 @@
 
 use Annotate\Api\Adapter\AnnotationAdapter;
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
-$hyperlink = $this->plugin('hyperlink');
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
 
-$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
+$this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 $this->htmlElement('body')->appendAttribute('class', 'annotations browse');
 
 $userIsAllowedBatchUpdate = $this->userIsAllowed(AnnotationAdapter::class, 'batch_update');

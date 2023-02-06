@@ -7,10 +7,13 @@
  * @var string $deleteButton
  */
 
-$translate = $this->plugin('translate');
-$hyperlink = $this->plugin('hyperlink');
-$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/resource-form.js', 'Omeka'), 'text/javascript', ['defer' => 'defer']);
+$plugins = $this->getHelperPluginManager();
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+$hyperlink = $plugins->get('hyperlink');
+
+$this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($assetUrl('js/resource-form.js', 'Omeka'), 'text/javascript', ['defer' => 'defer']);
 
 /*
 $sectionNavs = [

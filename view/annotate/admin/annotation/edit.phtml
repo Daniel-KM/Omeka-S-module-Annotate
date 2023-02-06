@@ -6,7 +6,9 @@
  */
 
 $translate = $this->plugin('translate');
+
 $this->htmlElement('body')->appendAttribute('class', 'annotations edit');
+
 $deleteButton = $annotation->userIsAllowed('delete')
     ? '<a href="#" class="delete button">' . $translate('Delete') . '</a>'
     : null;

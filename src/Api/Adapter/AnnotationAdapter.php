@@ -1166,6 +1166,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      */
     protected function isHtml($string): bool
     {
-        return (string) $string !== strip_tags((string) $string);
+        $string = trim((string) $string);
+        return $string !== strip_tags($string);
     }
 }

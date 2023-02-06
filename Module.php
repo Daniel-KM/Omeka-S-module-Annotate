@@ -110,7 +110,7 @@ class Module extends AbstractModule
                 $message = new \Omeka\Stdlib\Message(
                     'The settings to manage the annotation template are not saved. You shoud edit the resource template "Annotation" manually.' // @translate
                 );
-                $messenger = new \Omeka\Mvc\Controller\Plugin\Messenger();
+                $messenger = $services->get('ControllerPluginManager')->get('messenger');
                 $messenger->addWarning($message);
                 continue;
             }
@@ -1088,9 +1088,9 @@ class Module extends AbstractModule
      */
     protected function userCanRead(): bool
     {
-        $userIsAllowed = $this->getServiceLocator()->get('ViewHelperManager')
-            ->get('userIsAllowed');
-        return $userIsAllowed(Annotation::class, 'read');
+        /** @var \Omeka\Permissions\Acl $acl */
+        $acl = $this->getServiceLocator()->get('Omeka\Acl');
+        return $acl->userIsAllowed(Annotation::class, 'read');
     }
 
     /**

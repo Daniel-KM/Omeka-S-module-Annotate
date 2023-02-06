@@ -4,11 +4,14 @@
  * @var array $query
  */
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+
 // Adapted from the advanced-search/properties.phtml template.
-$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
+$this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
 // Prepare the datetime queries.
 $datetimes = isset($query['datetime']) ? (is_array($query['datetime']) ? $query['datetime'] : [['value' => $query['datetime']]]) : [];

@@ -5,10 +5,13 @@
  * @var \Annotate\Api\Representation\AnnotationRepresentation $annotation
  */
 
-$translate = $this->plugin('translate');
-$escape = $this->plugin('escapeHtml');
-$this->headLink()->appendStylesheet($this->assetUrl('css/annotate-admin.css', 'Annotate'));
-// $this->headScript()->appendFile($this->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$assetUrl = $plugins->get('assetUrl');
+$translate = $plugins->get('translate');
+
+$this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
+// $this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
 $this->htmlElement('body')->appendAttribute('class', 'annotations show');
 
@@ -20,6 +23,7 @@ $sectionNavs = [
 ];
 */
 ?>
+
 <?= $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')) ?>
 <div id="page-actions">
     <?php if ($annotation->userIsAllowed('update')): ?>

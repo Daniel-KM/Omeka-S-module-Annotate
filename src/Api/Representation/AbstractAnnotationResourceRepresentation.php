@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Api\Representation;
 
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
@@ -52,7 +53,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'dcterms:format' => 'format',
             'rdf:value' => 'value',
             // Manage a specific value for cartography.
-            // TODO Use a trigger to manage the values.
+            // TODO Use a trigger to manage the values and/or move to value annotation.
             'cartography:uncertainty' => 'cartography:uncertainty',
         ];
 
@@ -113,8 +114,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
             'item_sets' => 'o:ItemSet',
             'media' => 'o:Media',
         ];
-        return $mapResourceTypes[$type]
-            ?? null;
+        return $mapResourceTypes[$type] ?? null;
     }
 
     /**
