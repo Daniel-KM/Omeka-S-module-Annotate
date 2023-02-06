@@ -55,7 +55,9 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
-    protected $dependency = 'CustomVocab';
+    protected $dependencies = [
+        'CustomVocab',
+    ];
 
     public function onBootstrap(MvcEvent $event): void
     {
@@ -70,11 +72,11 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
         $module = $services->get('Omeka\ModuleManager')->getModule('Generic');
-        if ($module && version_compare($module->getIni('version') ?? '', '3.3.28', '<')) {
+        if ($module && version_compare($module->getIni('version') ?? '', '3.4.41', '<')) {
             $translator = $services->get('MvcTranslator');
             $message = new \Omeka\Stdlib\Message(
                 $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
-                'Generic', '3.3.28'
+                'Generic', '3.4.41'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -118,10 +120,10 @@ class Module extends AbstractModule
         $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
-    public function uninstall(ServiceLocatorInterface $serviceLocator): void
+    public function uninstall(ServiceLocatorInterface $services): void
     {
-        $this->setServiceLocator($serviceLocator);
-        $services = $serviceLocator;
+        $this->setServiceLocator($services);
+        $services = $services;
 
         if (!class_exists(\Generic\InstallResources::class)) {
             require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')
@@ -155,7 +157,7 @@ class Module extends AbstractModule
             $installResources->removeResourceTemplate($resourceTemplate);
         }
 
-        parent::uninstall($serviceLocator);
+        parent::uninstall($services);
     }
 
     public function warnUninstall(Event $event): void
@@ -166,8 +168,8 @@ class Module extends AbstractModule
             return;
         }
 
-        $serviceLocator = $this->getServiceLocator();
-        $t = $serviceLocator->get('MvcTranslator');
+        $services = $this->getServiceLocator();
+        $t = $services->get('MvcTranslator');
 
         $vocabularyLabels = 'RDF Concepts" / "Web Annotation Ontology';
         $customVocabs = 'Annotation oa:motivatedBy" / "oa:hasPurpose" / "rdf:type" / "dcterms:format';
