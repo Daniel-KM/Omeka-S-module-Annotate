@@ -231,9 +231,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                         $scalarField, $entityClass
                     ));
                 }
-                $qb->select(['_omeka_root.id', "IDENTITY(_omeka_root.$scalarField) AS $scalarField"]);
+                $qb->select('_omeka_root.id', "IDENTITY(_omeka_root.$scalarField) AS $scalarField");
             } else {
-                $qb->select(['_omeka_root.id', '_omeka_root.' . $scalarField]);
+                $qb->select('_omeka_root.id', '_omeka_root.' . $scalarField);
             }
 
             $content = array_column($qb->getQuery()->getScalarResult(), $scalarField, 'id');

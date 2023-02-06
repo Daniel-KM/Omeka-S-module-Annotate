@@ -31,7 +31,7 @@ SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
 UPDATE value
 SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 }
 
 if (version_compare($oldVersion, '3.0.3', '<')) {
@@ -41,7 +41,7 @@ UPDATE `custom_vocab`
 SET `label` = 'Annotation oa:motivatedBy'
 WHERE `label` = 'Annotation oa:Motivation';
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 
     // Complete the annotation custom vocabularies with Omeka resource types.
     $label = 'Annotation Target rdf:type';
@@ -84,7 +84,7 @@ SET property_id = $oaHasBodyId
 WHERE value.property_id = $rdfValueId
 AND value.type = "resource"
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 
     // Unlike bodies, targets are saved in oa:hasSource (items in Cartography),
     // so there is no need to update them as "oa:hasTarget". Nevertheless,
@@ -99,7 +99,7 @@ SET property_id = $oaHasSelectorId
 WHERE value.property_id = $rdfValueId
 AND value.type = "resource"
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 }
 
 if (version_compare($oldVersion, '3.0.6', '<')) {
@@ -154,7 +154,7 @@ ALTER TABLE annotation_body ADD CONSTRAINT FK_D819DB36BF396750 FOREIGN KEY (id) 
 ALTER TABLE annotation_target ADD CONSTRAINT FK_9F53A3D6BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
 SQL;
     foreach (array_filter(explode(';', $sql)) as $sql) {
-        $connection->exec($sql);
+        $connection->executeStatement($sql);
     }
 }
 
@@ -171,7 +171,7 @@ if (version_compare($oldVersion, '3.3', '<')) {
     $sql = <<<'SQL'
 ALTER TABLE `annotation_part` CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL;
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 }
 
 if (version_compare($oldVersion, '3.3.3.6', '<')) {
@@ -194,7 +194,7 @@ WHERE `id` IN (
     "annotate_append_media_show"
 )
 SQL;
-    $connection->exec($sql);
+    $connection->executeStatement($sql);
 
     $messenger->addWarning($message);
 }
