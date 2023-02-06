@@ -1,7 +1,7 @@
 {
     "name": "daniel-km/omeka-s-module-annotate",
-    "type": "library",
     "description": "Annotate, module for Omeka S, that allows to annotate (comment, highlight, tag...) any resources with the W3C Annotation data model and vocabulary.",
+    "type": "library",
     "license": "CECILL-2.1",
     "authors": [
         {
@@ -22,16 +22,22 @@
         "Web Annotation Ontology",
         "annotating",
         "tagging",
-        "commenting"
+        "commenting",
+        "rating"
     ],
+    "require": {
+        "grimmlink/webui-popover": "^1.2",
+        "oomphinc/composer-installers-extender": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Annotate\\": "src/"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
             "AnnotateTest\\": "test/AnnotateTest/"
         }
-    },
-    "require": {
-        "grimmlink/webui-popover": "^1.2",
-        "oomphinc/composer-installers-extender": "^2.0"
     },
     "extra": {
         "installer-types": ["omeka-addon-asset"],
@@ -65,5 +71,11 @@
             "@php -r '@rename(__DIR__ . \"/asset/vendor/webui-popover-full/dist\", __DIR__ . \"/asset/vendor/webui-popover\");'",
             "@php -r 'exec(sprintf(\"rm -rf %s\", escapeshellarg(__DIR__ . \"/asset/vendor/webui-popover-full\")));'"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "oomphinc/composer-installers-extender": true
+        }
     }
 }
