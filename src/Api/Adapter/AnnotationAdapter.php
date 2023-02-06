@@ -39,6 +39,13 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         'modified' => 'modified',
     ];
 
+    protected $scalarFields = [
+        'id' => 'id',
+        'is_public' => 'isPublic',
+        'created' => 'created',
+        'modified' => 'modified',
+    ];
+
     public function getResourceName()
     {
         return 'annotations';
@@ -87,6 +94,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             'offset' => null,
             'sort_by' => null,
             'sort_order' => null,
+            'return_scalar' => null,
         ];
         $query += $defaultQuery;
         $query['sort_order'] = strtoupper((string) $query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
@@ -220,6 +228,18 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             ->setParameters($parameters);
 
         $scalarField = $request->getOption('returnScalar');
+        if (!$scalarField && $query['return_scalar']) {
+            if (!array_key_exists($query['return_scalar'], $this->scalarFields)) {
+                throw new Exception\BadRequestException(sprintf(
+                    $this->getTranslator()->translate('The "%1$s" field is not available in the %2$s adapter class.'),
+                    $query['return_scalar'], get_class($this)
+                ));
+            }
+            // The return_scalar passed in the query is valid. Note that we must
+            // set returnScalar to the request so the API manager skips validation.
+            $scalarField = $query['return_scalar'];
+            $request->setOption('returnScalar', $scalarField);
+        }
         if ($scalarField) {
             $classMetadata = $this->getEntityManager()->getClassMetadata($entityClass);
             $fieldNames = $classMetadata->getFieldNames();
@@ -235,7 +255,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             } else {
                 $qb->select('_omeka_root.id', '_omeka_root.' . $scalarField);
             }
-
             $content = array_column($qb->getQuery()->getScalarResult(), $scalarField, 'id');
             $response = new Response($content);
             $response->setTotalResults(count($content));
