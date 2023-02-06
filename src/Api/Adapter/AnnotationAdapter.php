@@ -1049,14 +1049,14 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                             && stripos($hasBody['dcterms:format'][0]['@value'], 'integer') !== false
                         ) {
                             $value = [
-                                '@value' => $value['@value'],
+                                '@value' => (string) $value['@value'],
                                 'property_id' => $rdfValueId,
                                 'type' => 'numeric:integer',
                                 // No language, no visibility.
                             ];
                         } else {
                             $value = [
-                                '@value' => $value['@value'],
+                                '@value' => (string) $value['@value'],
                                 'property_id' => $rdfValueId,
                                 'type' => 'literal',
                                 // No language, no visibility.
@@ -1067,7 +1067,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     if (!empty($hasBody['dcterms:format'])) {
                         foreach ($hasBody['dcterms:format'] as &$value) {
                             $value = [
-                                '@value' => $value['@value'],
+                                '@value' => (string) $value['@value'],
                                 'property_id' => $dctermsFormatId,
                                 'type' => 'literal',
                                 // No language, no visibility.
@@ -1078,7 +1078,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     if (!empty($hasBody['oa:hasPurpose'])) {
                         foreach ($hasBody['oa:hasPurpose'] as &$value) {
                             $value = [
-                                '@value' => $value['@value'],
+                                '@value' => (string) $value['@value'],
                                 'property_id' => $oaHasPurposeId,
                                 'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
                                 // No language, no visibility.
@@ -1094,7 +1094,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                             continue;
                         }
                         $value = [
-                            'value_resource_id' => $value['value_resource_id'],
+                            'value_resource_id' => (int) $value['value_resource_id'],
                             'property_id' => $oaHasSourceId,
                             'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
                             // No language, no visibility.
@@ -1117,7 +1117,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 foreach ($data['oa:hasBody'] as &$hasBody) {
                     foreach ($hasBody['rdf:value'] as &$value) {
                         $value = [
-                            '@value' => $value['@value'],
+                            '@value' => (string) $value['@value'],
                             'property_id' => $rdfValueId,
                             'type' => 'literal',
                             // No language, no visibility.
@@ -1127,7 +1127,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     if (!empty($hasBody['oa:hasPurpose'])) {
                         foreach ($hasBody['oa:hasPurpose'] as &$value) {
                             $value = [
-                                '@value' => $value['@value'],
+                                '@value' => (string) $value['@value'],
                                 'property_id' => $oaHasPurposeId,
                                 'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
                                 // No language, no visibility.
@@ -1143,7 +1143,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                             continue;
                         }
                         $value = [
-                            'value_resource_id' => $value['value_resource_id'],
+                            'value_resource_id' => (int) $value['value_resource_id'],
                             'property_id' => $oaHasSourceId,
                             'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
                             // No language, no visibility.
