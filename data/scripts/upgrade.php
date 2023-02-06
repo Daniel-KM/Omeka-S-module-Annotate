@@ -198,3 +198,7 @@ SQL;
 
     $messenger->addWarning($message);
 }
+
+if (version_compare($oldVersion, '3.4.3.8', '<')) {
+    require_once __DIR__ . '/upgrade_vocabulary.php';
+}

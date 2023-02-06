@@ -291,7 +291,7 @@ of the CeCILL license and that you accept its terms.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2017-2021 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2017-2023 (see [Daniel-KM] on GitLab)
 
 * Library [webui-popover]: Sandy Walker
 
@@ -303,7 +303,7 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [Omeka S]: https://omeka.org/s
 [Web Annotation Ontology]: https://www.w3.org/annotation/
 [W3C]: https://www.w3.org
-[installing a module]: http://dev.omeka.org/docs/s/user-manual/modules/#installing-modules
+[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
