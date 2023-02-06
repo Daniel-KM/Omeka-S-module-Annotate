@@ -64,8 +64,9 @@ return [
             'normalizeDateTimeQuery' => View\Helper\NormalizeDateTimeQuery::class,
         ],
         'factories' => [
-            'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
             'annotations' => Service\ViewHelper\AnnotationsFactory::class,
+            'easyMeta' => Service\ViewHelper\EasyMetaFactory::class,
+            'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
         ],
     ],
     'form_elements' => [

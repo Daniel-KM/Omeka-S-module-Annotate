@@ -671,7 +671,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             if (is_numeric($query['resource_class'])) {
                 $resourceClass = (int) $query['resource_class'];
             } else {
-                $resourceClass = $this->resourceClassId($query['resource_class']);
+                /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
+                $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
+                $resourceClass = $easyMeta->resourceClassIds($query['resource_class']);
             }
             $resourceClassAlias = $this->createAlias();
             $qb->innerJoin(
@@ -870,6 +872,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             return;
         }
 
+        /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
+        $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
+
         $mainValueIsTargets = [];
 
         // Targets (single or multiple).
@@ -897,7 +902,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             switch ($valueValue) {
                 case 'application/wkt':
                     $data['oa:hasTarget'][$index]['rdf:type'][] = [
-                        'property_id' => $this->propertyId('rdf:type'),
+                        'property_id' => $easyMeta->propertyIds('rdf:type'),
                         'type' => 'customvocab:' . $this->customVocabId('Annotation Target rdf:type'),
                         '@value' => 'oa:Selector',
                     ];
@@ -954,7 +959,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $format = $this->isHtml($value['@value'] ?? '') ? 'text/html' : null;
                 if ($format) {
                     $data['oa:hasBody'][0]['dcterms:format'][] = [
-                        'property_id' => $this->propertyId('dcterms:format'),
+                        'property_id' => $easyMeta->propertyIds('dcterms:format'),
                         'type' => 'customvocab:' . $this->customVocabId('Annotation Body dcterms:format'),
                         '@value' => $format,
                     ];
@@ -1007,18 +1012,21 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             return;
         }
 
-        $resourceTemplateId = $this->resourceTemplateId('Annotation');
-        $resourceClassId = $this->resourceClassId('oa:Annotation');
+        /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
+        $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
+
+        $resourceTemplateId = $easyMeta->resourceTemplateIds('Annotation');
+        $resourceClassId = $easyMeta->resourceClassIds('oa:Annotation');
         $data['o:resource_template'] = $resourceTemplateId ? ['o:id' => $resourceTemplateId] : null;
         $data['o:resource_class'] = $resourceClassId ? ['o:id' => $resourceClassId] : null;
 
         $customVocabMotivatedById = $this->customVocabId('Annotation oa:motivatedBy');
         $customVocabHasPurposeId = $this->customVocabId('Annotation Body oa:hasPurpose');
-        $oaMotivatedById = $this->propertyId('oa:motivatedBy');
-        $oaHasPurposeId = $this->propertyId('oa:hasPurpose');
-        $oaHasSourceId = $this->propertyId('oa:hasSource');
-        $rdfValueId = $this->propertyId('rdf:value');
-        $dctermsFormatId = $this->propertyId('dcterms:format');
+        $oaMotivatedById = $easyMeta->propertyIds('oa:motivatedBy');
+        $oaHasPurposeId = $easyMeta->propertyIds('oa:hasPurpose');
+        $oaHasSourceId = $easyMeta->propertyIds('oa:hasSource');
+        $rdfValueId = $easyMeta->propertyIds('rdf:value');
+        $dctermsFormatId = $easyMeta->propertyIds('dcterms:format');
 
         /** @var \Omeka\DataType\Manager $dataTypeManager */
         $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
@@ -1036,9 +1044,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     foreach ($hasBody['rdf:value'] as &$value) {
                         if ($hasNumericDataTypes
                             && is_numeric($value['@value'])
-                            && ctype_digit($value['@value'])
-                            && !empty($hasBody['dcterms:format'])
-                            && stripos($hasBody['dcterms:format'], 'integer') !== false
+                            && ctype_digit((string) $value['@value'])
+                            && !empty($hasBody['dcterms:format'][0]['@value'])
+                            && stripos($hasBody['dcterms:format'][0]['@value'], 'integer') !== false
                         ) {
                             $value = [
                                 '@value' => $value['@value'],
@@ -1054,8 +1062,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                                 // No language, no visibility.
                             ];
                         }
-                        unset($value);
-                        foreach ($hasBody['dcterms:format'] ?? [] as &$value) {
+                    }
+                    unset($value);
+                    if (!empty($hasBody['dcterms:format'])) {
+                        foreach ($hasBody['dcterms:format'] as &$value) {
                             $value = [
                                 '@value' => $value['@value'],
                                 'property_id' => $dctermsFormatId,
@@ -1064,7 +1074,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                             ];
                         }
                         unset($value);
-                        foreach ($hasBody['oa:hasPurpose'] ?? [] as &$value) {
+                    }
+                    if (!empty($hasBody['oa:hasPurpose'])) {
+                        foreach ($hasBody['oa:hasPurpose'] as &$value) {
                             $value = [
                                 '@value' => $value['@value'],
                                 'property_id' => $oaHasPurposeId,
@@ -1112,15 +1124,17 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                         ];
                     }
                     unset($value);
-                    foreach ($hasBody['oa:hasPurpose'] ?? [] as &$value) {
-                        $value = [
-                            '@value' => $value['@value'],
-                            'property_id' => $oaHasPurposeId,
-                            'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
-                            // No language, no visibility.
-                        ];
+                    if (!empty($hasBody['oa:hasPurpose'])) {
+                        foreach ($hasBody['oa:hasPurpose'] as &$value) {
+                            $value = [
+                                '@value' => $value['@value'],
+                                'property_id' => $oaHasPurposeId,
+                                'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
+                                // No language, no visibility.
+                            ];
+                        }
+                        unset($value);
                     }
-                    unset($value);
                 }
                 foreach ($data['oa:hasTarget'] as &$hasTarget) {
                     foreach ($hasTarget['oa:hasSource'] as &$value) {
@@ -1147,27 +1161,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         $request->setContent($data);
-    }
-
-    protected function propertyId($term): ?int
-    {
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        $result = $api->searchOne('properties', ['term' => $term], ['initialize' => false, 'finalize' => false])->getContent();
-        return $result ? $result->getId() : null;
-    }
-
-    protected function resourceClassId($term): ?int
-    {
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        $result = $api->searchOne('resource_classes', ['term' => $term], ['initialize' => false, 'finalize' => false])->getContent();
-        return $result ? $result->getId() : null;
-    }
-
-    protected function resourceTemplateId($label): ?int
-    {
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        $result = $api->searchOne('resource_templates', ['label' => $label], ['initialize' => false, 'finalize' => false])->getContent();
-        return $result ? $result->getId() : null;
     }
 
     protected function customVocabId($label): ?int
