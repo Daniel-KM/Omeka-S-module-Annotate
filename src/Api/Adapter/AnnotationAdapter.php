@@ -331,12 +331,22 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         // Added before parent buildQuery because a property is added.
         // FIXME: oa:hasSource is used to get the target, but in very rare cases, it can be attached to the body. Require to search a property on a subpart.
-        if (isset($query['resource_id'])) {
+        if (isset($query['resource_id']) && is_numeric($query['resource_id'])) {
             $query['property'][] = [
                 'joiner' => 'and',
                 'property' => 'oa:hasSource',
                 'type' => 'res',
                 'text' => $query['resource_id'],
+            ];
+        }
+
+        // Added before parent buildQuery because a property is added.
+        if (isset($query['motivation']) && $query['motivation'] !== '') {
+            $query['property'][] = [
+                'joiner' => 'and',
+                'property' => 'oa:motivatedBy',
+                'type' => 'eq',
+                'text' => $query['motivation'],
             ];
         }
 
