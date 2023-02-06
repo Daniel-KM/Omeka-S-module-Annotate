@@ -1,36 +1,28 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\View\Helper;
 
-use Annotate\Mvc\Controller\Plugin\ResourceAnnotations;
 use Laminas\View\Helper\AbstractHelper;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
 class Annotations extends AbstractHelper
 {
     /**
-     * @var ResourceAnnotations
-     */
-    protected $resourceAnnotationsPlugin;
-
-    public function __construct(ResourceAnnotations $resourceAnnotationsPlugin)
-    {
-        $this->resourceAnnotationsPlugin = $resourceAnnotationsPlugin;
-    }
-
-    /**
      * Return the partial to display annotations.
-     *
-     * @return string
      */
-    public function __invoke(AbstractResourceEntityRepresentation $resource)
+    public function __invoke(AbstractResourceEntityRepresentation $resource): string
     {
-        $resourceAnnotationsPlugin = $this->resourceAnnotationsPlugin;
-        $annotations = $resourceAnnotationsPlugin($resource);
-        echo $this->getView()->partial(
+        $view = $this->getView();
+        $query = ['resource_id' => $resource->id()];
+        $response = $view->search('annotations', $query);
+        $annotations = $response->getContent();
+        $totalAnnotations = $response->getTotalResults();
+        echo $view->partial(
             'common/site/annotation-resource',
             [
                 'resource' => $resource,
                 'annotations' => $annotations,
+                'totalAnnotations' => $totalAnnotations,
             ]
         );
     }

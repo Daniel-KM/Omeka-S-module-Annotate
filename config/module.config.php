@@ -61,10 +61,10 @@ return [
     ],
     'view_helpers' => [
         'invokables' => [
+            'annotations' => View\Helper\Annotations::class,
             'normalizeDateTimeQuery' => View\Helper\NormalizeDateTimeQuery::class,
         ],
         'factories' => [
-            'annotations' => Service\ViewHelper\AnnotationsFactory::class,
             'easyMeta' => Service\ViewHelper\EasyMetaFactory::class,
             'showAnnotateForm' => Service\ViewHelper\ShowAnnotateFormFactory::class,
         ],
@@ -85,11 +85,10 @@ return [
     'controller_plugins' => [
         'invokables' => [
             'isAnnotable' => Mvc\Controller\Plugin\IsAnnotable::class,
-            'resourceAnnotations' => Mvc\Controller\Plugin\ResourceAnnotations::class,
-            'totalResourceAnnotations' => Mvc\Controller\Plugin\TotalResourceAnnotations::class,
         ],
         'factories' => [
             'annotationPartMapper' => Service\ControllerPlugin\AnnotationPartMapperFactory::class,
+            /** @deprecated Use right form to get values instead using plugin divideMergedValues. */
             'divideMergedValues' => Service\ControllerPlugin\DivideMergedValuesFactory::class,
             'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],

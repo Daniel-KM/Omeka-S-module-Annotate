@@ -1061,11 +1061,11 @@ class Module extends AbstractModule
         array $query = []
     ): void {
         $services = $this->getServiceLocator();
-        $controllerPlugins = $services->get('ControllerPluginManager');
-        $resourceAnnotationsPlugin = $controllerPlugins->get('resourceAnnotations');
-        $annotations = $resourceAnnotationsPlugin($resource, $query);
-        $totalResourceAnnotationsPlugin = $controllerPlugins->get('totalResourceAnnotations');
-        $totalAnnotations = $totalResourceAnnotationsPlugin($resource, $query);
+        $api = $services->get('Omeka\ApiManager');
+        $query['resource_id'] = $resource->id();
+        $response = $api->search('annotations', $query);
+        $annotations = $response->getContent();
+        $totalAnnotations = $response->getTotalResults();
         $partial = $listAsDiv
             // Quick detail view.
             ? 'common/admin/annotation-resource'
