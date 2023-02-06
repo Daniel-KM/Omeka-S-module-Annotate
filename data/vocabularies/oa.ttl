@@ -40,19 +40,19 @@ oa:Choice a rdfs:Class ;
     rdfs:subClassOf as:OrderedCollection .
 
 oa:CssSelector a rdfs:Class ;
-    rdfs:label "CssSelector" ;
+    rdfs:label "Css selector" ;
     rdfs:comment "A CssSelector describes a Segment of interest in a representation that conforms to the Document Object Model through the use of the CSS selector specification." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:CssStyle a rdfs:Class ;
-    rdfs:label "CssStyle" ;
+    rdfs:label "Css style" ;
     rdfs:comment "A resource which describes styles for resources participating in the Annotation using CSS." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Style .
 
 oa:DataPositionSelector a rdfs:Class ;
-    rdfs:label "DataPositionSelector" ;
+    rdfs:label "Data position selector" ;
     rdfs:comment "DataPositionSelector describes a range of data by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first byte, position 1 would be immediately before the second byte, and so on. The start byte is thus included in the list, but the end byte is not." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
@@ -63,13 +63,13 @@ oa:Direction a rdfs:Class ;
     rdfs:isDefinedBy oa: .
 
 oa:FragmentSelector a rdfs:Class ;
-    rdfs:label "FragmentSelector" ;
+    rdfs:label "Fragment selector" ;
     rdfs:comment "The FragmentSelector class is used to record the segment of a representation using the IRI fragment specification defined by the representation's media type." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:HttpRequestState a rdfs:Class ;
-    rdfs:label "HttpRequestState" ;
+    rdfs:label "Http request state" ;
     rdfs:comment "The HttpRequestState class is used to record the HTTP request headers that a client SHOULD use to request the correct representation from the resource. " ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:State .
@@ -81,13 +81,13 @@ oa:Motivation a rdfs:Class ;
     rdfs:subClassOf skos:Concept .
 
 oa:RangeSelector a rdfs:Class ;
-    rdfs:label "RangeSelector" ;
+    rdfs:label "Range selector" ;
     rdfs:comment "A Range Selector can be used to identify the beginning and the end of the selection by using other Selectors. The selection consists of everything from the beginning of the starting selector through to the beginning of the ending selector, but not including it." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:ResourceSelection a rdfs:Class ;
-    rdfs:label "ResourceSelection" ;
+    rdfs:label "Resource selection" ;
     rdfs:comment "Instances of the ResourceSelection class identify part (described by an oa:Selector) of another resource (referenced with oa:hasSource), possibly from a particular representation of a resource (described by an oa:State). Please note that ResourceSelection is not used directly in the Web Annotation model, but is provided as a separate class for further application profiles to use, separate from oa:SpecificResource which has many Annotation specific features." ;
     rdfs:isDefinedBy oa: .
 
@@ -97,7 +97,7 @@ oa:Selector a rdfs:Class ;
     rdfs:isDefinedBy oa: .
 
 oa:SpecificResource a rdfs:Class ;
-    rdfs:label "SpecificResource" ;
+    rdfs:label "Specific resource" ;
     rdfs:comment "Instances of the SpecificResource class identify part of another resource (referenced with oa:hasSource), a particular representation of a resource, a resource with styling hints for renders, or any combination of these, as used within an Annotation." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:ResourceSelection .
@@ -113,52 +113,52 @@ oa:Style a rdfs:Class ;
     rdfs:isDefinedBy oa: .
 
 oa:SvgSelector a rdfs:Class ;
-    rdfs:label "SvgSelector" ;
+    rdfs:label "Svg selector" ;
     rdfs:comment "An SvgSelector defines an area through the use of the Scalable Vector Graphics [SVG] standard. This allows the user to select a non-rectangular area of the content, such as a circle or polygon by describing the region using SVG. The SVG may be either embedded within the Annotation or referenced as an External Resource." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:TextPositionSelector a rdfs:Class ;
-    rdfs:label "TextPositionSelector" ;
+    rdfs:label "Text position selector" ;
     rdfs:comment "The TextPositionSelector describes a range of text by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first character, position 1 would be immediately before the second character, and so on." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:TextQuoteSelector a rdfs:Class ;
-    rdfs:label "TextQuoteSelector" ;
+    rdfs:label "Text quote selector" ;
     rdfs:comment "The TextQuoteSelector describes a range of text by copying it, and including some of the text immediately before (a prefix) and after (a suffix) it to distinguish between multiple copies of the same sequence of characters." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:TextualBody a rdfs:Class ;
-    rdfs:label "TextualBody" ;
+    rdfs:label "Textual body" ;
     rdfs:comment "" ;
     rdfs:isDefinedBy oa: .
 
 oa:TimeState a rdfs:Class ;
-    rdfs:label "TimeState" ;
+    rdfs:label "Time state" ;
     rdfs:comment "A TimeState records the time at which the resource's state is appropriate for the Annotation, typically the time that the Annotation was created and/or a link to a persistent copy of the current version." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:State .
 
 oa:XPathSelector a rdfs:Class ;
-    rdfs:label "XPathSelector" ;
+    rdfs:label "XPath selector" ;
     rdfs:comment " An XPathSelector is used to select elements and content within a resource that supports the Document Object Model via a specified XPath value." ;
     rdfs:isDefinedBy oa: ;
     rdfs:subClassOf oa:Selector .
 
 oa:PreferContainedDescriptions a rdfs:Resource ;
-    rdfs:label "PreferContainedDescriptions" ;
+    rdfs:label "Prefer contained descriptions" ;
     rdfs:comment "An IRI to signal the client prefers to receive full descriptions of the Annotations from a container, not just their IRIs." ;
     rdfs:isDefinedBy oa: .
 
 oa:PreferContainedIRIs a rdfs:Resource ;
-    rdfs:label "PreferContainedIRIs" ;
+    rdfs:label "Prefer contained IRIs" ;
     rdfs:comment "An IRI to signal that the client prefers to receive only the IRIs of the Annotations from a container, not their full descriptions." ;
     rdfs:isDefinedBy oa: .
 
 oa:annotationService a rdf:Property ;
-    rdfs:label "annotationService" ;
+    rdfs:label "annotation service" ;
     rdfs:comment """The object of the relationship is the end point of a service that conforms to the annotation-protocol, and it may be associated with any resource.  The expectation of asserting the relationship is that the object is the preferred service for maintaining annotations about the subject resource, according to the publisher of the relationship.
 
   This relationship is intended to be used both within Linked Data descriptions and as the  rel  type of a Link, via HTTP Link Headers rfc5988 for binary resources and in HTML <link> elements.  For more information about these, please see the Annotation Protocol specification annotation-protocol.
@@ -171,7 +171,7 @@ oa:assessing a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:bodyValue a rdf:Property ;
-    rdfs:label "bodyValue" ;
+    rdfs:label "body value" ;
     rdfs:comment """The object of the predicate is a plain text string to be used as the content of the body of the Annotation.  The value MUST be an  xsd:string  and that data type MUST NOT be expressed in the serialization. Note that language MUST NOT be associated with the value either as a language tag, as that is only available for  rdf:langString .
   """ ;
     rdfs:domain oa:Annotation ;
@@ -184,7 +184,7 @@ oa:bookmarking a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:cachedSource a rdf:Property ;
-    rdfs:label "cachedSource" ;
+    rdfs:label "cached source" ;
     rdfs:comment "A object of the relationship is a copy of the Source resource's representation, appropriate for the Annotation." ;
     rdfs:domain oa:TimeState ;
     rdfs:isDefinedBy oa: .
@@ -227,59 +227,59 @@ oa:exact a rdf:Property ;
     rdfs:range xsd:string .
 
 oa:hasBody a rdf:Property ;
-    rdfs:label "hasBody" ;
+    rdfs:label "has body" ;
     rdfs:comment "The object of the relationship is a resource that is a body of the Annotation." ;
     rdfs:domain oa:Annotation ;
     rdfs:isDefinedBy oa: .
 
 oa:hasEndSelector a rdf:Property ;
-    rdfs:label "hasEndSelector" ;
+    rdfs:label "has end selector" ;
     rdfs:comment "The relationship between a RangeSelector and the Selector that describes the end position of the range. " ;
     rdfs:domain oa:RangeSelector ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:Selector .
 
 oa:hasPurpose a rdf:Property ;
-    rdfs:label "hasPurpose" ;
+    rdfs:label "has purpose" ;
     rdfs:comment "The purpose served by the resource in the Annotation." ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:Motivation .
 
 oa:hasScope a rdf:Property ;
-    rdfs:label "hasScope" ;
+    rdfs:label "has scope" ;
     rdfs:comment "The scope or context in which the resource is used within the Annotation." ;
     rdfs:domain oa:SpecificResource ;
     rdfs:isDefinedBy oa: .
 
 oa:hasSelector a rdf:Property ;
-    rdfs:label "hasSelector" ;
+    rdfs:label "has selector" ;
     rdfs:comment "The object of the relationship is a Selector that describes the segment or region of interest within the source resource.  Please note that the domain ( oa:ResourceSelection ) is not used directly in the Web Annotation model." ;
     rdfs:domain oa:ResourceSelection ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:Selector .
 
 oa:hasSource a rdf:Property ;
-    rdfs:label "hasSource" ;
+    rdfs:label "has source" ;
     rdfs:comment "The resource that the ResourceSelection, or its subclass SpecificResource, is refined from, or more specific than. Please note that the domain ( oa:ResourceSelection ) is not used directly in the Web Annotation model." ;
     rdfs:domain oa:ResourceSelection ;
     rdfs:isDefinedBy oa: .
 
 oa:hasStartSelector a rdf:Property ;
-    rdfs:label "hasStartSelector" ;
+    rdfs:label "has start selector" ;
     rdfs:comment "The relationship between a RangeSelector and the Selector that describes the start position of the range. " ;
     rdfs:domain oa:RangeSelector ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:Selector .
 
 oa:hasState a rdf:Property ;
-    rdfs:label "hasState" ;
+    rdfs:label "has state" ;
     rdfs:comment "The relationship between the ResourceSelection, or its subclass SpecificResource, and a State resource. Please note that the domain ( oa:ResourceSelection ) is not used directly in the Web Annotation model." ;
     rdfs:domain oa:ResourceSelection ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:State .
 
 oa:hasTarget a rdf:Property ;
-    rdfs:label "hasTarget" ;
+    rdfs:label "has target" ;
     rdfs:comment "The relationship between an Annotation and its Target." ;
     rdfs:domain oa:Annotation ;
     rdfs:isDefinedBy oa: .
@@ -300,7 +300,7 @@ oa:linking a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:ltrDirection a oa:Direction ;
-    rdfs:label "ltrDirection" ;
+    rdfs:label "ltr direction" ;
     rdfs:comment "The direction of text that is read from left to right." ;
     rdfs:isDefinedBy oa: .
 
@@ -310,7 +310,7 @@ oa:moderating a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:motivatedBy a rdf:Property ;
-    rdfs:label "motivatedBy" ;
+    rdfs:label "motivated by" ;
     rdfs:comment "The relationship between an Annotation and a Motivation that describes the reason for the Annotation's creation." ;
     rdfs:domain oa:Annotation ;
     rdfs:isDefinedBy oa: ;
@@ -323,7 +323,7 @@ oa:prefix a rdf:Property ;
     rdfs:range xsd:string .
 
 oa:processingLanguage a rdf:Property ;
-    rdfs:label "processingLanguage" ;
+    rdfs:label "processing language" ;
     rdfs:comment "The object of the property is the language that should be used for textual processing algorithms when dealing with the content of the resource, including hyphenation, line breaking, which font to use for rendering and so forth.  The value must follow the recommendations of BCP47." ;
     rdfs:isDefinedBy oa: ;
     rdfs:range xsd:string .
@@ -334,12 +334,12 @@ oa:questioning a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:refinedBy a rdf:Property ;
-    rdfs:label "refinedBy" ;
+    rdfs:label "refined by" ;
     rdfs:comment "The relationship between a Selector and another Selector or a State and a Selector or State that should be applied to the results of the first to refine the processing of the source resource. " ;
     rdfs:isDefinedBy oa: .
 
 oa:renderedVia a rdf:Property ;
-    rdfs:label "renderedVia" ;
+    rdfs:label "rendered via" ;
     rdfs:comment "A system that was used by the application that created the Annotation to render the resource." ;
     rdfs:domain oa:SpecificResource ;
     rdfs:isDefinedBy oa: .
@@ -350,26 +350,26 @@ oa:replying a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:rtlDirection a oa:Direction ;
-    rdfs:label "rtlDirection" ;
+    rdfs:label "rtl direction" ;
     rdfs:comment "The direction of text that is read from right to left." ;
     rdfs:isDefinedBy oa: .
 
 oa:sourceDate a rdf:Property ;
-    rdfs:label "sourceDate" ;
+    rdfs:label "source date" ;
     rdfs:comment "The timestamp at which the Source resource should be interpreted as being applicable to the Annotation." ;
     rdfs:domain oa:TimeState ;
     rdfs:isDefinedBy oa: ;
     rdfs:range xsd:dateTime .
 
 oa:sourceDateEnd a rdf:Property ;
-    rdfs:label "sourceDateEnd" ;
+    rdfs:label "source date end" ;
     rdfs:comment "The end timestamp of the interval over which the Source resource should be interpreted as being applicable to the Annotation." ;
     rdfs:domain oa:TimeState ;
     rdfs:isDefinedBy oa: ;
     rdfs:range xsd:dateTime .
 
 oa:sourceDateStart a rdf:Property ;
-    rdfs:label "sourceDateStart" ;
+    rdfs:label "source date start" ;
     rdfs:comment "The start timestamp of the interval over which the Source resource should be interpreted as being applicable to the Annotation." ;
     rdfs:domain oa:TimeState ;
     rdfs:isDefinedBy oa: ;
@@ -382,14 +382,14 @@ oa:start a rdf:Property ;
     rdfs:range xsd:nonNegativeInteger .
 
 oa:styleClass a rdf:Property ;
-    rdfs:label "styleClass" ;
+    rdfs:label "style class" ;
     rdfs:comment "The name of the class used in the CSS description referenced from the Annotation that should be applied to the Specific Resource." ;
     rdfs:domain oa:SpecificResource ;
     rdfs:isDefinedBy oa: ;
     rdfs:range xsd:string .
 
 oa:styledBy a rdf:Property ;
-    rdfs:label "styledBy" ;
+    rdfs:label "styled by" ;
     rdfs:comment "A reference to a Stylesheet that should be used to apply styles to the Annotation rendering." ;
     rdfs:domain oa:Annotation ;
     rdfs:isDefinedBy oa: ;
@@ -407,7 +407,7 @@ oa:tagging a oa:Motivation ;
     rdfs:isDefinedBy oa: .
 
 oa:textDirection a rdf:Property ;
-    rdfs:label "textDirection" ;
+    rdfs:label "text direction" ;
     rdfs:comment "The direction of the text of the subject resource. There MUST only be one text direction associated with any given resource." ;
     rdfs:isDefinedBy oa: ;
     rdfs:range oa:Direction .
