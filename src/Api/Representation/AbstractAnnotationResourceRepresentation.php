@@ -156,7 +156,8 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
      * Renormalize values as json-ld rdf Annotation resource.
      *
      * @see https://www.w3.org/TR/annotation-model/
-     * @todo Factorize with AnnotationRepresentation::valuesOnly().
+œ     *
+     * @todo Check why to output always an array of resources.
      *
      * @param \Omeka\Api\Representation\ValueRepresentation[] $values
      * @return array|string
@@ -166,17 +167,12 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
         $result = [];
 
         foreach ($values as $value) {
-            switch ($value->type()) {
-                case 'resource':
-                    $result[] = $value->valueResource()->apiUrl();
-                    break;
-                case 'uri':
-                    $result[] = $value->uri();
-                    break;
-                case 'literal':
-                default:
-                    $result[] = $value->value();
-                    break;
+            if ($vr = $value->valueResource()) {
+                $result[] = $vr->apiUrl();
+            } elseif ($uri = $value->uri()) {
+                $result[] = $uri;
+            } else {
+                $result[] = $value->value();
             }
         }
 

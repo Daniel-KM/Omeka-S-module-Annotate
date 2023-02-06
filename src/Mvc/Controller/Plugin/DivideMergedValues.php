@@ -345,35 +345,4 @@ class DivideMergedValues extends AbstractPlugin
             return 'application/wkt';
         }
     }
-
-    /**
-     * Renormalize values as json-ld rdf Annotation resource.
-     *
-     * @see https://www.w3.org/TR/annotation-model/
-     * @todo Factorize with AbstractValueResourceEntityRepresentation::valuesOnly().
-     *
-     * @param \Omeka\Api\Representation\ValueRepresentation[] $values
-     * @return array|string
-     */
-    protected function valuesOnly(array $values)
-    {
-        $result = [];
-
-        foreach ($values as $value) {
-            switch ($value->type()) {
-                case 'resource':
-                    $result[] = $value->valueResource()->apiUrl();
-                    break;
-                case 'uri':
-                    $result[] = $value->uri();
-                    break;
-                case 'literal':
-                default:
-                    $result[] = $value->value();
-                    break;
-            }
-        }
-
-        return count($result) > 1 ? $result : reset($result);
-    }
 }
