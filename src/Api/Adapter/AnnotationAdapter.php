@@ -975,13 +975,12 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
     /**
      * To simplify sub-modules or third-party clients, the annotations can be
-     * created simpler, without property ids for main keys.
+     * created partial, without property ids, language and type, so only value,
+     * uri or value_resource_id can be passed. The main structure with a
+     * oa:motivatedBy, a oa:hasBody and a oa:hasTarget should be kept
+     * nevertheless.
      *
-     * There should be only for oa:motivatedBy and at least one target.
-     *
-     * @param \Omeka\Api\Request $request
-     * @param \Omeka\Entity\EntityInterface $entity
-     * @param \Omeka\Stdlib\ErrorStore $errorStore
+     * The process does not check consistency.
      */
     protected function completeRequest(
         Request $request,
@@ -989,18 +988,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         ErrorStore $errorStore
     ): void {
         $data = $request->getContent();
-
-        $isSimple = !empty($data['oa:motivatedBy'])
-            && count($data['oa:motivatedBy']) === 1
-            && count($data['oa:motivatedBy'][0]) === 1
-            && !empty($data['oa:motivatedBy'][0]['@value'])
-            // Some motivations may have no body, for example bookmarking.
-            // && !empty($data['oa:hasBody'][0]['rdf:value'])
-            && !empty($data['oa:hasTarget'][0]['oa:hasSource'])
-        ;
-        if (!$isSimple) {
-            return;
-        }
 
         /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
         $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
@@ -1012,27 +999,62 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         $customVocabMotivatedById = $this->customVocabId('Annotation oa:motivatedBy');
         $customVocabHasPurposeId = $this->customVocabId('Annotation Body oa:hasPurpose');
-        $oaMotivatedById = $easyMeta->propertyIds('oa:motivatedBy');
-        $oaHasPurposeId = $easyMeta->propertyIds('oa:hasPurpose');
-        $oaHasSourceId = $easyMeta->propertyIds('oa:hasSource');
-        $rdfValueId = $easyMeta->propertyIds('rdf:value');
-        $dctermsFormatId = $easyMeta->propertyIds('dcterms:format');
 
         /** @var \Omeka\DataType\Manager $dataTypeManager */
         $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
         $hasNumericDataTypes = $dataTypeManager->has('numeric:integer');
 
-        // TODO Add support for language and possibly for visibility (anyway, the full format manage them).
-
-        $motivation = $data['oa:motivatedBy'][0]['@value'];
+        $motivation = $data['oa:motivatedBy'][0]['@value'] ?? 'undefined';
         $data['oa:motivatedBy'] = [[
             '@value' => $motivation,
-            'property_id' => $oaMotivatedById,
+            'property_id' => $easyMeta->propertyIds('oa:motivatedBy'),
             'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
         ]];
 
+        $entityManager = $this->getEntityManager();
+        $completeProperties = function (array &$propertyValues) use ($easyMeta, $entityManager): array {
+            foreach ($propertyValues as $term => &$values) {
+                if (!$values) {
+                    unset($propertyValues[$term]);
+                    continue;
+                }
+                $propertyId = $easyMeta->propertyIds($term);
+                if (!$propertyId) {
+                    unset($propertyValues[$term]);
+                    continue;
+                }
+                foreach ($values as $key => &$value) {
+                    $hasResource = !empty($value['value_resource_id']);
+                    if ($hasResource) {
+                        /** @var \Omeka\Entity\Resource $resource */
+                        $resource = $entityManager->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
+                        if (!$resource) {
+                            unset($values[$key]);
+                            continue;
+                        }
+                        $resourceTypes = [
+                            'items' => 'resource:item',
+                            'item_sets' => 'resource:itemset',
+                            'media' => 'resource:media',
+                        ];
+                    }
+                    $hasUri = !empty($value['@id']);
+                    $value['property_id'] = $propertyId;
+                    $value['type'] = $value['type']
+                        ?? ($hasResource
+                            ? ($resourceTypes[$resource->getResourceName()] ?? 'resource')
+                            : ($hasUri ? 'uri' : 'literal'));
+                }
+                unset($value);
+            }
+            unset($values);
+            return $propertyValues;
+        };
+
         if (!empty($data['oa:hasBody'])) {
             foreach ($data['oa:hasBody'] as &$hasBody) {
+                // Manage exceptions for rdf:value (integer) and oa:hasPurpose
+                // (customvocab).
                 if (!empty($hasBody['rdf:value'])) {
                     foreach ($hasBody['rdf:value'] as &$value) {
                         if ($motivation === 'assessing'
@@ -1042,28 +1064,12 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                             && !empty($hasBody['dcterms:format'][0]['@value'])
                             && stripos($hasBody['dcterms:format'][0]['@value'], 'integer') !== false
                         ) {
+                            // Even number, the value should always be a string.
                             $value = [
                                 '@value' => (string) $value['@value'],
-                                'property_id' => $rdfValueId,
-                                'type' => 'numeric:integer',
-                            ];
-                        } else {
-                            $value = [
-                                '@value' => (string) $value['@value'],
-                                'property_id' => $rdfValueId,
-                                'type' => 'literal',
+                                'type' => $value['type'] ?? 'numeric:integer',
                             ];
                         }
-                    }
-                    unset($value);
-                }
-                if (!empty($hasBody['dcterms:format'])) {
-                    foreach ($hasBody['dcterms:format'] as &$value) {
-                        $value = [
-                            '@value' => (string) $value['@value'],
-                            'property_id' => $dctermsFormatId,
-                            'type' => 'literal',
-                        ];
                     }
                     unset($value);
                 }
@@ -1071,32 +1077,20 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     foreach ($hasBody['oa:hasPurpose'] as &$value) {
                         $value = [
                             '@value' => (string) $value['@value'],
-                            'property_id' => $oaHasPurposeId,
                             'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
                         ];
                     }
                     unset($value);
                 }
+                $completeProperties($hasBody);
             }
+            unset($hasBody);
         }
 
         foreach ($data['oa:hasTarget'] as &$hasTarget) {
-            foreach ($hasTarget['oa:hasSource'] as &$value) {
-                $resource = $this->getEntityManager()->find(\Omeka\Entity\Resource::class, $value['value_resource_id']);
-                if (!$resource) {
-                    continue;
-                }
-                $value = [
-                    'value_resource_id' => (int) $value['value_resource_id'],
-                    'property_id' => $oaHasSourceId,
-                    'type' => 'resource:' . mb_strtolower(mb_substr(mb_strrchr(get_class($resource), '\\'), 1)),
-                ];
-            }
-            unset($value);
-            // No subpart.
-            unset($hasTarget['rdf:type']);
-            unset($hasTarget['rdf:value']);
+            $completeProperties($hasTarget);
         }
+        unset($hasTarget);
 
         $request->setContent($data);
     }
