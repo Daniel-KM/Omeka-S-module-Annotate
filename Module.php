@@ -1098,13 +1098,7 @@ class Module extends AbstractModule
      */
     protected function columnNameOfEntity(AbstractEntity $resource): ?string
     {
-        $entityColumnNames = [
-            \Omeka\Entity\ItemSet::class => 'resource_id',
-            \Omeka\Entity\Item::class => 'resource_id',
-            \Omeka\Entity\Media::class => 'resource_id',
-            \Omeka\Entity\User::class => 'owner_id',
-        ];
-        return $entityColumnNames[$resource->getResourceId()] ?? null;
+        return $resource->getResourceId() === \Omeka\Entity\User::class ? 'owner_id' : 'resource_id';
     }
 
     /**
@@ -1115,12 +1109,6 @@ class Module extends AbstractModule
      */
     protected function columnNameOfRepresentation(AbstractEntityRepresentation $representation): ?string
     {
-        $entityColumnNames = [
-            'item-set' => 'resource_id',
-            'item' => 'resource_id',
-            'media' => 'resource_id',
-            'user' => 'owner_id',
-        ];
-        return $entityColumnNames[$representation->getControllerName()] ?? null;
+        return $representation->getControllerName() === 'user' ? 'owner_id' : 'resource_id';
     }
 }
