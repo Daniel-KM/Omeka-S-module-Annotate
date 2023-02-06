@@ -93,7 +93,13 @@ return [
     'column_defaults' => [
         'admin' => [
             'annotations' => [
-                ['type' => 'resource_class'],
+                [
+                    'type' => 'value',
+                    'header' => 'Motivation',
+                    'default' => '',
+                    'property_term' => 'oa:motivatedBy',
+                    'max_values' => 1,
+                ],
                 ['type' => 'owner'],
                 ['type' => 'created'],
             ],
