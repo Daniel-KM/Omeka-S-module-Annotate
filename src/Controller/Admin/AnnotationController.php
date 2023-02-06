@@ -25,9 +25,19 @@ class AnnotationController extends AbstractActionController
 
     public function browseAction()
     {
-        $this->setBrowseDefaults('created');
+        $isOldOmeka = version_compare(\Omeka\Module::VERSION, '4', '<');
+
+        $isOldOmeka
+            ? $this->setBrowseDefaults('created')
+            : $this->browse()->setDefaults('annotations');
         $response = $this->api()->search('annotations', $this->params()->fromQuery());
         $this->paginator($response->getTotalResults(), $this->params()->fromQuery('page'));
+
+        // Set the return query for batch actions. Note that we remove the page
+        // from the query because there's no assurance that the page will return
+        // results once changes are made.
+        $returnQuery = $this->params()->fromQuery();
+        unset($returnQuery['page']);
 
         $formSearch = $this->getForm(QuickSearchForm::class);
         $formSearch->setAttribute('action', $this->url()->fromRoute(null, ['action' => 'browse'], true));
@@ -57,13 +67,17 @@ class AnnotationController extends AbstractActionController
             ->get('submit')->setAttribute('disabled', true);
 
         $resources = $response->getContent();
-        return new ViewModel([
+        $view = new ViewModel([
             'resources' => $resources,
             'annotations' => $resources,
             'formSearch' => $formSearch,
             'formDeleteSelected' => $formDeleteSelected,
             'formDeleteAll' => $formDeleteAll,
         ]);
+        if ($isOldOmeka) {
+            $view->setTemplate('annotate/admin/annotation/browse-v3');
+        }
+        return $view;
     }
 
     public function showAction()

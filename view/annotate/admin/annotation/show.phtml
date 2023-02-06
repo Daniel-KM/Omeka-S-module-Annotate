@@ -13,7 +13,7 @@ $translate = $plugins->get('translate');
 $this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
 // $this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
-$this->htmlElement('body')->appendAttribute('class', 'annotations show');
+$this->htmlElement('body')->appendAttribute('class', 'annotations show' . (version_compare(\Omeka\Module::VERSION, '4', '<') ? ' v3' : ''));
 
 /*
 $sectionNavs = [
@@ -38,7 +38,7 @@ $sectionNavs = [
     <?= $annotation->displayValues() ?>
 </div>
 
-<div id="annotation-bodies" class="active section">
+<div id="annotation-bodies" class="active section annotation-parts">
     <?php $bodies = $annotation->bodies(); ?>
     <div class="meta-group">
         <h4 class="annotation-caption"><?= $translate('Bodies') ?></h4>
@@ -60,7 +60,7 @@ $sectionNavs = [
     </div>
 </div>
 
-<div id="annotation-targets" class="active section">
+<div id="annotation-targets" class="active section annotation-parts">
     <?php $targets = $annotation->targets(); ?>
     <div class="meta-group">
         <h4 class="annotation-caption"><?= $translate('Targets') ?></h4>

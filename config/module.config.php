@@ -90,6 +90,46 @@ return [
             'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],
     ],
+    'column_defaults' => [
+        'admin' => [
+            'annotations' => [
+                ['type' => 'resource_class'],
+                ['type' => 'owner'],
+                ['type' => 'created'],
+            ],
+        ],
+    ],
+    'browse_defaults' => [
+        'admin' => [
+            'annotations' => [
+                'sort_by' => 'created',
+                'sort_order' => 'desc',
+            ],
+        ],
+        'admin' => [
+            'annotations' => [
+                'sort_by' => 'created',
+                'sort_order' => 'desc',
+            ],
+        ],
+    ],
+    'sort_defaults' => [
+        'admin' => [
+            'annotations' => [
+                'title' => 'Title', // @translate
+                'resource_class_label' => 'Resource class', // @translate
+                'owner_name' => 'Owner', // @translate
+                'created' => 'Created', // @translate
+            ],
+        ],
+        'public' => [
+            'annotations' => [
+                'title' => 'Title', // @translate
+                'resource_class_label' => 'Resource class', // @translate
+                'created' => 'Created', // @translate
+            ],
+        ],
+    ],
     'navigation' => [
         'AdminResource' => [
             'annotate' => [

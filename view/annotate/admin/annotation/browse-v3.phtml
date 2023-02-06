@@ -16,15 +16,31 @@ $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 
-$this->headLink()
-    ->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()
-    ->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
-
-$this->htmlElement('body')->appendAttribute('class', 'annotations browse');
+$this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
+$this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
+$this->htmlElement('body')->appendAttribute('class', 'annotations browse v3');
 
 $userIsAllowedBatchUpdate = $this->userIsAllowed(AnnotationAdapter::class, 'batch_update');
 $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batch_delete');
+
+$sortHeadings = [
+    [
+        'label' => $translate('Annotator'),
+        'value' => 'name',
+    ],
+    [
+        'label' => $translate('Annotator email'),
+        'value' => 'email',
+    ],
+    [
+        'label' => $translate('Resource'),
+        'value' => 'resource_id',
+    ],
+    [
+        'label' => $translate('Date annotated'),
+        'value' => 'created',
+    ],
+];
 ?>
 
 <?= $this->pageTitle('', 1, $translate('Annotations')) ?>
@@ -34,7 +50,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
  <div class="browse-controls">
     <?= $this->pagination() ?>
     <?= $hyperlink($translate('Quick Search'), '#', ['class' => 'search advanced-search']) ?>
-    <?= $this->browse()->renderSortSelector('annotations') ?>
+    <?= $this->sortSelector($sortHeadings) ?>
 </div>
 
 <?php $this->trigger('view.browse.before'); ?>
@@ -56,8 +72,8 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
         <div class="batch-actions">
             <button type="button" class="default active" disabled="disabled"><?= $translate('Go') ?></button>
             <?php if ($userIsAllowedBatchUpdate): ?>
-            <input type="submit" class="update-selected" name="update_selected" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit'], true)) ?>">
-            <input type="submit" class="update-all" name="update_all" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit-all'], true)) ?>">
+            <input type="submit" class="update-selected" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit'], true)) ?>">
+            <input type="submit" class="update-all" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit-all'], true)) ?>">
             <?php endif; ?>
             <input type="hidden" name="query" class="batch-query" value="<?= $escape(json_encode($this->params()->fromQuery())) ?>">
             <?php if ($userIsAllowedBatchDelete): ?>
@@ -71,19 +87,28 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
 <table class="tablesaw batch-edit" data-tablesaw-mode="stack">
     <thead>
         <tr>
-            <th><input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>"></th>
-            <?= $this->browse()->renderHeaderRow('annotations') ?>
+            <th>
+                <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
+                <input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>">
+                <?php endif; ?>
+                <?= $translate('Annotation') ?>
+            </th>
+            <th><?= $translate('Targets') ?></th>
+            <th><?= $translate('Annotator') ?></th>
+            <th><?= $translate('Date annotated') ?></th>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($annotations as $annotation):
+        <?php foreach ($annotations as $annotation): ?>
+        <?php
         $userIsAllowedUpdate = $annotation->userIsAllowed('update');
         $userIsAllowedDelete = $annotation->userIsAllowed('delete');
         $resources = $annotation->targetSources();
+        $owner = $annotation->owner();
         ?>
         <tr class="annotation">
             <td>
-                <?php if (($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete) && ($userIsAllowedUpdate || $userIsAllowedDelete)): ?>
+                <?php if ($userIsAllowedBatchUpdate || $userIsAllowedBatchDelete): ?>
                 <input type="checkbox" name="resource_ids[]" value="<?= $annotation->id() ?>" aria-label="<?= $translate('Select item') ?>"<?php if (!($userIsAllowedUpdate || $userIsAllowedDelete)): ?> disabled="disabled"<?php endif; ?>>
                 <?php endif; ?>
                 <?= $annotation->linkPretty() ?>
@@ -113,7 +138,26 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
                     ]) ?></li>
                 </ul>
             </td>
-            <?php echo $this->browse()->renderContentRow('annotations', $annotation); ?>
+            <td>
+                <?php if ($resources): ?>
+                    <?php foreach ($resources as $resource): ?>
+                    <?= $resource->linkPretty() ?>
+                    <span class="resource-name <?= $resource->getControllerName() ?>" aria-label="<?= $translate($resource->getControllerName()) ?>"></span>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    [<?= $translate('Removed') ?>]
+                <span class="resource-name no-resource"></span>
+                <?php endif; ?>
+            </td>
+            <td>
+                <span class="<?php if ($owner): ?>annotation-user<?php else: ?>annotation-public<?php endif; ?>"><?php
+                    echo $annotation->linkAnnotator();
+                ?></span>
+                <?php if (!$owner): ?>
+                    <span class="o-icon-users" aria-label="<?= $translate('Public') ?>"></span>
+                <?php endif; ?>
+            </td>
+            <td><?= $annotation->created()->format('Y-m-d H:i:s') ?></td>
         </tr>
         <?php endforeach; ?>
     </tbody>

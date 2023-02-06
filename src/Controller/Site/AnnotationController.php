@@ -11,7 +11,11 @@ class AnnotationController extends AbstractActionController
     {
         $site = $this->currentSite();
 
-        $this->setBrowseDefaults('created');
+        $isOldOmeka = version_compare(\Omeka\Module::VERSION, '4', '<');
+
+        $isOldOmeka
+            ? $this->setBrowseDefaults('created')
+            : $this->browse()->setDefaults('annotations');
 
         $query = $this->params()->fromQuery();
         $query['site_id'] = $site->id();
@@ -21,11 +25,15 @@ class AnnotationController extends AbstractActionController
 
         $resources = $response->getContent();
 
-        return new ViewModel([
+        $view = new ViewModel([
             'site' => $site,
             'resources' => $resources,
             'annotations' => $resources,
         ]);
+        if ($isOldOmeka) {
+            $view->setTemplate('annotate/site/annotation/browse-v3');
+        }
+        return $view;
     }
 
     public function showAction()
