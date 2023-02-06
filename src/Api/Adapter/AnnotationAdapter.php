@@ -317,6 +317,18 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
+        if (isset($query['owner_id']) && is_numeric($query['owner_id'])) {
+            $userAlias = $this->createAlias();
+            $qb->innerJoin(
+                'omeka_root.owner',
+                $userAlias
+            );
+            $qb->andWhere($qb->expr()->eq(
+                "$userAlias.id",
+                $this->createNamedParameter($qb, $query['owner_id']))
+            );
+        }
+
         // Added before parent buildQuery because a property is added.
         // FIXME: oa:hasSource is used to get the target, but in very rare cases, it can be attached to the body. Require to search a property on a subpart.
         if (isset($query['resource_id'])) {
