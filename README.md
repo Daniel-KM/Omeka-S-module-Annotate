@@ -127,12 +127,13 @@ the same. The motivation is required and is a way to declare the meaning of the
 annotation. It explains why the annotation is created. The purpose is optional
 and is a way to declare the meaning of the body. It explains why the body is
 what it is. For example, if a user adds a bookmark "readme" to a page of a text,
-the motivation is "bookmarking" but the purpose will be "tagging". For a
-comment, the motivation is "commenting", but the purpose may be "commenting",
-"replying", "editing" or even "questionning", "describing", etc. For a rating,
-the motivation is "assessment" and the purpose may be "classifying" when the
-rate is a symbol or a descriptor like "good", "very good", or nothing when it is
-a simple integer value (rendered, for example, as zero or one to five stars).
+the motivation is "bookmarking" but the purpose will be "tagging". If the
+bookmark is a small note, the purpose will be "describing". For a comment, the
+motivation is "commenting", but the purpose may be "commenting", "replying",
+"editing" or even "questionning", "describing", etc. For a rating, the
+motivation is "assessment" and the purpose may be "classifying" when the rate is
+a symbol or a descriptor like "good", "very good", or nothing when it is a
+simple integer value (rendered, for example, as zero or one to five stars).
 
 In practice, for common cases or for simplicity, the purpose is the same than
 the motivation and can be skipped.
@@ -143,10 +144,13 @@ Development
 
 - Internally, targets and bodies are managed like Omeka resources, but they
   aren’t rdf classes.
-- In the json-ld of the resources, the key `oa:Annotation` is deprecated and
-  has been removed since version 3.3.3.6. Use the key `o:annotation`.
+- In the json-ld of the resources, the list of annotation is available under
+  the key `o:annotation`. The old key `oa:Annotation` is deprecated and
+  has been removed since version 3.3.3.6.
 
 ### Api endpoint
+
+#### Create
 
 You can create annotations in a standard way on the api. To simplify process, it
 is possible to skip some keys in the payload for some motivations.
@@ -210,21 +214,31 @@ curl -X POST -H 'Accept: application/json' -i 'https://example.org/api/annotatio
 ```
 
 These shortcuts are available only when there is one and only one motivation and
-only for "assessing" and "commenting" for now.
+at least one target. Values for other properties can be appended and they will
+be completed with the property id and a generic type.
+
+#### Search
+
+Search can be done with standard api request with properties on `/api/annotations`.
+Some query arguments are specific:
+
+- `resource_id`: get all the annotations for a specific resource.
+- `owner_id`: get all annotations for a specific user.
+- `motivation`: get all annotations for a specific motivation.
 
 
 TODO
 ----
 
-- [ ] Keep "literal" as value type instead of a custom vocab.
-- [ ] Remove dependency with CustomVocab.
-- [ ] Does the annotation need to be in the same json of the item? An item doesn't
-  know annotations about itself, they are independant, so to be removed: just keep a link.
-- [ ] Check the validity of multiple contexts omeka + annotation inside jsonld of
-  annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
-- [ ] Targets and bodies should not have rest api access (they are created with the
-  annotation). Upgrade them like value hydrator.
+- [ ] Move all code specific of Cartography into module Cartography.
+- [ ] Remove dependency with CustomVocab?
+- [ ] Keep "literal" as value type instead of a custom vocab?
+- [x] Does the annotation need to be in the same json of the item? An item doesn't know annotations about itself, they are independant, so to be removed: just keep a link.
+- [ ] Check the validity of multiple contexts omeka + annotation inside json-ld of annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
+- [x] Targets and bodies should not have rest api access (they are created with the annotation). Upgrade them like value hydrator.
 - [ ] Make compatible with module Group (user page).
+- [x] Clean labels of oa vocabulary.
+- [ ] Normalize sub-selector as value annotation of the target?
 
 
 Warning
