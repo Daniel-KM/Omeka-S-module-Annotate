@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Media\Ingester;
 
 // use Annotate\Form\AnnotationBodyForm;
@@ -39,7 +40,7 @@ class AnnotationBody implements IngesterInterface
     protected $formElementManager;
 
     /**
-     * @var User
+     * @var User|null
      */
     protected $user;
 
@@ -48,7 +49,7 @@ class AnnotationBody implements IngesterInterface
         Downloader $downloader,
         Validator $validator,
         FormElementManager $formElementManager,
-        User $user
+        ?User $user
     ) {
         $this->uploader = $uploader;
         $this->downloader = $downloader;
@@ -100,7 +101,7 @@ class AnnotationBody implements IngesterInterface
         $data['o:media[__index__][dcterms:format][0][@value]'] = $options['dcterms:format'][0]['@value'] ?? '';
 
         $data['o:media[__index__][dcterms:creator][0][@value]'] = $options['dcterms:creator'][0]['@value']
-            ?? $this->user->getEmail();
+            ?? ($this->user ? $this->user->getEmail() : null);
         $data['o:media[__index__][dcterms:created][0][@value]'] = $options['dcterms:created'][0]['@value']
             ?? gmdate("Y-m-d\TH:i:s\Z");
 

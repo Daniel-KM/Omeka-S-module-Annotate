@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Service\Media\Ingester;
 
 use Annotate\Media\Ingester\AnnotationBody;
