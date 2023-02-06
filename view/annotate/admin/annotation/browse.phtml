@@ -259,7 +259,7 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
     <div class="sidebar-content">
         <div id="sidebar-search-form" class="disable-unsaved-warning">
             <h3><?= $translate('Search annotations') ?></h3>
-            <?= $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'advanced-search']) ?>
+            <?= $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'o-icon-search advanced-search']) ?>
             <?= $this->form($formSearch) ?>
         </div>
     </div>
