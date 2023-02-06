@@ -740,7 +740,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             unset($data[$jsonName]);
         }
         $request->setContent($data);
+
+        // Validate request, hydrate and validate entity for main annotation.
         parent::hydrate($request, $entity, $errorStore);
+
         // Reset the bodies and the targets that were skipped above.
         foreach ($childEntities as $jsonName => $resourceName) {
             $data[$jsonName] = $children[$jsonName];
@@ -840,12 +843,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $errorStore->addError('oa:hasBody', 'Annotation body must be an array.'); // @translate
         }
 
-        if (array_key_exists('oa:hasTarget', $data)) {
-            if (!is_array($data['oa:hasTarget'])) {
-                $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
-            } elseif (count($data['oa:hasTarget']) < 1) {
-                $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
-            }
+        if (empty($data['oa:hasTarget'])) {
+            $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
+        } elseif (!is_array($data['oa:hasTarget'])) {
+            $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
         }
     }
 
