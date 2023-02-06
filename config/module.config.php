@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate;
 
 return [
@@ -90,6 +91,11 @@ return [
             'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],
     ],
+    'column_types' => [
+        'invokables' => [
+            'annotated_resource' => ColumnType\AnnotatedResource::class,
+        ],
+    ],
     'column_defaults' => [
         'admin' => [
             'annotations' => [
@@ -99,6 +105,12 @@ return [
                     'default' => '',
                     'property_term' => 'oa:motivatedBy',
                     'max_values' => 1,
+                ],
+                [
+                    'type' => 'annotated_resource',
+                    'header' => 'Targets',
+                    'default' => '',
+                    'max_values' => null,
                 ],
                 ['type' => 'owner'],
                 ['type' => 'created'],

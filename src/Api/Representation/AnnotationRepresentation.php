@@ -128,6 +128,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * Return the target resources if any.
      *
+     * This is the list of annotated resource.
+     *
      * @return AbstractResourceEntityRepresentation[]
      */
     public function targetSources()
@@ -138,6 +140,19 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             $result = array_merge($result, array_values($target->sources()));
         }
         return array_values($result);
+    }
+
+    /**
+     * Return the primary target resource if any.
+     *
+     * This is the annotated resource.
+     */
+    public function primaryTargetSource(): ?AbstractResourceEntityRepresentation
+    {
+        $targets = $this->targetSources();
+        return $targets
+            ? reset($targets)
+            : null;
     }
 
     public function siteUrl($siteSlug = null, $canonical = false)
