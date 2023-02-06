@@ -83,9 +83,6 @@ return [
         ],
     ],
     'controller_plugins' => [
-        'invokables' => [
-            'isAnnotable' => Mvc\Controller\Plugin\IsAnnotable::class,
-        ],
         'factories' => [
             'annotationPartMapper' => Service\ControllerPlugin\AnnotationPartMapperFactory::class,
             /** @deprecated Use right form to get values instead using plugin divideMergedValues. */
