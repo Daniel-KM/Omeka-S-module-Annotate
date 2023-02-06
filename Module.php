@@ -386,11 +386,7 @@ class Module extends AbstractModule
      */
     protected function addRulesForAnnotators(LaminasAcl $acl): void
     {
-        $annotators = [
-            \Annotate\Permissions\Acl::ROLE_ANNOTATOR,
-            \Omeka\Permissions\Acl::ROLE_RESEARCHER,
-            \Omeka\Permissions\Acl::ROLE_AUTHOR,
-        ];
+        $annotators = $acl->getRoles();
         $acl
             ->allow(
                 $annotators,
@@ -412,6 +408,11 @@ class Module extends AbstractModule
                 $annotators,
                 [Controller\Site\AnnotationController::class]
             )
+        ;
+        // Unset guest in admin.
+        $guestId = array_search('guest', $annotators);
+        unset($annotators[$guestId]);
+        $acl
             ->allow(
                 $annotators,
                 [Controller\Admin\AnnotationController::class],
