@@ -694,7 +694,31 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         EntityInterface $entity,
         ErrorStore $errorStore
     ): void {
-        $this->normalizeRequest($request, $entity, $errorStore);
+        // Notes about format of data.
+
+        // Since 3.3.3.6, the form or source must send well formed annotations:
+        // no move, only basic default completion (property id, type, etc.).
+
+        // Before 3.3.3.6, the annotation request was normalized and some
+        // properties where moved from annotation into bodies and targets:
+        // - oa:hasSource[] into oa:hasTarget[][oa:hasSource][]
+        // - dcterms:format[] into oa:hasTarget[][dcterms:format][]
+        // - oa:hasPurpose[] into oa:hasBody[]oa:hasPurpose[]
+        // - oa:styleClass for cartography
+        // - rdf:value for multiple target or one body
+        //
+        // The process allowed to use standard Omeka resource methods and
+        // default form, that is not multi-level. Some heuristic was needed for
+        // the value "rdf:value", according to motivation/purpose, type and
+        // format.
+        //
+        // It managed too multiple targets and body. In most of the cases, an
+        // annotation has only one target and a target has only one source and
+        // an annotation with multiple targets has not an intuitive meaning: it
+        // means that the bodies apply independantly on each target.
+        // @see https://www.w3.org/TR/annotation-model/#sets-of-bodies-and-targets
+
+        $this->completeRequest($request, $entity, $errorStore);
 
         // Skip the bodies and the targets that are hydrated separately below.
         // It avoids the value hydrator to try to hydrate values from them: they
@@ -823,154 +847,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
             }
         }
-    }
-
-    /**
-     * Normalize an annotation request (move properties in bodies and targets).
-     *
-     * So, move:
-     * - oa:hasSource[] into oa:hasTarget[][oa:hasSource][]
-     * - dcterms:format[] into oa:hasTarget[][dcterms:format][]
-     * - oa:hasPurpose[] into oa:hasBody[]oa:hasPurpose[]
-     * - oa:styleClass for cartography
-     * - rdf:value for multiple target or one body
-     *
-     * When there are multiple sources, the key is used.
-     *
-     * This process is required as long as the standard Omeka resource methods
-     * are used and the default form, that is not multi-level.
-     * Anyway, this is not a full implementation, but a quick tool for common
-     * tasks (cartography, folksonomy, commenting, rating, quiz…).
-     * Some heuristic is needed for the value "rdf:value", according to
-     * motivation/purpose, type and format.
-     *
-     * @deprecated Since 3.3.3.6. The form or source must send well formed annotations (no move, only basic default completion).
-     *
-     * @param Request $request
-     * @param EntityInterface $entity
-     * @param ErrorStore $errorStore
-     */
-    protected function normalizeRequest(
-        Request $request,
-        EntityInterface $entity,
-        ErrorStore $errorStore
-    ): void {
-        $data = $request->getContent();
-
-        // TODO Remove any language, since data model require to use a property.
-
-        // Check if the data are already normalized.
-        if (isset($data['oa:hasTarget'])
-            || isset($data['oa:hasBody'])
-        ) {
-            $this->completeRequest($request, $entity, $errorStore);
-            return;
-        }
-
-        // TODO Manage the normalization of an annotation update.
-        if (Request::UPDATE === $request->getOperation()) {
-            return;
-        }
-
-        /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
-        $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
-
-        $mainValueIsTargets = [];
-
-        // Targets (single or multiple).
-
-        // Normally, an annotation has only one target and a target has only one
-        // source. An annotation with multiple targets has not an intuitive
-        // meaning: it means that the bodies apply independantly on each target.
-        // @see https://www.w3.org/TR/annotation-model/#sets-of-bodies-and-targets
-
-        // Anyway, multiple targets are created here, with one source by target.
-        // No check is done on the type of the source, so it is possible to
-        // create annotation from an external party.
-        $data['oa:hasTarget'] = [];
-        foreach ($data['oa:hasSource'] ?? [] as $value) {
-            $data['oa:hasTarget'][] = [
-                'oa:hasSource' => [$value],
-            ];
-        }
-        unset($data['oa:hasSource']);
-
-        // FIXME Manage cartography in module Cartography.
-        $index = 0;
-        foreach ($data['dcterms:format'] ?? [] as $key => $value) {
-            $valueValue = $value['@value'];
-            switch ($valueValue) {
-                case 'application/wkt':
-                    $data['oa:hasTarget'][$index]['rdf:type'][] = [
-                        'property_id' => $easyMeta->propertyIds('rdf:type'),
-                        'type' => 'customvocab:' . $this->customVocabId('Annotation Target rdf:type'),
-                        '@value' => 'oa:Selector',
-                    ];
-                    $value['@language'] = null;
-                    $data['oa:hasTarget'][$index]['dcterms:format'][] = $value;
-                    unset($data['dcterms:format'][$key]);
-                    $mainValueIsTargets[$key] = $index;
-                    ++$index;
-                    break;
-            }
-        }
-        if (empty($data['dcterms:format'])) {
-            unset($data['dcterms:format']);
-        }
-
-        foreach ($data['oa:styleClass'] ?? [] as $key => $value) {
-            if (isset($mainValueIsTargets[$key])) {
-                $value['@language'] = null;
-                $data['oa:hasTarget'][$mainValueIsTargets[$key]]['oa:styleClass'][] = $value;
-                unset($data['oa:styleClass'][$key]);
-            }
-        }
-        if (empty($data['oa:styleClass'])) {
-            unset($data['oa:styleClass']);
-        }
-
-        foreach ($data['rdf:value'] ?? [] as $key => $value) {
-            // A rdf value can be a target or a body in the old process.
-            if (isset($mainValueIsTargets[$key])) {
-                $value['@language'] = null;
-                $data['oa:hasTarget'][$mainValueIsTargets[$key]]['rdf:value'][] = $value;
-                unset($data['rdf:value'][$key]);
-            }
-        }
-        if (empty($data['rdf:value'])) {
-            unset($data['rdf:value']);
-        }
-
-        // Bodies (single).
-
-        if (!empty($data['oa:hasPurpose'])) {
-            $data['oa:hasBody'][0]['oa:hasPurpose'] = $data['oa:hasPurpose'];
-        }
-        unset($data['oa:hasPurpose']);
-
-        $index = 0;
-        foreach ($data['rdf:value'] ?? [] as $key => $value) {
-            // A rdf value can be a target or a body in the old process.
-            // In the case of a body, there is only one body.
-            if (!isset($mainValueIsTargets[$key])) {
-                $value['@language'] = null;
-                $data['oa:hasBody'][0]['rdf:value'][] = $value;
-                unset($data['rdf:value'][$key]);
-                $format = $this->isHtml($value['@value'] ?? '') ? 'text/html' : null;
-                if ($format) {
-                    $data['oa:hasBody'][0]['dcterms:format'][] = [
-                        'property_id' => $easyMeta->propertyIds('dcterms:format'),
-                        'type' => 'customvocab:' . $this->customVocabId('Annotation Body dcterms:format'),
-                        '@value' => $format,
-                    ];
-                }
-            }
-        }
-        if (empty($data['rdf:value'])) {
-            unset($data['rdf:value']);
-        }
-
-        $request->setContent($data);
     }
 
     /**
