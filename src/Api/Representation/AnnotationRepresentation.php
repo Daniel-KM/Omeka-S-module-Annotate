@@ -57,7 +57,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
      *
      * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $jsonLd = parent::jsonSerialize();
 

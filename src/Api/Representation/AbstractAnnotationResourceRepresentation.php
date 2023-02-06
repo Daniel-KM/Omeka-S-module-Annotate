@@ -125,7 +125,7 @@ abstract class AbstractAnnotationResourceRepresentation extends AbstractResource
      * {@inheritDoc}
      * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $childJsonLd = $this->getJsonLd();
         // $type = $this->getJsonLdType();

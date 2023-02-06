@@ -104,7 +104,7 @@ abstract class AbstractValueResourceEntityRepresentation extends AbstractResourc
      * {@inheritDoc}
      * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         $jsonLd = $this->getJsonLd();
         // No filter: use main annotation instead.
