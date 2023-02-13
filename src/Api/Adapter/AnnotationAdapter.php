@@ -312,7 +312,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     'joiner' => 'and',
                     'property' => 'dcterms:creator',
                     'type' => 'eq',
-                    'text' => $query['annotator'],
+                    // Cast avoid some issues on standard Omeka core.
+                    'text' => (string) $query['annotator'],
                 ];
             }
         }
@@ -336,7 +337,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'joiner' => 'and',
                 'property' => 'oa:hasSource',
                 'type' => 'res',
-                'text' => $query['resource_id'],
+                // Cast avoid some issues on standard Omeka core.
+                'text' => (string) $query['resource_id'],
             ];
         }
 
@@ -346,7 +348,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'joiner' => 'and',
                 'property' => 'oa:motivatedBy',
                 'type' => 'eq',
-                'text' => $query['motivation'],
+                // Cast avoid some issues on standard Omeka core.
+                'text' => (string) $query['motivation'],
             ];
         }
 
