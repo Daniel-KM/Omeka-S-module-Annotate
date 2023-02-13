@@ -170,6 +170,17 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         return $value ? $value->value() : null;
     }
 
+    /**
+     * @todo Support reverse subject values for annotation.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::subjectValuesForReverse()
+     */
+    public function subjectValuesForReverse($propertyId = null, $resourceType = null, $siteId = null)
+    {
+        return [];
+    }
+
     public function siteUrl($siteSlug = null, $canonical = false)
     {
         if (!$siteSlug) {

@@ -14,6 +14,7 @@ use Omeka\Api\Request;
 use Omeka\Api\ResourceInterface;
 use Omeka\Api\Response;
 use Omeka\Entity\EntityInterface;
+use Omeka\Entity\Resource;
 use Omeka\Stdlib\ErrorStore;
 
 /**
@@ -647,6 +648,17 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         } elseif (!is_array($data['oa:hasTarget'])) {
             $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
         }
+    }
+
+    /**
+     * @todo Support reverse subject values for annotation.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::getSubjectValuesSimple()
+     */
+    public function getSubjectValuesSimple(Resource $resource, $propertyId = null, $resourceType = null, $siteId = null)
+    {
+        return [];
     }
 
     /**
