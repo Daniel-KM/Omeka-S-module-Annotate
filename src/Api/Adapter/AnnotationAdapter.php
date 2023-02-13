@@ -6,13 +6,10 @@ use Annotate\Entity\Annotation;
 use Annotate\Entity\AnnotationTarget;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use Laminas\EventManager\Event;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Exception;
 use Omeka\Api\Request;
 use Omeka\Api\ResourceInterface;
-use Omeka\Api\Response;
 use Omeka\Entity\EntityInterface;
 use Omeka\Entity\Resource;
 use Omeka\Stdlib\ErrorStore;
@@ -25,6 +22,7 @@ use Omeka\Stdlib\ErrorStore;
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
     use QueryDateTimeTrait;
+    use QueryPropertiesTrait;
 
     protected $annotables = [
         \Omeka\Entity\Item::class,
@@ -68,218 +66,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $data = $data->getAnnotation();
         }
         return parent::getRepresentation($data);
-    }
-
-    /**
-     * The process should be able to search in values of the properties of the
-     * annotation, the body and the target, but outputing only annotations.
-     * So it searches in annotation parts and filters only annotations with a
-     * "group by".
-     *
-     * Nevertheless, the "group by" fails with sql mode "only_full_group_by"
-     * (default on mysql), so a subquery is used, that should fix most of the
-     * cases.
-     *
-     * {@inheritDoc}
-     * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
-     */
-    public function search(Request $request)
-    {
-        $query = $request->getContent();
-
-        // Set default query parameters
-        $defaultQuery = [
-            'page' => null,
-            'per_page' => null,
-            'limit' => null,
-            'offset' => null,
-            'sort_by' => null,
-            'sort_order' => null,
-            'return_scalar' => null,
-        ];
-        $query += $defaultQuery;
-        $query['sort_order'] = strtoupper((string) $query['sort_order']) === 'DESC' ? 'DESC' : 'ASC';
-
-        // Begin building the search query.
-        $entityClass = $this->getEntityClass();
-
-        $this->index = 0;
-        // Join all related bodies and targets to get their properties too.
-        // Idealy, the request should be done on resource with a join or where
-        // condition on resource_type (in annotation, body and target), but the
-        // resource_type is not available in the ORM query builder, unlike the
-        // DBAL query builder, because it is the discriminator map.
-        // Nevertheless, Doctrine allows to use a special function in that case.
-        // @see https://www.doctrine-project.org/projects/doctrine-orm/en/2.6/reference/inheritance-mapping.html#query-the-type
-        // This special function is not so simple, so use AnnotationPart: all
-        // annotations, bodies and targets are subparts of AnnotationPart. The
-        // method getRepresentation() checks the part to return always the
-        // annotation one. It avoids a "select from select unions" too.
-        $entityManager = $this->getEntityManager();
-        $qb = $entityManager
-            ->createQueryBuilder()
-            ->select('omeka_root')
-            // ->from($entityClass, $alias);
-            ->from(
-                // The annotation part allows to get values of all sub-parts
-                // in properties or via modules.
-                \Annotate\Entity\AnnotationPart::class,
-                // The alias is this class, like in the normal queries. It
-                // allows to manage derivated queries easily.
-                'omeka_root'
-            );
-        $this->buildBaseQuery($qb, $query);
-        $this->buildQuery($qb, $query);
-        // The group is done on the annotation, not the id, so only annotations
-        // are returned. It works fine with mariadb (see previous version).
-        // Nevertheless, sql mode "only_full_group_by" requires group on an id.
-        // $qb->groupBy('omeka_root.annotation');
-        // Useless, but avoid an issue on mysql with group by clause.
-        // $qb->addSelect('omeka_root.id HIDDEN rid');
-        $qb->groupBy('omeka_root.id');
-
-        // Trigger the search.query event.
-        $event = new Event('api.search.query', $this, [
-            'queryBuilder' => $qb,
-            'request' => $request,
-        ]);
-        $this->getEventManager()->triggerEvent($event);
-
-        // To avoid issue with "only_full_group_by", a sub query is used.
-        // The main query needs only the id.
-        $expr = $qb->expr();
-        $qbSub = $qb;
-        $qbSub->select('omeka_root.id');
-        $parameters = $qbSub->getParameters();
-
-        /*
-        // In pure sql: "select annotation from annotation inner join annotation_part on annotation_part.annotation_id in ($query) limit x;"
-        // But dql adds related joins, and the join is not possible with a
-        // discriminator, so a sub-sub-query is needed for current version.
-        $qb = $entityManager
-            ->createQueryBuilder()
-            ->select('_omeka_root')
-            ->from(
-                \Annotate\Entity\Annotation::class,
-                '_omeka_root'
-            )
-            ->innerJoin(
-                \Annotate\Entity\AnnotationPart::class,
-                '_annotation_parts',
-                \Doctrine\ORM\Query\Expr\Join::ON,
-                $expr->in(
-                    'IDENTITY(_annotation_parts.annotation)',
-                    $qbSub->getDQL()
-                )
-            )
-            ->setParameters($parameters);
-        */
-
-        $qb = $entityManager
-            ->createQueryBuilder()
-            ->select('_omeka_root')
-            ->from(
-                \Annotate\Entity\Annotation::class,
-                '_omeka_root'
-            )
-            ->where($expr->in(
-                '_omeka_root.id',
-                $entityManager
-                    ->createQueryBuilder()
-                    ->select('DISTINCT IDENTITY(_annotation_parts.annotation)')
-                    ->from(
-                        \Annotate\Entity\AnnotationPart::class,
-                        '_annotation_parts'
-                    )
-                    ->where($expr->in('_annotation_parts.id', $qbSub->getDQL()))
-                    ->getDQL()
-            ))
-            ->setParameters($parameters)
-        ;
-
-        // Add the LIMIT clause.
-        $this->limitQuery($qb, $query);
-
-        // Before adding the ORDER BY clause, set a paginator responsible for
-        // getting the total count. This optimization excludes the ORDER BY
-        // clause from the count query, greatly speeding up response time.
-        $countQb = clone $qb;
-        // $countQb->select('1')->resetDQLPart('orderBy');
-        $countQb->resetDQLPart('orderBy');
-        $countPaginator = new Paginator($countQb, false);
-
-        // Add the ORDER BY clause. Always sort by entity ID in addition to any
-        // sorting the adapters add.
-        $this->sortQuery($qbSub, $query);
-        $qbSub->addOrderBy('omeka_root.annotation', $query['sort_order']);
-        $parameters = $qbSub->getParameters();
-        $qb
-            ->where($expr->in(
-                '_omeka_root.id',
-                $entityManager
-                    ->createQueryBuilder()
-                    ->select('DISTINCT IDENTITY(_annotation_parts.annotation)')
-                    ->from(
-                        \Annotate\Entity\AnnotationPart::class,
-                        '_annotation_parts'
-                    )
-                    ->where($expr->in('_annotation_parts.id', $qbSub->getDQL()))
-                    ->getDQL()
-            ))
-            ->setParameters($parameters);
-
-        $scalarField = $request->getOption('returnScalar');
-        if (!$scalarField && $query['return_scalar']) {
-            if (!array_key_exists($query['return_scalar'], $this->scalarFields)) {
-                throw new Exception\BadRequestException(sprintf(
-                    $this->getTranslator()->translate('The "%1$s" field is not available in the %2$s adapter class.'),
-                    $query['return_scalar'], get_class($this)
-                ));
-            }
-            // The return_scalar passed in the query is valid. Note that we must
-            // set returnScalar to the request so the API manager skips validation.
-            $scalarField = $query['return_scalar'];
-            $request->setOption('returnScalar', $scalarField);
-        }
-        if ($scalarField) {
-            $classMetadata = $this->getEntityManager()->getClassMetadata($entityClass);
-            $fieldNames = $classMetadata->getFieldNames();
-            if (!in_array($scalarField, $fieldNames)) {
-                $associationNames = $classMetadata->getAssociationNames();
-                if (!in_array($scalarField, $associationNames)) {
-                    throw new Exception\BadRequestException(sprintf(
-                        $this->getTranslator()->translate('The "%1$s" field is not available in the %2$s entity class.'),
-                        $scalarField, $entityClass
-                    ));
-                }
-                $qb->select('_omeka_root.id', "IDENTITY(_omeka_root.$scalarField) AS $scalarField");
-            } else {
-                $qb->select('_omeka_root.id', '_omeka_root.' . $scalarField);
-            }
-            $content = array_column($qb->getQuery()->getScalarResult(), $scalarField, 'id');
-            $response = new Response($content);
-            $response->setTotalResults(count($content));
-            return $response;
-        }
-
-        $paginator = new Paginator($qb, false);
-        $entities = [];
-        // Don't make the request if the LIMIT is set to zero. Useful if the
-        // only information needed is total results.
-        if ($qb->getMaxResults() || null === $qb->getMaxResults()) {
-            foreach ($paginator as $entity) {
-                if (is_array($entity)) {
-                    // Remove non-entity columns added to the SELECT. You can use
-                    // "AS HIDDEN {alias}" to avoid this condition.
-                    $entity = $entity[0];
-                }
-                $entities[] = $entity;
-            }
-        }
-
-        $response = new Response($entities);
-        $response->setTotalResults($countPaginator->count());
-        return $response;
     }
 
     /**
