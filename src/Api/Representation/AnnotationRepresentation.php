@@ -128,7 +128,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * Return the target resources if any.
      *
-     * This is the list of annotated resource.
+     * This is the list of annotated resources.
      *
      * @return AbstractResourceEntityRepresentation[]
      */
@@ -153,6 +153,21 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         return $targets
             ? reset($targets)
             : null;
+    }
+
+    public function motivations(): array
+    {
+        $result = [];
+        foreach ($this->value('oa:motivatedBy', ['all' => true]) as $value) {
+            $result[] = $value->value();
+        }
+        return $result;
+    }
+
+    public function motivation(): ?string
+    {
+        $value = $this->value('oa:motivatedBy');
+        return $value ? $value->value() : null;
     }
 
     public function siteUrl($siteSlug = null, $canonical = false)
