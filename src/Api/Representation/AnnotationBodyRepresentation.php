@@ -19,6 +19,21 @@ class AnnotationBodyRepresentation extends AbstractValueResourceEntityRepresenta
         return 'oa:hasBody';
     }
 
+    public function purposes(): array
+    {
+        $result = [];
+        foreach ($this->value('oa:hasPurpose', ['all' => true]) as $value) {
+            $result[] = $value->value();
+        }
+        return $result;
+    }
+
+    public function purpose(): ?string
+    {
+        $value = $this->value('oa:hasPurpose');
+        return $value ? $value->value() : null;
+    }
+
     public function displayTitle($default = null, $lang = null)
     {
         // TODO Check if this is a textual value or not before setting the title.
