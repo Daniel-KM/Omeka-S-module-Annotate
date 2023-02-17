@@ -17,7 +17,7 @@ class Annotations extends AbstractHelper
         $response = $view->api()->search('annotations', $query);
         $annotations = $response->getContent();
         $totalAnnotations = $response->getTotalResults();
-        echo $view->partial(
+        return $view->partial(
             'common/site/annotation-resource',
             [
                 'resource' => $resource,
