@@ -222,9 +222,9 @@ be completed with the property id and a generic type.
 Search can be done with standard api request with properties on `/api/annotations`.
 Some query arguments are specific:
 
-- `resource_id`: get all the annotations for a specific resource.
-- `owner_id`: get all annotations for a specific user.
-- `motivation`: get all annotations for a specific motivation.
+- `resource_id`: get all the annotations for a specific resource or multiple resources.
+- `owner_id`: get all annotations for a specific user or multiple users.
+- `motivation`: get all annotations for a specific motivation or multiple motivations.
 
 
 TODO
