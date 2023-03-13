@@ -94,26 +94,39 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     $userAlias
                 );
                 $qb->andWhere($expr->isNull($userAlias . '.id'));
-            } else {
+            } elseif ($query['annotator'] !== '' && $query['annotator'] !== []) {
+                if (is_array($query['annotator']) && count($query['annotator']) === 1) {
+                    $query['annotator'] = reset($query['annotator']);
+                }
                 $query['property'][] = [
                     'joiner' => 'and',
                     'property' => 'dcterms:creator',
-                    'type' => 'eq',
+                    'type' => is_array($query['annotator']) ? 'list' : 'eq',
                     'text' => $query['annotator'],
                 ];
             }
         }
 
-        if (isset($query['owner_id']) && is_numeric($query['owner_id'])) {
+        if (isset($query['owner_id']) && $query['owner_id'] !== '' && $query['owner_id'] !== []) {
+            if (is_array($query['owner_id']) && count($query['owner_id']) === 1) {
+                $query['owner_id'] = reset($query['owner_id']);
+            }
             $userAlias = $this->createAlias();
             $qb->innerJoin(
                 'omeka_root.owner',
                 $userAlias
             );
-            $qb->andWhere($expr->eq(
-                "$userAlias.id",
-                $this->createNamedParameter($qb, $query['owner_id']))
-            );
+            if (is_array($query['owner_id'])) {
+                $qb->andWhere($expr->in(
+                    "$userAlias.id",
+                    $this->createNamedParameter($qb, $query['owner_id']))
+                );
+            } else {
+                $qb->andWhere($expr->eq(
+                    "$userAlias.id",
+                    $this->createNamedParameter($qb, $query['owner_id']))
+                );
+            }
         }
 
         // Added before parent buildQuery because a property is added.
