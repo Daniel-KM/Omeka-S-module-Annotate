@@ -53,13 +53,8 @@
     }
 
     /* Annotation show */
-    .section-nav {
-        height: initial;
-        min-height: 42px;
-    }
-    .section-nav ul {
-        display: flex;
-        flex-wrap: wrap;
+    .section.active {
+        clear: both;
     }
     .annotations .annotation-caption {
         background-color: rgba(0,0,0,0.04);
