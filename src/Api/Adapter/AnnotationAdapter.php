@@ -118,7 +118,10 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         // Added before parent buildQuery because a property is added.
         // FIXME: oa:hasSource is used to get the target, but in very rare cases, it can be attached to the body. Require to search a property on a subpart.
-        if (isset($query['resource_id']) && is_numeric($query['resource_id'])) {
+        if (isset($query['resource_id']) && $query['resource_id'] !== '' && $query['resource_id'] !== []) {
+            if (is_array($query['resource_id']) && count($query['resource_id']) === 1) {
+                $query['resource_id'] = reset($query['resource_id']);
+            }
             $query['property'][] = [
                 'joiner' => 'and',
                 'property' => 'oa:hasSource',
@@ -128,11 +131,14 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         }
 
         // Added before parent buildQuery because a property is added.
-        if (isset($query['motivation']) && $query['motivation'] !== '') {
+        if (isset($query['motivation']) && $query['motivation'] !== '' && $query['motivation'] !== []) {
+            if (is_array($query['motivation']) && count($query['motivation']) === 1) {
+                $query['motivation'] = reset($query['motivation']);
+            }
             $query['property'][] = [
                 'joiner' => 'and',
                 'property' => 'oa:motivatedBy',
-                'type' => 'eq',
+                'type' => is_array($query['motivation']) ? 'list' : 'eq',
                 'text' => $query['motivation'],
             ];
         }
