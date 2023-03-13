@@ -9,12 +9,13 @@ use Omeka\Stdlib\Message;
  * @var Module $this
  * @var \Laminas\ServiceManager\ServiceLocatorInterface $services
  */
+$services = $this->getServiceLocator();
 
 if (!method_exists($this, 'getInstallResources')) {
     throw new ModuleCannotInstallException((string) new Message(
         'This module requires module %s version %s or greater.', // @translate
         'Generic',
-        '3.4.41'
+        '3.4.43'
     ));
 }
 
