@@ -99,8 +99,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     'joiner' => 'and',
                     'property' => 'dcterms:creator',
                     'type' => 'eq',
-                    // Cast avoid some issues on standard Omeka core.
-                    'text' => (string) $query['annotator'],
+                    'text' => $query['annotator'],
                 ];
             }
         }
@@ -111,7 +110,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'omeka_root.owner',
                 $userAlias
             );
-            $qb->andWhere($qb->expr()->eq(
+            $qb->andWhere($expr->eq(
                 "$userAlias.id",
                 $this->createNamedParameter($qb, $query['owner_id']))
             );
@@ -124,8 +123,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'joiner' => 'and',
                 'property' => 'oa:hasSource',
                 'type' => 'res',
-                // Cast avoid some issues on standard Omeka core.
-                'text' => (string) $query['resource_id'],
+                'text' => $query['resource_id'],
             ];
         }
 
@@ -135,31 +133,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'joiner' => 'and',
                 'property' => 'oa:motivatedBy',
                 'type' => 'eq',
-                // Cast avoid some issues on standard Omeka core.
-                'text' => (string) $query['motivation'],
+                'text' => $query['motivation'],
             ];
         }
 
-        // Parent buildQuery() uses "id" when "id" is queried, but it should be
-        // "annotation_id".
-        // So either copy all the parent method, either unset it before and
-        // check it after. Else, change the data model to set "id" for "root".
-        // TODO Check for Omeka 3.
-        $hasQueryId = isset($query['id']) && is_numeric($query['id']);
-        if ($hasQueryId) {
-            $id = $query['id'];
-            $qb->andWhere($expr->eq(
-                'omeka_root.annotation',
-                $this->createNamedParameter($qb, $query['id'])
-            ));
-            unset($query['id']);
-        }
-
         parent::buildQuery($qb, $query);
-
-        if ($hasQueryId) {
-            $query['id'] = $id;
-        }
 
         // TODO Check the query of annotations by site.
         // TODO Make the limit to a site working for item sets and media too.
