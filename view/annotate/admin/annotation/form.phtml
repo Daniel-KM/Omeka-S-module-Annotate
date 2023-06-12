@@ -13,7 +13,9 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
-$this->headScript()->appendFile($assetUrl('js/resource-form.js', 'Omeka'), 'text/javascript', ['defer' => 'defer']);
+$this->headScript()
+    ->appendFile($assetUrl('vendor/sortablejs/Sortable.min.js', 'Omeka'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('js/resource-form.js', 'Omeka'), 'text/javascript', ['defer' => 'defer']);
 
 /*
 $sectionNavs = [
