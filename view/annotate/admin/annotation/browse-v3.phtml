@@ -49,7 +49,7 @@ $sortHeadings = [
 
  <div class="browse-controls">
     <?= $this->pagination() ?>
-    <?= $hyperlink($translate('Quick Search'), '#', ['class' => 'search advanced-search']) ?>
+    <button type="button" class="search advanced-search quick-search"><?= $escape($translate('Quick Search')) ?></button>
     <?= $this->sortSelector($sortHeadings) ?>
 </div>
 
