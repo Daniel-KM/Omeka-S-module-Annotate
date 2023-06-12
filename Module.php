@@ -534,12 +534,6 @@ class Module extends AbstractModule
 
         // TODO Add the special data to the resource template.
 
-        $sharedEventManager->attach(
-            '*',
-            'view.layout',
-            [$this, 'addHeadersAdmin']
-        );
-
         // Allows to search resource template by resource class.
         $sharedEventManager->attach(
             \Omeka\Api\Adapter\ResourceTemplateAdapter::class,
@@ -581,8 +575,25 @@ class Module extends AbstractModule
             'Omeka\Controller\Admin\Item',
             'Omeka\Controller\Admin\ItemSet',
             'Omeka\Controller\Admin\Media',
+            \Annotate\Controller\Admin\AnnotationController::class,
         ];
         foreach ($controllers as $controller) {
+            $sharedEventManager->attach(
+                $controller,
+                'view.show.after',
+                [$this, 'addHeadersAdmin']
+            );
+            $sharedEventManager->attach(
+                $controller,
+                'view.add.before',
+                [$this, 'addHeadersAdmin']
+            );
+            $sharedEventManager->attach(
+                $controller,
+                'view.edit.before',
+                [$this, 'addHeadersAdmin']
+            );
+
             $sharedEventManager->attach(
                 $controller,
                 'view.show.section_nav',
@@ -615,6 +626,12 @@ class Module extends AbstractModule
                 [$this, 'displayList']
             );
         }
+
+        $sharedEventManager->attach(
+            \Annotate\Controller\Admin\AnnotationController::class,
+            'view.browse.before',
+            [$this, 'addHeadersAdmin']
+        );
 
         // Add a tab to the resource template admin pages.
         // Can be added to the view of the form too.
@@ -926,7 +943,7 @@ class Module extends AbstractModule
         }
         $view->headLink()
             ->appendStylesheet($view->assetUrl('css/annotate-admin.css', 'Annotate'));
-        $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate/default', ['action' => 'browse'], true), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         $view->headScript()
             ->appendScript($searchUrl)
             ->appendFile($view->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
