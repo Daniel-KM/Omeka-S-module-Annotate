@@ -123,7 +123,6 @@ class Module extends AbstractModule
     public function uninstall(ServiceLocatorInterface $services): void
     {
         $this->setServiceLocator($services);
-        $services = $services;
 
         if (!class_exists(\Generic\InstallResources::class)) {
             require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')

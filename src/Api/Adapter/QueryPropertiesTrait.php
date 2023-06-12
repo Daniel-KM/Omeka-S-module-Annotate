@@ -671,7 +671,7 @@ trait QueryPropertiesTrait
             $qb
                 ->where($whereClause);
 
-            // TODO For now, where are concatenated manually.
+            // TODO For now, "where" are concatenated manually.
             $qbPartialResult = $qb->getQuery()->getScalarResult();
             $qbPartialResult = $qbPartialResult ? array_column($qbPartialResult, '1', '1') : [];
             if ($partialResults === null) {
