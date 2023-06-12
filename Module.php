@@ -943,9 +943,7 @@ class Module extends AbstractModule
         }
         $view->headLink()
             ->appendStylesheet($view->assetUrl('css/annotate-admin.css', 'Annotate'));
-        $searchUrl = sprintf('var searchAnnotationsUrl = %s;', json_encode($view->url('admin/annotate'), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         $view->headScript()
-            ->appendScript($searchUrl)
             ->appendFile($view->assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
     }
 
@@ -981,21 +979,23 @@ class Module extends AbstractModule
      */
     public function displayList(Event $event): void
     {
-        echo '<div id="annotate" class="section annotate">';
         $vars = $event->getTarget()->vars();
         // Manage add/edit form.
         if (isset($vars->resource)) {
             $resource = $vars->resource;
         } elseif (isset($vars->item)) {
             $resource = $vars->item;
-        } elseif (isset($vars->itemSet)) {
-            $resource = $vars->itemSet;
         } elseif (isset($vars->media)) {
             $resource = $vars->media;
+        } elseif (isset($vars->itemSet)) {
+            $resource = $vars->itemSet;
+        } elseif (isset($vars->annotation)) {
+            $resource = $vars->annotation;
         } else {
             $resource = null;
         }
         $vars->offsetSet('resource', $resource);
+        echo '<div id="annotate" class="section annotate">';
         $this->displayResourceAnnotations($event, $resource, false);
         echo '</div>';
     }
@@ -1073,7 +1073,7 @@ class Module extends AbstractModule
      */
     protected function displayResourceAnnotations(
         Event $event,
-        AbstractResourceEntityRepresentation $resource,
+        ?AbstractResourceEntityRepresentation $resource,
         bool $listAsDiv = false,
         array $query = []
     ): void {
