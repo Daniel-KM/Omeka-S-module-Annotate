@@ -207,16 +207,18 @@ trait QueryPropertiesTrait
         }
 
         // $valuesJoin = 'omeka_root.values';
-        // $where = '';
+        $where = '';
         $hasIncorrectValue = false;
 
         // To simplify maintenance with module AdvancedSearch, use class
         // properties for adapter and connection.
         $this->adapter = $this;
 
-        // @see \Doctrine\ORM\QueryBuilder::expr().
+        /**
+         * @see \Doctrine\ORM\QueryBuilder::expr().
+         * @var \Doctrine\ORM\EntityManager $entityManager
+         */
         $expr = $qb->expr();
-        /** @var \Doctrine\ORM\EntityManager $entityManager */
         $entityManager = $this->adapter->getEntityManager();
 
         $this->connection = $entityManager->getConnection();
@@ -237,6 +239,15 @@ trait QueryPropertiesTrait
         // for a user.
         // TODO Find a better way to aggregate sub-queries sub queries with parameters. Use sql? Add a  table with source (but problem will remain for other properties but most of them are in bodies)?
         $partialResults = null;
+        $smqAlias = $this->adapter->createAlias();
+        $smq = $entityManager->createQueryBuilder();
+        $smqParameters = $smq->getParameters();
+        // To fix issues with doctrine subqueries and parameters, execute
+        // queries directly. Most of the time, it is to find annotation of an
+        // item of a user.
+        // TODO Find a better way to aggregate sub-queries sub queries with parameters or use sql.
+        $partialResults = null;
+        $qbs = [];
 
         foreach ($query['property'] as $queryRow) {
             if (!is_array($queryRow)
@@ -258,19 +269,19 @@ trait QueryPropertiesTrait
             elseif (in_array($queryType, $this->propertyQuery['value_array'], true)) {
                 if ((is_array($value) && !count($value))
                     || (!is_array($value) && !strlen((string) $value))
-                    ) {
-                        continue;
-                    }
-                    if (!is_array($value)) {
-                        $value = [$value];
-                    }
-                    // To use array_values() avoids doctrine issue with string keys.
-                    $value = in_array($queryType, $this->propertyQuery['value_integer'])
-                        ? array_values(array_unique(array_map('intval', $value)))
-                        : array_values(array_unique(array_filter(array_map('trim', array_map('strval', $value)), 'strlen')));
-                    if (empty($value)) {
-                        continue;
-                    }
+                ) {
+                    continue;
+                }
+                if (!is_array($value)) {
+                    $value = [$value];
+                }
+                // To use array_values() avoids doctrine issue with string keys.
+                $value = in_array($queryType, $this->propertyQuery['value_integer'])
+                    ? array_values(array_unique(array_map('intval', $value)))
+                    : array_values(array_unique(array_filter(array_map('trim', array_map('strval', $value)), 'strlen')));
+                if (empty($value)) {
+                    continue;
+                }
             }
             // The value should be scalar in all other cases (int or string).
             elseif (is_array($value)) {
@@ -523,7 +534,7 @@ trait QueryPropertiesTrait
                     }
                     break;
 
-                    // The linked resources (subject values) use the same sub-query.
+                // The linked resources (subject values) use the same sub-query.
                 case 'nlex':
                     // For consistency, "nlex" is the reverse of "lex" even when
                     // a resource is linked with a public and a private resource.
@@ -564,7 +575,7 @@ trait QueryPropertiesTrait
             // Avoid to get results when the query is incorrect.
             // In that case, no param should be set in the current loop.
             if ($incorrectValue) {
-                // $where = $expr->eq('omeka_root.id', 0);
+                $where = $expr->eq('omeka_root.id', 0);
                 $hasIncorrectValue = true;
                 break;
             }
@@ -670,16 +681,48 @@ trait QueryPropertiesTrait
             } else {
                 $partialResults = array_intersect_key($partialResults, $qbPartialResult);
             }
+
+            if ($where === '') {
+                $where = '';
+            } elseif ($joiner === 'or') {
+                $where .= ' OR ';
+            } else {
+                $where .= ' AND ';
+            }
+            $where .= $expr->in($smqAlias, $qb->getDQL());
+            foreach ($qb->getParameters() as $parameter) {
+                $smqParameters->add($parameter);
+            }
         }
 
         // Properties are one argument to append as a whole.
-        if ($hasIncorrectValue || $partialResults === []) {
-            $mainQb
-                ->andWhere($expr->eq('omeka_root.id', 0));
-        } elseif ($partialResults !== null) {
+        if ($where) {
+            $smq = $entityManager->createQueryBuilder();
+            $smqAlias = $this->adapter->createAlias();
+            $smqParameters = $smq->getParameters();
+            $smq
+                ->select("DISTINCT IDENTITY($smqAlias)")
+                ->from(\Annotate\Entity\Annotation::class, $smqAlias);
+            $first = true;
+            foreach ($qbs as $qbd) {
+                if ($first) {
+                    $first = false;
+                    $smq
+                        ->where($expr->in("$smqAlias.id", $qbd['qb']->getDQL()));
+                } elseif ($qbd['joiner'] === 'or') {
+                    $smq
+                        ->orWhere($expr->in("$smqAlias.id", $qbd['qb']->getDQL()));
+                } else {
+                    $smq
+                        ->andWhere($expr->in("$smqAlias.id", $qbd['qb']->getDQL()));
+                }
+                foreach ($qbd['qb']->getParameters() as $qbParameters) {
+                    $smqParameters->add($qbParameters);
+                }
+            }
             $mainQb
                 ->andWhere($expr->in('omeka_root', ':annotation_ids'))
-                ->setParameter('annotation_ids', array_keys($partialResults), Connection::PARAM_INT_ARRAY)
+                ->setParameter('annotation_ids', array_keys($partialResults), $this->connection::PARAM_INT_ARRAY)
             ;
         }
     }
