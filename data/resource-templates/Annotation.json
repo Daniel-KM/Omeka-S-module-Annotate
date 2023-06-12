@@ -5,8 +5,12 @@
             "o:alternate_label": "Motivated by",
             "o:alternate_comment": null,
             "o:is_required": false,
-            "data_type_name": "customvocab:1",
-            "data_type_label": "Annotation oa:motivatedBy",
+            "data_types": [
+                {
+                    "name": "customvocab:1",
+                    "label": "Annotation oa:motivatedBy"
+                }
+            ],
             "vocabulary_namespace_uri": "http://www.w3.org/ns/oa#",
             "vocabulary_label": "Web Annotation Ontology",
             "local_name": "motivatedBy",
@@ -16,8 +20,12 @@
             "o:alternate_label": "Value",
             "o:alternate_comment": "May be used for body textual content and/or json/xml/svg, etc. target selector.",
             "o:is_required": false,
-            "data_type_name": null,
-            "data_type_label": null,
+            "data_types": [
+                {
+                    "name": "literal",
+                    "label": "Text"
+                }
+            ],
             "vocabulary_namespace_uri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             "vocabulary_label": "The RDF Concepts Vocabulary (RDF)",
             "local_name": "value",
@@ -27,8 +35,12 @@
             "o:alternate_label": "Has purpose",
             "o:alternate_comment": null,
             "o:is_required": false,
-            "data_type_name": "customvocab:2",
-            "data_type_label": "Annotation Body oa:hasPurpose",
+            "data_types": [
+                {
+                    "name": "customvocab:2",
+                    "label": "Annotation Body oa:hasPurpose"
+                }
+            ],
             "vocabulary_namespace_uri": "http://www.w3.org/ns/oa#",
             "vocabulary_label": "Web Annotation Ontology",
             "local_name": "hasPurpose",
@@ -38,8 +50,12 @@
             "o:alternate_label": null,
             "o:alternate_comment": "Language of the textual body.",
             "o:is_required": false,
-            "data_type_name": null,
-            "data_type_label": null,
+            "data_types": [
+                {
+                    "name": "literal",
+                    "label": "Text"
+                }
+            ],
             "vocabulary_namespace_uri": "http://purl.org/dc/terms/",
             "vocabulary_label": "Dublin Core",
             "local_name": "language",
@@ -49,8 +65,12 @@
             "o:alternate_label": "Has source",
             "o:alternate_comment": null,
             "o:is_required": false,
-            "data_type_name": "resource",
-            "data_type_label": "All",
+            "data_types": [
+                {
+                    "name": "resource",
+                    "label": "All"
+                }
+            ],
             "vocabulary_namespace_uri": "http://www.w3.org/ns/oa#",
             "vocabulary_label": "Web Annotation Ontology",
             "local_name": "hasSource",
@@ -60,8 +80,12 @@
             "o:alternate_label": "Rdf type",
             "o:alternate_comment": "The type of the selector, if any.",
             "o:is_required": false,
-            "data_type_name": "customvocab:4",
-            "data_type_label": "Annotation Target rdf:type",
+             "data_types": [
+                {
+                    "name": "customvocab:4",
+                    "label": "Annotation Target rdf:type"
+                }
+            ],
             "vocabulary_namespace_uri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             "vocabulary_label": "The RDF Concepts Vocabulary (RDF)",
             "local_name": "type",
@@ -71,8 +95,12 @@
             "o:alternate_label": null,
             "o:alternate_comment": "The format of the selector, if any",
             "o:is_required": false,
-            "data_type_name": "customvocab:5",
-            "data_type_label": "Annotation Target dcterms:format",
+             "data_types": [
+                {
+                    "name": "customvocab:5",
+                    "label": "Annotation Target dcterms:format"
+                }
+            ],
             "vocabulary_namespace_uri": "http://purl.org/dc/terms/",
             "vocabulary_label": "Dublin Core",
             "local_name": "format",
