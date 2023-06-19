@@ -93,6 +93,7 @@ return [
     ],
     'column_types' => [
         'invokables' => [
+            'annotation_id' => ColumnType\Id::class,
             'annotated_resource' => ColumnType\AnnotatedResource::class,
         ],
     ],
