@@ -71,7 +71,10 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
 <table class="tablesaw batch-edit" data-tablesaw-mode="stack">
     <thead>
         <tr>
-            <th><input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>"></th>
+            <th>
+                <input type="checkbox" class="select-all" aria-label="<?= $translate('Select all') ?>">
+                <?= $translate('Title') ?>
+            </th>
             <?= $this->browse()->renderHeaderRow('annotations') ?>
         </tr>
     </thead>
