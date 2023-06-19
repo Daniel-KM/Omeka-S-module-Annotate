@@ -13,7 +13,7 @@ $annotation = $resource;
 ?>
 
 <div class="resource-details" data-resource-values="<?php //echo $escape($values); ?>">
-    <h3 class="o-module-annotation"><?= $annotation->linkPretty() ?></h3>
+    <h3 class="oa-annotation"><?= $annotation->linkPretty() ?></h3>
     <div class="meta-group">
         <?php $owner = $annotation->owner(); ?>
         <h4><?= $escape($translate('Annotator')) ?> <?php if (!$owner): ?><span class="annotation-public"><?= $translate('(public)') ?></span><?php endif; ?></h4>
