@@ -151,6 +151,9 @@ trait QueryPropertiesTrait
      * Pseudo-override buildPropertyQuery() via the api manager delegator.
      * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildPropertyQuery()
      *
+     * @see \AdvancedSearch\Mvc\Controller\Plugin\SearchResources::buildPropertyQuery()
+     * @see \Annotate\Api\Adapter\QueryPropertiesTrait::buildPropertyQuery()
+     *
      * Query format:
      *
      * - property[{index}][joiner]: "and" OR "or" OR "not" joiner with previous query
@@ -530,7 +533,7 @@ trait QueryPropertiesTrait
                     } else {
                         $dataTypeAlias = $this->adapter->createAlias();
                         $qb->setParameter($dataTypeAlias, $value, Connection::PARAM_STR_ARRAY);
-                        $predicateExpr = $expr->in("$valuesAlias.type", $dataTypeAlias);
+                        $predicateExpr = $expr->in("$valuesAlias.type", ":$dataTypeAlias");
                     }
                     break;
 
