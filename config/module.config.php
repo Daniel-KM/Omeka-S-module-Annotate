@@ -117,6 +117,25 @@ return [
                 ['type' => 'created'],
             ],
         ],
+        'public' => [
+            'annotations' => [
+                [
+                    'type' => 'value',
+                    'header' => 'Motivation',
+                    'default' => '',
+                    'property_term' => 'oa:motivatedBy',
+                    'max_values' => 1,
+                ],
+                [
+                    'type' => 'annotated_resource',
+                    'header' => 'Targets',
+                    'default' => '',
+                    'max_values' => null,
+                ],
+                ['type' => 'owner'],
+                ['type' => 'created'],
+            ],
+        ],
     ],
     'browse_defaults' => [
         'admin' => [
@@ -125,7 +144,7 @@ return [
                 'sort_order' => 'desc',
             ],
         ],
-        'admin' => [
+        'public' => [
             'annotations' => [
                 'sort_by' => 'created',
                 'sort_order' => 'desc',
