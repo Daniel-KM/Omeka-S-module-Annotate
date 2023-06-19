@@ -126,13 +126,13 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
-     * Return the target resources if any.
+     * Return the target resources.
      *
      * This is the list of annotated resources.
      *
      * @return AbstractResourceEntityRepresentation[]
      */
-    public function targetSources()
+    public function targetSources(): array
     {
         $result = [];
         $targets = $this->targets();
@@ -143,7 +143,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
-     * Return the primary target resource if any.
+     * Return the primary target resource.
      *
      * This is the annotated resource.
      */
@@ -153,6 +153,46 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         return $targets
             ? reset($targets)
             : null;
+    }
+
+    /**
+     * Return the target selectors.
+     *
+     * This is the list of all oa:hasSelector of targets, generally a single media.
+     *
+     * @return \Omeka\Api\Representation\ValueRepresentation[]
+     */
+    public function targetSelectors(): array
+    {
+        $result = [];
+        $targets = $this->targets();
+        foreach ($targets as $target) {
+            $result = array_merge($result, $target->value('oa:hasSelector', ['all' => true]));
+        }
+        return array_values($result);
+    }
+
+    /**
+     * Return the target selectors that are resources.
+     *
+     * This is the list of all oa:hasSelector of targets, generally a single media.
+     *
+     * @return \Omeka\Api\Representation\ValueRepresentation[]
+     */
+    public function targetSelectorResources(): array
+    {
+        $result = [];
+        $targets = $this->targets();
+        foreach ($targets as $target) {
+            $subResult = [];
+            foreach ($target->value('oa:hasSelector', ['all' => true]) as $value) {
+                if ($value->valueResource()) {
+                    $subResult[] = $value;
+                }
+            }
+            $result = array_merge($result, $subResult);
+        }
+        return array_values($result);
     }
 
     public function motivations(): array
