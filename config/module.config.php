@@ -172,7 +172,7 @@ return [
         'AdminResource' => [
             'annotate' => [
                 'label' => 'Annotations', // @translate
-                'class' => 'o-icon- annotations fa-hand-o-up',
+                'class' => 'o-icon- annotations o-icon- fa-hand-point-up fa-hand-o-up',
                 'route' => 'admin/annotate/default',
                 'resource' => Controller\Admin\AnnotationController::class,
                 'privilege' => 'browse',

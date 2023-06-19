@@ -93,7 +93,7 @@ class AnnotateForm extends Form
                 'name' => 'submit',
                 'attributes' => [
                     'value' => 'Annotate it!', // @translate
-                    'class' => 'o-icon- far fa-hand-o-up',
+                    'class' => 'o-icon- fa-hand-point-up fa-hand-o-up',
                 ],
             ]);
 
