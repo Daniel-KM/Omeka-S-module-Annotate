@@ -1,13 +1,14 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Mvc\Controller\Plugin;
 
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
-use Omeka\Mvc\Controller\Plugin\Settings;
+use Omeka\Settings\Settings;
 
 class ResourceTemplateAnnotationPartMap extends AbstractPlugin
 {
     /**
-     * @var Settings
+     * @var \Omeka\Settings\Settings
      */
     protected $settings;
 
@@ -26,8 +27,7 @@ class ResourceTemplateAnnotationPartMap extends AbstractPlugin
      */
     public function __invoke($resourceTemplateId)
     {
-        $settings = $this->settings;
-        $mapping = $settings()->get('annotate_resource_template_data', []);
+        $mapping = $this->settings->get('annotate_resource_template_data', []);
         return $mapping[$resourceTemplateId] ?? [];
     }
 }

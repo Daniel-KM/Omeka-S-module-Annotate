@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Mvc\Controller\Plugin;
 
+use Common\Stdlib\EasyMeta;
 use Laminas\Mvc\Controller\Plugin\AbstractPlugin;
-use Omeka\Mvc\Controller\Plugin\Api;
+use Omeka\Api\Manager as ApiManager;
 
 /**
  * @deprecated Will be replaced by a new resource form, on the resource template base.
@@ -10,16 +12,19 @@ use Omeka\Mvc\Controller\Plugin\Api;
 class DivideMergedValues extends AbstractPlugin
 {
     /**
-     * @var Api
+     * @var \Omeka\Api\Manager
      */
     protected $api;
 
     /**
-     * @param Api $api
+     * @var \Common\Stdlib\EasyMeta
      */
-    public function __construct(Api $api)
+    protected $easyMeta;
+
+    public function __construct(ApiManager $api, EasyMeta $easyMeta)
     {
         $this->api = $api;
+        $this->easyMeta = $easyMeta;
     }
 
     /**
@@ -43,8 +48,6 @@ class DivideMergedValues extends AbstractPlugin
      */
     public function __invoke(array $data, array $resourceTemplateData = [])
     {
-        $api = $this->api;
-
         // Standard or recommended properties from https://www.w3.org/TR/annotation-vocab.
         $map = [
             'oa:Annotation' => [
@@ -127,7 +130,7 @@ class DivideMergedValues extends AbstractPlugin
         // Step 1.
         // Manage the exception for rdf:type.
         /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
-        $customVocab = $api
+        $customVocab = $this->api
             ->read('custom_vocabs', ['label' => 'Annotation Target rdf:type'])->getContent();
 
         $terms = $customVocab->terms();
@@ -180,15 +183,13 @@ class DivideMergedValues extends AbstractPlugin
         // TODO Check when there are multiple bodies and targets.
         // TODO Replace rdf:value by oa:hasSelector in the form?
         if (!empty($data['oa:hasBody'][0]['rdf:value'])) {
-            $customVocab = $api
+            $customVocab = $this->api
                 ->read('custom_vocabs', ['label' => 'Annotation Target dcterms:format'])->getContent();
             $targetFormats = $customVocab->terms();
             if (!is_array($targetFormats)) {
                 $targetFormats = array_map('trim', explode("\n", $targetFormats));
             }
-            $property = $api->searchOne('properties', [
-                'term' => 'dcterms:format',
-            ], [], ['responseContent' => 'reference'])->getContent();
+            $propertyId = $this->easyMeta->propertyId('dcterms:format');
             foreach ($data['oa:hasBody'] as $key => $body) {
                 foreach ($body['rdf:value'] as $keyB => $valueB) {
                     // TODO Manage the case where the resource is in the body (no form currently, except the main one).
@@ -204,7 +205,7 @@ class DivideMergedValues extends AbstractPlugin
                             // Save the media type (forced).
                             $data['oa:hasTarget'][0]['dcterms:format'][0] = [
                                 '@value' => $mediaType,
-                                'property_id' => $property->id(),
+                                'property_id' => $propertyId,
                                 'type' => 'customvocab:' . $customVocab->id(),
                             ];
                             unset($data['oa:hasBody'][$key]['rdf:value'][$keyB]);

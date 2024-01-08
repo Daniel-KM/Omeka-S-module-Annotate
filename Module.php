@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 /*
- * Copyright Daniel Berthereau, 2017-2023
+ * Copyright Daniel Berthereau, 2017-2024
  *
  * This software is governed by the CeCILL license under French law and abiding
  * by the rules of distribution of free software.  You can use, modify and/ or
@@ -29,15 +29,14 @@
 
 namespace Annotate;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
 use Annotate\Entity\Annotation;
 use Annotate\Permissions\Acl;
-use Generic\AbstractModule;
+use Common\Stdlib\PsrMessage;
+use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
@@ -50,18 +49,29 @@ use Omeka\Api\Representation\ItemSetRepresentation;
 use Omeka\Api\Representation\MediaRepresentation;
 use Omeka\Api\Representation\UserRepresentation;
 use Omeka\Entity\AbstractEntity;
+use Omeka\Module\AbstractModule;
 
+/**
+ * Annotate
+ *
+ * @copyright Daniel Berthereau, 2017-2024
+ * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
+ */
 class Module extends AbstractModule
 {
+    use TraitModule;
+
     const NAMESPACE = __NAMESPACE__;
 
     protected $dependencies = [
+        'Common',
         'CustomVocab',
     ];
 
     public function onBootstrap(MvcEvent $event): void
     {
         parent::onBootstrap($event);
+
         // TODO Add filters (don't display when resource is private, like media?).
         // TODO Set Acl public rights to false when the visibility filter will be ready.
         // $this->addEntityManagerFilters();
@@ -71,12 +81,12 @@ class Module extends AbstractModule
     protected function preInstall(): void
     {
         $services = $this->getServiceLocator();
-        $module = $services->get('Omeka\ModuleManager')->getModule('Generic');
-        if ($module && version_compare($module->getIni('version') ?? '', '3.4.43', '<')) {
-            $translator = $services->get('MvcTranslator');
+        $translate = $services->get('ControllerPluginManager')->get('translate');
+
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
             $message = new \Omeka\Stdlib\Message(
-                $translator->translate('This module requires the module "%s", version %s or above.'), // @translate
-                'Generic', '3.4.43'
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.53'
             );
             throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
         }
@@ -87,6 +97,7 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $api = $services->get('Omeka\ApiManager');
         $settings = $services->get('Omeka\Settings');
+        $messenger = $services->get('ControllerPluginManager')->get('messenger');
 
         // TODO Replace the resource templates for annotations that are not items.
 
@@ -107,10 +118,9 @@ class Module extends AbstractModule
             try {
                 $resourceTemplate = $api->read('resource_templates', ['label' => $label])->getContent();
             } catch (\Omeka\Api\Exception\NotFoundException $e) {
-                $message = new \Omeka\Stdlib\Message(
+                $message = new PsrMessage(
                     'The settings to manage the annotation template are not saved. You shoud edit the resource template "Annotation" manually.' // @translate
                 );
-                $messenger = $services->get('ControllerPluginManager')->get('messenger');
                 $messenger->addWarning($message);
                 continue;
             }
@@ -120,17 +130,13 @@ class Module extends AbstractModule
         $settings->set('annotate_resource_template_data', $resourceTemplateData);
     }
 
-    public function uninstall(ServiceLocatorInterface $services): void
+    protected function postUninstall(): void
     {
-        $this->setServiceLocator($services);
+        $services = $this->getServiceLocator();
 
-        if (!class_exists(\Generic\InstallResources::class)) {
-            require_once file_exists(dirname(__DIR__) . '/Generic/InstallResources.php')
-                ? dirname(__DIR__) . '/Generic/InstallResources.php'
-                : __DIR__ . '/src/Generic/InstallResources.php';
-        }
+        require_once dirname(__DIR__) . '/Common/InstallResources.php';
 
-        $installResources = new \Generic\InstallResources($services);
+        $installResources = new \Common\InstallResources($services);
         $installResources = $installResources();
 
         if (!empty($_POST['remove-vocabulary'])) {
@@ -155,8 +161,6 @@ class Module extends AbstractModule
             $resourceTemplate = 'Annotation';
             $installResources->removeResourceTemplate($resourceTemplate);
         }
-
-        parent::uninstall($services);
     }
 
     public function warnUninstall(Event $event): void
@@ -563,8 +567,16 @@ class Module extends AbstractModule
         $sharedEventManager->attach(
             \Annotate\Controller\Admin\AnnotationController::class,
             'view.advanced_search',
-            [$this, 'displayAdvancedSearchAnnotation']
+            [$this, 'handleViewAdvancedSearch']
         );
+        /* // TODO Include advanced search sidebar query form for annotations.
+        // Add search fields to the sidebar query form in advanced search pages.
+        $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Query',
+            'view.advanced_search',
+            [$this, 'handleViewAdvancedSearch']
+        );
+        */
         // Filter the search filters for the advanced search pages.
         $sharedEventManager->attach(
             \Annotate\Controller\Admin\AnnotationController::class,
@@ -748,7 +760,7 @@ class Module extends AbstractModule
     /**
      * Display the advanced search form for annotations via partial.
      */
-    public function displayAdvancedSearchAnnotation(Event $event): void
+    public function handleViewAdvancedSearch(Event $event): void
     {
         $query = $event->getParam('query', []);
         $query['datetime'] = $query['datetime'] ?? '';

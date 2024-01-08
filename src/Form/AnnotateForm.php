@@ -2,6 +2,7 @@
 
 namespace Annotate\Form;
 
+use Common\Stdlib\EasyMeta;
 use Laminas\Form\Element;
 use Laminas\Form\Form;
 use Omeka\Api\Manager as ApiManager;
@@ -13,6 +14,11 @@ class AnnotateForm extends Form
      */
     protected $api;
 
+    /**
+     * @var \Common\Stdlib\EasyMeta
+     */
+    protected $easyMeta;
+
     public function init(): void
     {
         // TODO Move all static params into annotate controller?
@@ -20,11 +26,9 @@ class AnnotateForm extends Form
         // TODO Convert with fieldsets to allow check via getData().
         // TODO Hidden fields can be removed since data are automatically completed during hydration.
 
-        $resourceTemplateId = $this->api->search('resource_templates', ['label' => 'Annotation'], ['initialize' => false, 'finalize' => false, 'returnScalar' => 'id'])->getContent();
-        $resourceTemplateId = $resourceTemplateId ? reset($resourceTemplateId) : null;
-        $vocabulary = $this->api->read('vocabularies', ['prefix' => 'oa'])->getContent();
-        $resourceClass = $this->api->read('resource_classes', ['vocabulary' => $vocabulary->id(), 'localName' => 'Annotation'])->getContent();
-        $resourceClassId = $resourceClass ? $resourceClass->id() : null;
+        $resourceTemplateId = $this->easyMeta->resourceTemplateId('Annotation');
+        $resourceClassId = $this->easyMeta->resourceClassId('oa:Annotation');
+
         $this
             ->add([
                 'type' => Element\Hidden::class,
@@ -38,9 +42,9 @@ class AnnotateForm extends Form
             ]);
 
         // Motivated by.
+        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
         $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
         $terms = $customVocab->terms();
-        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
         $this
             ->add([
@@ -61,12 +65,16 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:motivatedBy[0][property_id]',
-                'attributes' => ['value' => $this->propertyId('oa:motivatedBy')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('oa:motivatedBy'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:motivatedBy[0][type]',
-                'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
+                'attributes' => [
+                    'value' => 'customvocab:' . $customVocab->id(),
+                ],
             ]);
 
         // Annotation body.
@@ -116,9 +124,9 @@ class AnnotateForm extends Form
     protected function initAnnotationBody(): void
     {
         // Has purpose (only for the body, so different of motivated by).
-        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
+        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
+        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Body oa:hasPurpose'])->getContent();
         $terms = $customVocab->terms();
-        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
 
         $this
@@ -142,12 +150,16 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasBody[0][rdf:value][0][property_id]',
-                'attributes' => ['value' => $this->propertyId('rdf:value')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('rdf:value'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasBody[0][rdf:value][0][type]',
-                'attributes' => ['value' => 'literal'],
+                'attributes' => [
+                    'value' => 'literal',
+                ],
             ])
             // Purpose.
             ->add([
@@ -168,12 +180,16 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasBody[0][oa:hasPurpose][0][property_id]',
-                'attributes' => ['value' => $this->propertyId('oa:hasPurpose')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('oa:hasPurpose'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasBody[0][oa:hasPurpose][0][type]',
-                'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
+                'attributes' => [
+                    'value' => 'customvocab:' . $customVocab->id(),
+                ],
             ]);
     }
 
@@ -181,9 +197,9 @@ class AnnotateForm extends Form
     {
         // Note, oa:hasSelector references an entity that have a rdf:type and a
         // rdf:value, or it is a simple uri.
+        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
         $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Target rdf:type'])->getContent();
         $terms = $customVocab->terms();
-        $terms = is_array($terms) ? $terms : array_filter(array_map('trim', explode(PHP_EOL, $terms)));
         $terms = array_combine($terms, $terms);
 
         // The source of the annotation target is the current resource.
@@ -191,7 +207,9 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasTarget[0][oa:hasSource][0][property_id]',
-                'attributes' => ['value' => $this->propertyId('oa:hasSource')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('oa:hasSource'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
@@ -221,12 +239,16 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasTarget[0][rdf:type][0][property_id]',
-                'attributes' => ['value' => $this->propertyId('rdf:type')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('rdf:type'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasTarget[0][rdf:type][0][type]',
-                'attributes' => ['value' => 'customvocab:' . $customVocab->id()],
+                'attributes' => [
+                    'value' => 'customvocab:' . $customVocab->id(),
+                ],
             ])
 
             ->add([
@@ -246,7 +268,9 @@ class AnnotateForm extends Form
             ->add([
                 'type' => Element\Hidden::class,
                 'name' => 'oa:hasTarget[0][rdf:value][0][property_id]',
-                'attributes' => ['value' => $this->propertyId('rdf:value')],
+                'attributes' => [
+                    'value' => $this->easyMeta->propertyId('rdf:value'),
+                ],
             ])
             ->add([
                 'type' => Element\Hidden::class,
@@ -255,16 +279,15 @@ class AnnotateForm extends Form
             ]);
     }
 
-    protected function propertyId($term): ?int
-    {
-        $properties = $this->api
-            ->search('properties', ['term' => $term], ['initialize' => false, 'finalize' => false, 'returnScalar' => 'id'])->getContent();
-        return $properties ? (int) reset($properties) : null;
-    }
-
     public function setApi(ApiManager $api): self
     {
         $this->api = $api;
+        return $this;
+    }
+
+    public function setEasyMeta(EasyMeta $easyMeta): self
+    {
+        $this->easyMeta = $easyMeta;
         return $this;
     }
 }

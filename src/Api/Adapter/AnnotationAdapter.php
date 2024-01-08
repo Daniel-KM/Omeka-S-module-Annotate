@@ -252,23 +252,33 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $expr = $qb->expr();
 
             if (is_numeric($query['resource_class'])) {
-                $resourceClass = (int) $query['resource_class'];
+                $resourceClassIds = array_filter([(int) $query['resource_class']]);
             } else {
-                /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
-                $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
-                $resourceClass = $easyMeta->resourceClassIds($query['resource_class']);
+                /** @var \Common\Stdlib\EasyMeta $easyMeta */
+                $easyMeta = $this->getServiceLocator()->get('EasyMeta');
+                $resourceClassIds = $easyMeta->resourceClassIds($query['resource_class']);
             }
+
             $resourceClassAlias = $this->createAlias();
             $qb->innerJoin(
                 'omeka_root.resourceClass',
                 $resourceClassAlias
             );
-            $qb->andWhere(
-                $expr->eq(
-                    $resourceClassAlias . '.id',
-                    $this->createNamedParameter($qb, $resourceClass)
-                )
-            );
+            if (count($resourceClassIds) <= 1) {
+                $qb->andWhere(
+                    $expr->eq(
+                        $resourceClassAlias . '.id',
+                        $this->createNamedParameter($qb, reset($resourceClassIds) ?: 0)
+                    )
+                );
+            } else {
+                $qb->andWhere(
+                    $expr->in(
+                        $resourceClassAlias . '.id',
+                        $this->createNamedParameter($qb, $resourceClassIds)
+                    )
+                );
+            }
         }
     }
 
@@ -460,26 +470,23 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     ): void {
         $data = $request->getContent();
 
-        /** @var \Annotate\View\Helper\EasyMeta $easyMeta */
-        $easyMeta = $this->getServiceLocator()->get('ViewHelperManager')->get('easyMeta');
+        /** @var \Common\Stdlib\EasyMeta $easyMeta */
+        $easyMeta = $this->getServiceLocator()->get('EasyMeta');
 
-        $resourceTemplateId = $easyMeta->resourceTemplateIds('Annotation');
-        $resourceClassId = $easyMeta->resourceClassIds('oa:Annotation');
+        $resourceTemplateId = $easyMeta->resourceTemplateId('Annotation');
+        $resourceClassId = $easyMeta->resourceClassId('oa:Annotation');
         $data['o:resource_template'] = $resourceTemplateId ? ['o:id' => $resourceTemplateId] : null;
         $data['o:resource_class'] = $resourceClassId ? ['o:id' => $resourceClassId] : null;
 
-        $customVocabMotivatedById = $this->customVocabId('Annotation oa:motivatedBy');
-        $customVocabHasPurposeId = $this->customVocabId('Annotation Body oa:hasPurpose');
-
-        /** @var \Omeka\DataType\Manager $dataTypeManager */
-        $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
-        $hasNumericDataTypes = $dataTypeManager->has('numeric:integer');
+        $dataTypeCustomVocabMotivatedBy = $easyMeta->dataTypeName('Annotation oa:motivatedBy');
+        $dataTypeCustomVocabHasPurpose = $easyMeta->dataTypeName('Annotation Body oa:hasPurpose');
+        $hasNumericDataTypes = $easyMeta->dataTypeName('numeric:integer') ? true : false;
 
         $motivation = $data['oa:motivatedBy'][0]['@value'] ?? 'undefined';
         $data['oa:motivatedBy'] = [[
             '@value' => $motivation,
-            'property_id' => $easyMeta->propertyIds('oa:motivatedBy'),
-            'type' => $customVocabMotivatedById ? 'customvocab:' . $customVocabMotivatedById : 'literal',
+            'property_id' => $easyMeta->propertyId('oa:motivatedBy'),
+            'type' => $dataTypeCustomVocabMotivatedBy ?: 'literal',
         ]];
 
         $entityManager = $this->getEntityManager();
@@ -489,7 +496,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     unset($propertyValues[$term]);
                     continue;
                 }
-                $propertyId = $easyMeta->propertyIds($term);
+                $propertyId = $easyMeta->propertyId($term);
                 if (!$propertyId) {
                     unset($propertyValues[$term]);
                     continue;
@@ -548,7 +555,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     foreach ($hasBody['oa:hasPurpose'] as &$value) {
                         $value = [
                             '@value' => (string) $value['@value'],
-                            'type' => $customVocabHasPurposeId ? 'customvocab:' . $customVocabHasPurposeId : 'literal',
+                            'type' => $dataTypeCustomVocabHasPurpose ?: 'literal',
                         ];
                     }
                     unset($value);
@@ -564,16 +571,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         unset($hasTarget);
 
         $request->setContent($data);
-    }
-
-    protected function customVocabId($label): ?int
-    {
-        $api = $this->getServiceLocator()->get('ControllerPluginManager')->get('api');
-        try {
-            return $api->read('custom_vocabs', ['label' => $label], [], ['responseContent' => 'resource'])->getContent()->getId();
-        } catch (Exception\NotFoundException $e) {
-            return null;
-        }
     }
 
     /**

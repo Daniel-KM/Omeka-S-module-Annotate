@@ -2,7 +2,7 @@
 
 namespace Annotate;
 
-use Omeka\Stdlib\Message;
+use Common\Stdlib\PsrMessage;
 
 /**
  * @var Module $this
@@ -10,18 +10,27 @@ use Omeka\Stdlib\Message;
  * @var string $newVersion
  * @var string $oldVersion
  *
+ * @var \Omeka\Api\Manager $api
+ * @var \Omeka\Settings\Settings $settings
  * @var \Doctrine\DBAL\Connection $connection
  * @var \Doctrine\ORM\EntityManager $entityManager
- * @var \Omeka\Api\Manager $api
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
 $plugins = $services->get('ControllerPluginManager');
 $api = $plugins->get('api');
-// $config = require dirname(__DIR__, 2) . '/config/module.config.php';
-// $settings = $services->get('Omeka\Settings');
+$settings = $services->get('Omeka\Settings');
+$translate = $plugins->get('translate');
 $connection = $services->get('Omeka\Connection');
 $messenger = $plugins->get('messenger');
 $entityManager = $services->get('Omeka\EntityManager');
+
+if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.53')) {
+    $message = new \Omeka\Stdlib\Message(
+        $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+        'Common', '3.4.53'
+    );
+    throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+}
 
 if (version_compare($oldVersion, '3.0.1', '<')) {
     // The media-type is not standard, but application/wkt seems better.
@@ -159,11 +168,11 @@ SQL;
 }
 
 if (version_compare($oldVersion, '3.3', '<')) {
-    $message = new Message(
+    $message = new PsrMessage(
         'This release changed two features, so check your theme.'
     );
     $messenger->addWarning($message);
-    $message = new Message(
+    $message = new PsrMessage(
         'In api, the key "oa:Annotation" is replaced by "o:annotation".'
     );
     $messenger->addWarning($message);
@@ -177,11 +186,11 @@ SQL;
 if (version_compare($oldVersion, '3.3.3.6', '<')) {
     if ($this->isModuleActive('AdvancedSearch')) {
         // No need to update params when BlocksDisposition is present.
-        $message = new Message(
+        $message = new PsrMessage(
             'This release moved the params for public display to module BlocksDisposition, so check your site settings.'
         );
     } else {
-        $message = new Message(
+        $message = new PsrMessage(
             'This release moved the public display to module BlocksDisposition, so install it and check your site settings.'
         );
     }

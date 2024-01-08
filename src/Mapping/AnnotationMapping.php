@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Mapping;
 
 use CSVImport\Mapping\AbstractResourceMapping;

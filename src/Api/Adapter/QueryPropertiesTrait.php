@@ -141,11 +141,6 @@ trait QueryPropertiesTrait
     protected $connection;
 
     /**
-     * @var array
-     */
-    protected $usedPropertiesByTerm;
-
-    /**
      * Build query on value.
      *
      * Pseudo-override buildPropertyQuery() via the api manager delegator.
@@ -230,8 +225,8 @@ trait QueryPropertiesTrait
             return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $string);
         };
 
-        // Initialize properties and used properties one time.
-        $this->getPropertyIds();
+        /** @var \Common\Stdlib\EasyMeta $easyMeta */
+        $easyMeta = $this->adapter->getServiceLocator()->get('EasyMeta');
 
         $mainQb = $qb;
 
@@ -596,9 +591,9 @@ trait QueryPropertiesTrait
             // TODO What if a property is ""?
             $excludePropertyIds = $propertyIds || empty($queryRow['except'])
                 ? false
-                :  array_values(array_unique($this->getPropertyIds($queryRow['except'])));
+                :  array_values(array_unique($easyMeta->propertyIds($queryRow['except'])));
             if ($propertyIds) {
-                $propertyIds = array_values(array_unique($this->getPropertyIds($propertyIds)));
+                $propertyIds = array_values(array_unique($easyMeta->propertyIds($propertyIds)));
                 if ($propertyIds) {
                     // For queries on subject values, the properties should be
                     // checked against the sub-query.
@@ -622,7 +617,7 @@ trait QueryPropertiesTrait
             elseif ($excludePropertyIds) {
                 // The aim is to search anywhere except ocr content.
                 // Use not positive + in() or notIn()? A full list is simpler.
-                $otherIds = array_diff($this->usedPropertiesByTerm, $excludePropertyIds);
+                $otherIds = array_diff($easyMeta->propertyIdsUsed(), $excludePropertyIds);
                 // Avoid issue when everything is excluded.
                 $otherIds[] = 0;
                 if (in_array($queryType, $this->propertyQuery['value_subject'])) {
@@ -728,54 +723,5 @@ trait QueryPropertiesTrait
                 ->setParameter('annotation_ids', array_keys($partialResults), $this->connection::PARAM_INT_ARRAY)
             ;
         }
-    }
-
-    /**
-     * Get one or more property ids by JSON-LD terms or by numeric ids.
-     *
-     * @todo Factorize with \AdvancedSearch\View\Helper\EasyMeta::propertyIds() (differences: return array and used properties).
-     *
-     * @param array|int|string|null $termsOrIds One or multiple ids or terms.
-     * @return int[] The property ids matching terms or ids, or all properties
-     * by terms.
-     */
-    protected function getPropertyIds($termsOrIds = null): array
-    {
-        static $propertiesByTerms;
-        static $propertiesByTermsAndIds;
-
-        if (is_null($propertiesByTermsAndIds)) {
-            $qb = $this->connection->createQueryBuilder();
-            $qb
-                ->select(
-                    'DISTINCT CONCAT(vocabulary.prefix, ":", property.local_name) AS term',
-                    'property.id AS id',
-                    // Required with only_full_group_by.
-                    'vocabulary.id'
-                )
-                ->from('property', 'property')
-                ->innerJoin('property', 'vocabulary', 'vocabulary', 'property.vocabulary_id = vocabulary.id')
-                ->orderBy('vocabulary.id', 'asc')
-                ->addOrderBy('property.id', 'asc')
-            ;
-            $propertiesByTerms = array_map('intval', $this->connection->executeQuery($qb)->fetchAllKeyValue());
-            $propertiesByTermsAndIds = array_replace($propertiesByTerms, array_combine($propertiesByTerms, $propertiesByTerms));
-
-            $qb->innerJoin('property', 'value', 'value', 'property.id = value.property_id');
-            $this->usedPropertiesByTerm = array_map('intval', $this->connection->executeQuery($qb)->fetchAllKeyValue());
-        }
-
-        if (is_null($termsOrIds)) {
-            return $propertiesByTerms;
-        }
-
-        if (is_scalar($termsOrIds)) {
-            return isset($propertiesByTermsAndIds[$termsOrIds])
-                ? [$termsOrIds => $propertiesByTermsAndIds[$termsOrIds]]
-                : [];
-        }
-
-        // TODO Keep original order.
-        return array_intersect_key($propertiesByTermsAndIds, array_fill_keys($termsOrIds, null));
     }
 }

@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Annotate\Service\ControllerPlugin;
 
 use Annotate\Mvc\Controller\Plugin\AnnotationPartMapper;
