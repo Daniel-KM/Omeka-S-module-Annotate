@@ -67,15 +67,18 @@ resources, like in some projects.
 Installation
 ------------
 
-The module uses an external library, [webui-popover], so use the release zip to
-install it, or use and init the source.
-
 See general end user documentation for [installing a module].
+
+The module [Common] must be installed first.
+
+The module uses external libraries, so use the release zip to install it, or
+use and init the source.
 
 * From the zip
 
-Download the last release [Annotate.zip] from the list of releases (the master
-does not contain the dependency), and uncompress it in the `modules` directory.
+Download the last release [Annotate.zip] from the list of releases (the
+master does not contain the dependency), and uncompress it in the `modules`
+directory.
 
 * From the source and for development
 
@@ -153,7 +156,7 @@ Development
 #### Create
 
 You can create annotations in a standard way on the api. To simplify process, it
-is possible to skip some keys in the payload for some motivations.
+is possible to skip some keys in the payload for some common motivations.
 
 For a rating, that is an [assessment] with a value, generally numerical (that
 may be a float, a positive integer (from 1), a non negative integer (from 0),
@@ -304,6 +307,7 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [Web Annotation Ontology]: https://www.w3.org/annotation/
 [W3C]: https://www.w3.org
 [Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
