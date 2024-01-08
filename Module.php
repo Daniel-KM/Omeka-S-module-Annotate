@@ -233,6 +233,9 @@ class Module extends AbstractModule
         if (!$acl->hasRole('guest')) {
             $acl->addRole('guest');
         }
+        if (!$acl->hasRole('guest_private')) {
+            $acl->addRole('guest_private');
+        }
 
         $acl
             ->addRole(Acl::ROLE_ANNOTATOR)
