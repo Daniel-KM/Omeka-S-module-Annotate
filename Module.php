@@ -41,7 +41,6 @@ use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Mvc\MvcEvent;
 use Laminas\Permissions\Acl\Acl as LaminasAcl;
-use Laminas\ServiceManager\ServiceLocatorInterface;
 use Omeka\Api\Representation\AbstractEntityRepresentation;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 use Omeka\Api\Representation\ItemRepresentation;
@@ -723,7 +722,7 @@ class Module extends AbstractModule
             return;
         }
 
-        list($prefix, $localName) = explode(':', $query['resource_class']);
+        [$prefix, $localName] = explode(':', $query['resource_class']);
 
         /** @var \Doctrine\ORM\QueryBuilder $qb */
         $qb = $event->getParam('queryBuilder');
@@ -763,7 +762,7 @@ class Module extends AbstractModule
     public function handleViewAdvancedSearch(Event $event): void
     {
         $query = $event->getParam('query', []);
-        $query['datetime'] = $query['datetime'] ?? '';
+        $query['datetime'] ??= '';
         $partials = $event->getParam('partials', []);
 
         // Remove the resource class field, since it is always "oa:Annotation".

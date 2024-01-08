@@ -591,7 +591,7 @@ trait QueryPropertiesTrait
             // TODO What if a property is ""?
             $excludePropertyIds = $propertyIds || empty($queryRow['except'])
                 ? false
-                :  array_values(array_unique($easyMeta->propertyIds($queryRow['except'])));
+                : array_values(array_unique($easyMeta->propertyIds($queryRow['except'])));
             if ($propertyIds) {
                 $propertyIds = array_values(array_unique($easyMeta->propertyIds($propertyIds)));
                 if ($propertyIds) {

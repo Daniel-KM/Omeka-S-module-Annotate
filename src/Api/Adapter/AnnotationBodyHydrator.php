@@ -3,7 +3,6 @@
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
-use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
