@@ -230,7 +230,7 @@ class InstallResources
     public function checkCustomVocab(string $filepath): ?bool
     {
         $data = json_decode(file_get_contents($filepath), true);
-        if (!$data || empty($data['label'])) {
+        if (!$data || empty($data['o:label'])) {
             return false;
         }
 
@@ -336,7 +336,7 @@ class InstallResources
             $rdfImporter->import($vocabularyData['strategy'], $vocabularyData['vocabulary'], $vocabularyData['options']);
         } catch (\Omeka\Api\Exception\ValidationException $e) {
             throw new RuntimeException((string) new Message(
-                'An error occured when adding the prefix "%s" and the associated properties: %s', // @translate
+                'An error occured when adding the prefix "%1$s" and the associated properties: %2$s', // @translate
                 $prefix,
                 $e->getMessage()
             ));
@@ -426,7 +426,7 @@ class InstallResources
             $diff = $rdfImporter->update($vocabulary->getId(), $diff);
         } catch (\Omeka\Api\Exception\ValidationException $e) {
             throw new ModuleCannotInstallException((string) new Message(
-                'An error occured when updating vocabulary "%s" and the associated properties: %s', // @translate
+                'An error occured when updating vocabulary "%1$s" and the associated properties: %2$s', // @translate
                 $vocabularyData['vocabulary']['o:prefix'],
                 $e->getMessage()
             ));
