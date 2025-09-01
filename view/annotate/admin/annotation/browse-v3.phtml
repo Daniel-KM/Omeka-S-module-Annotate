@@ -49,7 +49,7 @@ $sortHeadings = [
 
  <div class="browse-controls">
     <?= $this->pagination() ?>
-    <button type="button" class="search advanced-search quick-search"><?= $escape($translate('Quick Search')) ?></button>
+    <button type="button" class="button search advanced-search quick-search"><?= $escape($translate('Quick Search')) ?></button>
     <?= $this->sortSelector($sortHeadings) ?>
 </div>
 
@@ -70,7 +70,7 @@ $sortHeadings = [
             <?php endif; ?>
         </select>
         <div class="batch-actions">
-            <button type="button" class="default active" disabled="disabled"><?= $translate('Go') ?></button>
+            <button type="button" class="button default active" disabled="disabled"><?= $translate('Go') ?></button>
             <?php if ($userIsAllowedBatchUpdate): ?>
             <input type="submit" class="update-selected" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit'], true)) ?>">
             <input type="submit" class="update-all" value="<?= $translate('Go') ?>" formaction="<?= $escape($this->url(null, ['action' => 'batch-edit-all'], true)) ?>">
