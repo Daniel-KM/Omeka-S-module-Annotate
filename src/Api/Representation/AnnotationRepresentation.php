@@ -275,7 +275,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             $public['name'] = (string) $creator;
         } else {
             $public['id'] = false;
-            if (is_null($default)) {
+            if ($default === null) {
                 $translator = $this->getServiceLocator()->get('MvcTranslator');
                 $public['name'] = $translator->translate('[Unknown]'); // @translate
             } else {

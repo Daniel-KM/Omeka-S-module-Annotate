@@ -185,7 +185,7 @@ class AnnotationController extends AbstractActionController
                 && strlen(trim($data['oa:hasTarget'][0]['rdf:value'][0]['@value'])))
             ? trim($data['oa:hasTarget'][0]['rdf:value'][0]['@value'])
             : null;
-        if (is_null($bodyValue) && is_null($targetValue)) {
+        if ($bodyValue === null && $targetValue === null) {
             $message = 'The annotation is empty.'; // @translate
             if ($isAjax) {
                 return $this->jsonError($message);
@@ -196,7 +196,7 @@ class AnnotationController extends AbstractActionController
         }
 
         // Add the format of the body.
-        if (is_null($bodyValue)) {
+        if ($bodyValue === null) {
             // TODO Remove the full body when there is no body.
             // $data['o:resource_class']['o:id'] = null;
             // Has purpose is used to add information about body text only.
@@ -210,7 +210,7 @@ class AnnotationController extends AbstractActionController
         }
 
         // TODO Check the format of the selector and the value.
-        if (!is_null($targetValue)) {
+        if ($targetValue !== null) {
             $format = $this->determineMediaType($targetValue);
             if ($format) {
                 $customVocab = $api->read('custom_vocabs', [
