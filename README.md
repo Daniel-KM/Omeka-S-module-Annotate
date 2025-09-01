@@ -306,7 +306,7 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [Omeka S]: https://omeka.org/s
 [Web Annotation Ontology]: https://www.w3.org/annotation/
 [W3C]: https://www.w3.org
-[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
