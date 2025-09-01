@@ -1,4 +1,4 @@
-@media screen {
+@media all {
     header nav .annotations::before,
     .annotations .subhead::before {
         content:"";
