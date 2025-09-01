@@ -13,6 +13,6 @@ class AnnotateFormFactory implements FactoryInterface
         $form = new AnnotateForm(null, $options ?? []);
         return $form
             ->setApi($services->get('Omeka\ApiManager'))
-            ->setEasyMeta($services->get('EasyMeta'));
+            ->setEasyMeta($services->get('Common\EasyMeta'));
     }
 }

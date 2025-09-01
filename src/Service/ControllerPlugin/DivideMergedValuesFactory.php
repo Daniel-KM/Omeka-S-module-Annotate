@@ -12,7 +12,7 @@ class DivideMergedValuesFactory implements FactoryInterface
     {
         return new DivideMergedValues(
             $services->get('Omeka\ApiManager'),
-            $services->get('EasyMeta')
+            $services->get('Common\EasyMeta')
         );
     }
 }

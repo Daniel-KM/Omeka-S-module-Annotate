@@ -14,7 +14,7 @@ class ResourceFormFactory implements FactoryInterface
         $form = new ResourceForm(null, $options ?? []);
         $form->setUrlHelper($viewHelperManager->get('Url'));
         $form->setEventManager($services->get('EventManager'));
-        $form->setEasyMeta($services->get('EasyMeta'));
+        $form->setEasyMeta($services->get('Common\EasyMeta'));
         return $form;
     }
 }

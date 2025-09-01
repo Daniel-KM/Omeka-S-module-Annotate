@@ -43,7 +43,10 @@ class AnnotationMapping extends AbstractResourceMapping
             if (isset($resourceTypes[$resourceType])) {
                 $data['resource_type'] = $resourceTypes[$resourceType];
             } else {
-                $this->logger->err(new Message('"%s" is not a valid resource type.', reset($values))); // @translate
+                $this->logger->err(
+                    '"{type}" is not a valid resource type.',
+                    ['type' => reset($values)]
+                ); // @translate
                 $this->setHasErr(true);
             }
         }

@@ -255,7 +255,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $resourceClassIds = array_filter([(int) $query['resource_class']]);
             } else {
                 /** @var \Common\Stdlib\EasyMeta $easyMeta */
-                $easyMeta = $this->getServiceLocator()->get('EasyMeta');
+                $easyMeta = $this->getServiceLocator()->get('Common\EasyMeta');
                 $resourceClassIds = $easyMeta->resourceClassIds($query['resource_class']);
             }
 
@@ -289,7 +289,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     ): void {
         // Notes about format of data.
 
-        // Since 3.3.3.6, the form or source must send well formed annotations:
+        // Since 3.3.3.6, the form or source must send well-formed annotations:
         // no move, only basic default completion (property id, type, etc.).
 
         // Before 3.3.3.6, the annotation request was normalized and some
@@ -471,7 +471,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $data = $request->getContent();
 
         /** @var \Common\Stdlib\EasyMeta $easyMeta */
-        $easyMeta = $this->getServiceLocator()->get('EasyMeta');
+        $easyMeta = $this->getServiceLocator()->get('Common\EasyMeta');
 
         $resourceTemplateId = $easyMeta->resourceTemplateId('Annotation');
         $resourceClassId = $easyMeta->resourceClassId('oa:Annotation');

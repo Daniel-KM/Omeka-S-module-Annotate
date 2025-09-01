@@ -551,6 +551,8 @@ class AnnotationController extends AbstractActionController
      *
      * @param string $string
      * @return bool
+     *
+     * @deprecated Use \Common\View\Helper\IsHtml()
      */
     protected function isHtml($string)
     {

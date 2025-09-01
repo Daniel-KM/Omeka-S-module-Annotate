@@ -226,7 +226,7 @@ trait QueryPropertiesTrait
         };
 
         /** @var \Common\Stdlib\EasyMeta $easyMeta */
-        $easyMeta = $this->adapter->getServiceLocator()->get('EasyMeta');
+        $easyMeta = $this->adapter->getServiceLocator()->get('Common\EasyMeta');
 
         $mainQb = $qb;
 

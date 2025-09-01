@@ -250,6 +250,8 @@ class DivideMergedValues extends AbstractPlugin
      *
      * @param string $string
      * @return bool
+     *
+     * @deprecated Use \Common\View\Helper\IsHtml()
      */
     protected function isHtml($string)
     {
