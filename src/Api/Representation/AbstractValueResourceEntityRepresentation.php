@@ -72,13 +72,13 @@ abstract class AbstractValueResourceEntityRepresentation extends AbstractResourc
         // TODO Don't manage the type with a resource class, but with rdf:type or o:type.
         $resourceClass = $this->resourceClass();
         if ($resourceClass) {
-            $resourceClass = $resourceClass->getReference();
+            $resourceClass = $resourceClass->getReference()->jsonSerialize();
             $values['o:resource_class'] = $resourceClass;
         }
 
         $resourceTemplate = $this->resourceTemplate();
         if ($resourceTemplate) {
-            $resourceTemplate = $resourceTemplate->getReference();
+            $resourceTemplate = $resourceTemplate->getReference()->jsonSerialize();
             $values['o:resource_template'] = $resourceTemplate;
         }
 
