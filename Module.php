@@ -29,7 +29,7 @@
 
 namespace Annotate;
 
-if (!class_exists(\Common\TraitModule::class)) {
+if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
@@ -133,9 +133,9 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
 
-        require_once dirname(__DIR__) . '/Common/InstallResources.php';
+        require_once dirname(__DIR__) . '/Common/ManageModuleAndResources.php';
 
-        $installResources = new \Common\InstallResources($services);
+        $installResources = new \Common\ManageModuleAndResources($services);
         $installResources = $installResources();
 
         if (!empty($_POST['remove-vocabulary'])) {

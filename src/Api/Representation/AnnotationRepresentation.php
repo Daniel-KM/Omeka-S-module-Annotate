@@ -42,6 +42,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $result = [];
         $bodies = $this->bodies();
         // Complies with https://www.w3.org/TR/annotation-model/#cardinality-of-bodies-and-targets
+        // TODO Check json ld.
         if ($bodies) {
             $result['oa:hasBody'] = $bodies;
         }

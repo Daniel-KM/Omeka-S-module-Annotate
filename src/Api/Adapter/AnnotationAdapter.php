@@ -191,21 +191,30 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $subQb
                     ->groupBy($subEntityAlias . '.id');
 
+                /**
+                 * See old version of this module Reference (#0c572cd).
+                 * @see \Annotate\Api\Adapter\AnnotationAdapter::buildQuery()
+                 * @see \ApiInfo\Module::limitMediaQuery()
+                 * @see \Reference\Mvc\Controller\Plugin\References::searchQuery()
+                 */
+
                 // The subquery cannot manage the parameters, since there are
                 // two independant queries, but they use the same aliases. Since
                 // number of ids may be great, it will be possible to create a
                 // temporary table. Currently, a simple string replacement of
                 // aliases is used.
                 // TODO Fix Omeka core for aliases in sub queries.
-                $subDql = str_replace('omeka_', 'akemo_', $subQb->getDQL());
+                // $subDql = strtr($subQb->getDQL(), [':omeka_' => ':akemo_']);
+                $subDql = strtr($subQb->getDQL(), ['omeka_' => 'akemo_']);
                 /** @var \Doctrine\ORM\Query\Parameter $parameter */
                 $subParams = $subQb->getParameters();
                 foreach ($subParams as $parameter) {
-                    $qb->setParameter(
-                        str_replace('omeka_', 'akemo_', $parameter->getName()),
-                        $parameter->getValue(),
-                        $parameter->getType()
-                    );
+                    $qb
+                        ->setParameter(
+                            strtr($parameter->getName(), ['omeka_' => 'akemo_']),
+                            $parameter->getValue(),
+                            $parameter->getType()
+                        );
                 }
 
                 $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();

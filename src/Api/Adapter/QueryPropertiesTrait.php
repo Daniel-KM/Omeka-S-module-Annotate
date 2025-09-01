@@ -15,7 +15,8 @@ use Doctrine\ORM\QueryBuilder;
  * (annotation, body or target). So just override buildPropertyQuery() with an
  * adapted version of the code in module AdvancedSearch.
  *
- * @see \AdvancedSearch\Mvc\Controller\Plugin\SearchResources::buildPropertyQuery()
+ * @see \AdvancedSearch\Stdlib\SearchResources::buildPropertyQuery()
+ * @todo Update querier for last advanced search.
  */
 trait QueryPropertiesTrait
 {
@@ -146,7 +147,7 @@ trait QueryPropertiesTrait
      * Pseudo-override buildPropertyQuery() via the api manager delegator.
      * @see \Omeka\Api\Adapter\AbstractResourceEntityAdapter::buildPropertyQuery()
      *
-     * @see \AdvancedSearch\Mvc\Controller\Plugin\SearchResources::buildPropertyQuery()
+     * @see \AdvancedSearch\Stdlib\SearchResources::buildPropertyQuery()
      * @see \Annotate\Api\Adapter\QueryPropertiesTrait::buildPropertyQuery()
      *
      * Query format:
@@ -560,7 +561,7 @@ trait QueryPropertiesTrait
                             $subQb->andWhere($expr->eq("$subValuesAlias.resource", $param));
                         } else {
                             $param = $this->adapter->createNamedParameter($qb, $value);
-                            $qb->setParameter(substr($param, 1), $value, Connection::PARAM_INT_ARRAY);
+                            $qb->setParameter(substr($param, 1), array_values($value), Connection::PARAM_INT_ARRAY);
                             $subQb->andWhere($expr->in("$subValuesAlias.resource", $param));
                         }
                     }
