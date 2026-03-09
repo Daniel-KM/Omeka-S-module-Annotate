@@ -422,8 +422,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $errorStore->addError('oa:hasBody', 'Annotation body must be an array.'); // @translate
         }
 
+        $isPartial = $request->getOption('isPartial', false);
         if (empty($data['oa:hasTarget'])) {
-            $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
+            if (!$isPartial) {
+                $errorStore->addError('oa:hasTarget', 'There must be one annotation target at least.'); // @translate
+            }
         } elseif (!is_array($data['oa:hasTarget'])) {
             $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
         }
