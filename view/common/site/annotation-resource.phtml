@@ -51,7 +51,7 @@ $this->headScript()
 <?php
 // Manage full bodies. If there are embedded body values, there must not be a
 // body [w3c av 2.2.2].
-/** @var \Annotate\Api\Representation\AnnotationBodyRepresentation[] $annotationBodies */
+/** @var \Annotate\Api\Representation\AnnotationPartValues[] $annotationBodies */
 $annotationBodies = $annotation->bodies();
 ?>
 <?php if (count($annotationBodies)): ?>
@@ -123,7 +123,7 @@ $annotationBodies = $annotation->bodies();
 <?php endif; ?>
 
 <?php
-/** @var \Annotate\Api\Representation\AnnotationTargetRepresentation[] $annotationTargets */
+/** @var \Annotate\Api\Representation\AnnotationPartValues[] $annotationTargets */
 $annotationTargets = $annotation->targets();
 // Check if there are data to display too (there is at least one target, but may be just the source).
 $hasTargetData = false;

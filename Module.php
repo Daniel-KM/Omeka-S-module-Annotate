@@ -222,8 +222,6 @@ class Module extends AbstractModule
 
     /**
      * Add ACL role and rules for this module.
-     *
-     * @todo Keep rights for Annotation only (body and  target are internal classes).
      */
     protected function addAclRoleAndRules(): void
     {

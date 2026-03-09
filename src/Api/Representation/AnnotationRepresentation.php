@@ -2,16 +2,24 @@
 
 namespace Annotate\Api\Representation;
 
-use Annotate\Api\Adapter\AnnotationBodyHydrator;
-use Annotate\Api\Adapter\AnnotationTargetHydrator;
 use Omeka\Api\Representation\AbstractResourceEntityRepresentation;
 
+/**
+ * The representation of an Annotation resource.
+ *
+ * @øee https://www.w3.org/TR/annotation-model/#web-annotation-principles
+ */
 class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 {
     /**
      * @var \Annotate\Entity\Annotation
      */
     protected $resource;
+
+    /**
+     * @var array|null Cache for loadPartValues().
+     */
+    protected $partValuesCache;
 
     public function getControllerName()
     {
@@ -26,11 +34,9 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * {@inheritDoc}
      *
-     * Unlike integrated resources, the class "oa:Annotation" is predefined and
-     * cannot be changed or merged.
+     * The class "oa:Annotation" is predefined and cannot be changed or merged.
      *
      * @link https://www.w3.org/TR/annotation-vocab/#annotation
-     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::getJsonLdType()
      */
     public function getJsonLdType()
     {
@@ -41,20 +47,31 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     {
         $result = [];
         $bodies = $this->bodies();
-        // Complies with https://www.w3.org/TR/annotation-model/#cardinality-of-bodies-and-targets
-        // TODO Check json ld.
         if ($bodies) {
-            $result['oa:hasBody'] = $bodies;
+            $result['oa:hasBody'] = array_map(
+                fn($b) => $b->jsonSerialize(),
+                $bodies
+            );
         }
-        $result['oa:hasTarget'] = $this->targets();
+        $targets = $this->targets();
+        if ($targets) {
+            $result['oa:hasTarget'] = array_map(
+                fn($t) => $t->jsonSerialize(),
+                $targets
+            );
+        }
         return $result;
     }
 
     /**
-     * {@inheritDoc}
+     * Get an array representation of this resource using JSON-LD notation.
      *
-     * Two rdf contexts are used: Open Annotation (main) and Omeka (secondary).
-     * @todo Extend oa model: oa:styledBy should be a SVG stylesheet, but oa:SvgStylesheed does not exist (only CssStylesheet). But GeoJson allows to manage css.
+     * @todo Check the following assertion: This resource is technically an Omeka resource, but not a rdf resource.
+     * This resource is technically an Omeka resource, but not a rdf resource.
+     *
+     * @see \Omeka\Api\Representation\AbstractResourceEntityRepresentation::getJsonLd()
+     *
+     * {@inheritDoc}
      *
      * @see \Omeka\Api\Representation\AbstractResourceRepresentation::jsonSerialize()
      */
@@ -73,27 +90,19 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * Get the bodies assigned to this annotation.
      *
-     * @todo Remove bodies without properties.
-     *
-     * @return AnnotationBodyRepresentation[]
+     * @return AnnotationPartValues[]
      */
-    public function bodies()
+    public function bodies(): array
     {
-        $bodies = [];
-        $bodyAdapter = new AnnotationBodyHydrator();
-        $bodyAdapter->setServiceLocator($this->getServiceLocator());
-        foreach ($this->resource->getBodies() as $bodyEntity) {
-            $bodies[] = $bodyAdapter->getRepresentation($bodyEntity);
-        }
-        return $bodies;
+        return $this->partsByField('body');
     }
 
     /**
      * Return the first body if one exists.
      *
-     * @return AnnotationBodyRepresentation
+     * @return AnnotationPartValues|null
      */
-    public function primaryBody()
+    public function primaryBody(): ?AnnotationPartValues
     {
         $bodies = $this->bodies();
         return $bodies ? reset($bodies) : null;
@@ -102,96 +111,81 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * Get the targets assigned to this annotation.
      *
-     * @return AnnotationTargetRepresentation[]
+     * @return AnnotationPartValues[]
      */
-    public function targets()
+    public function targets(): array
     {
-        $targets = [];
-        $targetAdapter = new AnnotationTargetHydrator();
-        $targetAdapter->setServiceLocator($this->getServiceLocator());
-        foreach ($this->resource->getTargets() as $targetEntity) {
-            $targets[] = $targetAdapter->getRepresentation($targetEntity);
-        }
-        return $targets;
+        return $this->partsByField('target');
     }
 
     /**
      * Return the first target if one exists.
      *
-     * @return AnnotationTargetRepresentation
+     * @return AnnotationPartValues|null
      */
-    public function primaryTarget()
+    public function primaryTarget(): ?AnnotationPartValues
     {
         $targets = $this->targets();
         return $targets ? reset($targets) : null;
     }
 
     /**
-     * Return the target resources.
-     *
-     * This is the list of annotated resources.
+     * Return the target resources (annotated resources).
      *
      * @return AbstractResourceEntityRepresentation[]
      */
     public function targetSources(): array
     {
         $result = [];
-        $targets = $this->targets();
-        foreach ($targets as $target) {
-            $result = array_merge($result, array_values($target->sources()));
+        foreach ($this->targets() as $target) {
+            $result = array_merge(
+                $result,
+                array_values($target->sources())
+            );
         }
         return array_values($result);
     }
 
     /**
-     * Return the primary target resource.
-     *
-     * This is the annotated resource.
+     * Return the primary target resource (annotated resource).
      */
     public function primaryTargetSource(): ?AbstractResourceEntityRepresentation
     {
         $targets = $this->targetSources();
-        return $targets
-            ? reset($targets)
-            : null;
+        return $targets ? reset($targets) : null;
     }
 
     /**
-     * Return the target selectors.
-     *
-     * This is the list of all oa:hasSelector of targets, generally a single media.
+     * Return the target selectors, generally a single media.
      *
      * @return \Omeka\Api\Representation\ValueRepresentation[]
      */
     public function targetSelectors(): array
     {
         $result = [];
-        $targets = $this->targets();
-        foreach ($targets as $target) {
-            $result = array_merge($result, $target->value('oa:hasSelector', ['all' => true]));
+        foreach ($this->targets() as $target) {
+            $result = array_merge(
+                $result,
+                $target->value('oa:hasSelector', ['all' => true])
+            );
         }
         return array_values($result);
     }
 
     /**
-     * Return the target selectors that are resources.
-     *
-     * This is the list of all oa:hasSelector of targets, generally a single media.
+     * Return the target selectors that are resources, generally a single media.
      *
      * @return \Omeka\Api\Representation\ValueRepresentation[]
      */
     public function targetSelectorResources(): array
     {
         $result = [];
-        $targets = $this->targets();
-        foreach ($targets as $target) {
-            $subResult = [];
+        foreach ($this->targets() as $target) {
             foreach ($target->value('oa:hasSelector', ['all' => true]) as $value) {
                 if ($value->valueResource()) {
-                    $subResult[] = $value;
+                    $result[] = $value;
                 }
             }
-            $result = array_merge($result, $subResult);
         }
         return array_values($result);
     }
@@ -258,7 +252,6 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     /**
      * Get the annotator of this annotation.
      *
-     * @param string $default
      * @return \Omeka\Api\Representation\UserRepresentation|array
      */
     public function annotator($default = null)
@@ -268,7 +261,6 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             return $owner;
         }
 
-        // TODO The annotator may be a public or a deleted owner.
         $public = [];
         $creator = $this->value('dcterms:creator');
         if ($creator) {
@@ -290,10 +282,7 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
-     * Get the link to all annotations of the annotator of this annotation.
-     *
-     * @param string $default
-     * @return string
+     * Get the link to all annotations of the annotator.
      */
     public function linkAnnotator($default = null)
     {
@@ -305,7 +294,6 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
             $text = $annotator->name();
             $query['owner_id'] = $annotator->id();
         } else {
-            // TODO Manage anonymous user deleted user.
             $text = $annotator['name'];
             $query['annotator'] = $annotator['id'] ? $text : '0';
         }
@@ -338,75 +326,141 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
-     * Merge values of the annotation, bodies and the targets.
+     * Merge values of annotation, bodies and targets.
      *
-     *  Most of the time, there is only one body and one target, and each entity
-     *  has its specific properties according to the specification. So the merge
-     *  create a simpler list of values.
+     * In the new model, all values are on the annotation resource, so this
+     * simply returns values().
      *
-     * @uses AbstractResourceEntityRepresentation::values()
-     *
-     * @deprecated Will be replaced by a new resource form, on the resource template base.
-s     *
-     * @return array
+     * @deprecated Use values() directly.
      */
-    public function mergedValues()
+    public function mergedValues(): array
     {
-        $values = $this->values();
-        // Note: array_merge_recursive may failed for memory overkill.
-        foreach ($this->bodies() as $body) {
-            // $values = array_merge_recursive($values, $body->values());
-            foreach ($body->values() as $term => $termValues) {
-                if (isset($values[$term]['property'])) {
-                    $values[$term]['values'] = empty($values[$term]['values'])
-                        ? $termValues['values']
-                        : array_merge($values[$term]['values'], $termValues['values']);
-                } else {
-                    $values[$term] = $termValues;
-                }
-            }
-        }
-        foreach ($this->targets() as $target) {
-            // $values = array_merge_recursive($values, $target->values());
-            foreach ($target->values() as $term => $termValues) {
-                if (isset($values[$term]['property'])) {
-                    $values[$term]['values'] = empty($values[$term]['values'])
-                        ? $termValues['values']
-                        : array_merge($values[$term]['values'], $termValues['values']);
-                } else {
-                    $values[$term] = $termValues;
-                }
-            }
-        }
-        return $values;
+        return $this->values();
     }
 
     /**
-     * Separate properties between annotation, bodies and targets.
+     * Separate flat properties between annotation, bodies and targets using the
+     * W3C vocabulary map.
      *
-     * Note: only standard annotation data are managed. Specific properties are
-     * kept in the annotation.
-     *
-     * @todo Use a standard rdf process, with no entities for bodies and targets.
-     *
-     * @deprecated Will be replaced by a new resource form, on the resource template base.
-     *
-     * @param array $data
-     * @return array
+     * @deprecated Use structured API data with oa:hasBody and oa:hasTarget.
      */
-    public function divideMergedValues(array $data)
+    public function divideMergedValues(array $data): array
     {
-        $plugins = $this->getServiceLocator()->get('ControllerPluginManager');
-        /** @var \Annotate\Mvc\Controller\Plugin\DivideMergedValues $divideMergedValues */
-        $divideMergedValues = $plugins->get('divideMergedValues');
-        $resourceTemplate = $this->resourceTemplate();
-        if ($resourceTemplate) {
-            /** @var \Annotate\Mvc\Controller\Plugin\ResourceTemplateAnnotationPartMap $resourceTemplateAnnotationPartMap */
-            $resourceTemplateAnnotationPartMap = $plugins->get('resourceTemplateAnnotationPartMap');
-            $annotationPartMap = $resourceTemplateAnnotationPartMap($resourceTemplate->id());
-        } else {
-            $annotationPartMap = [];
+        $bodyTerms = [
+            'oa:hasPurpose', 'oa:processingLanguage',
+            'oa:textDirection', 'dcterms:language', 'rdf:value',
+        ];
+        $targetTerms = [
+            'dcterms:format', 'oa:cachedSource', 'oa:end',
+            'oa:exact', 'oa:hasEndSelector', 'oa:hasScope',
+            'oa:hasSelector', 'oa:hasSource',
+            'oa:hasStartSelector', 'oa:hasState', 'oa:prefix',
+            'oa:refinedBy', 'oa:renderedVia', 'oa:sourceDate',
+            'oa:sourceDateEnd', 'oa:sourceDateStart',
+            'oa:start', 'oa:styleClass', 'oa:suffix',
+            'as:first', 'as:items', 'as:last', 'as:next',
+            'as:partOf', 'as:prev', 'as:startIndex',
+            'as:totalItems', 'dc:format',
+            'dcterms:conformsTo', 'rdfs:label',
+            'schema:accessibilityFeature',
+        ];
+
+        if (!isset($data['oa:hasBody'])) {
+            $data['oa:hasBody'] = [[]];
         }
-        return $divideMergedValues($data, $annotationPartMap);
+        if (!isset($data['oa:hasTarget'])) {
+            $data['oa:hasTarget'] = [[]];
+        }
+
+        foreach ($data as $term => $values) {
+            if (!is_array($values)
+                || strpos($term, 'o:') === 0
+            ) {
+                continue;
+            }
+            if (in_array($term, $bodyTerms, true)) {
+                $data['oa:hasBody'][0][$term] = $values;
+                unset($data[$term]);
+            } elseif (in_array($term, $targetTerms, true)) {
+                $data['oa:hasTarget'][0][$term] = $values;
+                unset($data[$term]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Load values grouped by field and ordinal from the annotation_value
+     * side-table.
+     *
+     * @return array [field => [ordinal => [term => ValueRep[]]]]
+     */
+    protected function loadPartValues(): array
+    {
+        if ($this->partValuesCache !== null) {
+            return $this->partValuesCache;
+        }
+
+        $services = $this->getServiceLocator();
+        $em = $services->get('Omeka\EntityManager');
+        $conn = $em->getConnection();
+
+        $sql = <<<'SQL'
+            SELECT av.id, av.field, av.ordinal
+            FROM annotation_value av
+            WHERE av.annotation_id = :id
+            ORDER BY av.field, av.ordinal, av.id
+            SQL;
+        $rows = $conn->executeQuery($sql, ['id' => $this->id()])
+            ->fetchAllAssociative();
+
+        // Index: value_id => [field, ordinal].
+        $valueMap = [];
+        foreach ($rows as $row) {
+            $valueMap[(int) $row['id']] = [
+                'field' => $row['field'],
+                'ordinal' => (int) $row['ordinal'],
+            ];
+        }
+
+        // Group the resource values by field/ordinal/term.
+        $grouped = [];
+        foreach ($this->values() as $term => $data) {
+            foreach ($data['values'] as $valueRep) {
+                $vid = $valueRep->id();
+                if (!isset($valueMap[$vid])) {
+                    continue;
+                }
+                $info = $valueMap[$vid];
+                $grouped[$info['field']][$info['ordinal']][$term][]
+                    = $valueRep;
+            }
+        }
+
+        $this->partValuesCache = $grouped;
+        return $grouped;
+    }
+
+    /**
+     * Get AnnotationPartValues for a given field (body or target).
+     *
+     * @return AnnotationPartValues[]
+     */
+    protected function partsByField(string $field): array
+    {
+        $parts = $this->loadPartValues();
+        $fieldData = $parts[$field] ?? [];
+        $services = $this->getServiceLocator();
+        $result = [];
+        foreach ($fieldData as $ordinal => $valuesByTerm) {
+            $result[] = new AnnotationPartValues(
+                $field,
+                $ordinal,
+                $valuesByTerm,
+                $services
+            );
+        }
+        return $result;
     }
 }

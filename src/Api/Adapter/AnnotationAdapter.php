@@ -3,22 +3,14 @@
 namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
-use Annotate\Entity\AnnotationTarget;
-use Doctrine\Common\Collections\ArrayCollection;
+use Annotate\Entity\AnnotationValue;
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Exception;
 use Omeka\Api\Request;
-use Omeka\Api\ResourceInterface;
 use Omeka\Entity\EntityInterface;
 use Omeka\Entity\Resource;
 use Omeka\Stdlib\ErrorStore;
-
-/**
- * The Annotation adapter use the body and the target hydrators.
- *
- * @todo Create another hydrator (recursive) for selector, refinedBy, etc. or use all as selector, with exception for body and target (that are nearly selector entity in fact).
- */
 class AnnotationAdapter extends AbstractResourceEntityAdapter
 {
     use QueryDateTimeTrait;
@@ -58,14 +50,6 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     public function getEntityClass()
     {
         return \Annotate\Entity\Annotation::class;
-    }
-
-    public function getRepresentation(ResourceInterface $data = null)
-    {
-        if ($data && $data->getPart() !== \Annotate\Entity\Annotation::class) {
-            $data = $data->getAnnotation();
-        }
-        return parent::getRepresentation($data);
     }
 
     /**
@@ -218,18 +202,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 }
 
                 $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
-                // The resource is attached via the property oa:hasSource of the
-                // AnnotationTargets, that are attached to annotations.
-                $targetAlias = $this->createAlias();
-                $qb->innerJoin(
-                    AnnotationTarget::class,
-                    $targetAlias,
-                    \Doctrine\ORM\Query\Expr\Join::WITH,
-                    $expr->eq($targetAlias . '.annotation', Annotation::class)
-                );
+                // The resource is attached via the property oa:hasSource in the
+                // annotation's own values.
                 $valuesAlias = $this->createAlias();
                 $qb->innerJoin(
-                    $targetAlias . '.values',
+                    'omeka_root.values',
                     $valuesAlias,
                     \Doctrine\ORM\Query\Expr\Join::WITH,
                     $expr->andX(
@@ -320,118 +297,118 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // means that the bodies apply independantly on each target.
         // @see https://www.w3.org/TR/annotation-model/#sets-of-bodies-and-targets
 
+        // Since 3.4.12, a field in table annotation_value indicate attachment.
+
         $this->completeRequest($request, $entity, $errorStore);
 
-        // Skip the bodies and the targets that are hydrated separately below.
-        // It avoids the value hydrator to try to hydrate values from them: they
-        // are not properties.
-        $childEntities = [
-            'oa:hasBody' => 'annotation_bodies',
-            'oa:hasTarget' => 'annotation_targets',
-        ];
-        // Body and target are no more adapter, but hydrator, so they are no
-        // more managed by the api, but only the entity manager.
-        $childHydrators = [
-            'oa:hasBody' => AnnotationBodyHydrator::class,
-            'oa:hasTarget' => AnnotationTargetHydrator::class,
-        ];
-        $children = [];
         $data = $request->getContent();
-        foreach ($childEntities as $jsonName => $resourceName) {
-            $children[$jsonName] = $request->getValue($jsonName, []);
-            unset($data[$jsonName]);
+
+        /** @var \Common\Stdlib\EasyMeta $easyMeta */
+        $easyMeta = $this->getServiceLocator()->get('Common\EasyMeta');
+
+        // Build a mapping of [term][index] => [field, ordinal] so we can create
+        // AnnotationValue rows after parent hydration.
+        $partMapping = [];
+
+        // Track annotation-level properties.
+        foreach ($data as $term => $values) {
+            if (!is_array($values) || strpos($term, 'o:') === 0) {
+                continue;
+            }
+            foreach ($values as $i => $v) {
+                $partMapping[$term][] = [
+                    'field' => 'annotation',
+                    'ordinal' => 0,
+                ];
+            }
         }
-        $request->setContent($data);
 
-        // Validate request, hydrate and validate entity for main annotation.
-        parent::hydrate($request, $entity, $errorStore);
-
-        // Reset the bodies and the targets that were skipped above.
-        foreach ($childEntities as $jsonName => $resourceName) {
-            $data[$jsonName] = $children[$jsonName];
-        }
-        $request->setContent($data);
-
-        // $isUpdate = Request::UPDATE === $request->getOperation();
-        // $isPartial = $isUpdate && $request->getOption('isPartial');
-        // $append = $isPartial && 'append' === $request->getOption('collectionAction');
-        // $remove = $isPartial && 'remove' === $request->getOption('collectionAction');
-
-        foreach ($childEntities as $jsonName => $resourceName) {
-            if ($this->shouldHydrate($request, $jsonName)) {
-                $childAdapter = new $childHydrators[$jsonName];
-                $childAdapter->setServiceLocator($this->getServiceLocator());
-                $class = $childAdapter->getEntityClass();
-
-                $retainChildren = [];
-                $childrenData = $request->getValue($jsonName, []);
-                foreach ($childrenData as $childData) {
-                    $subErrorStore = new ErrorStore;
-                    $isCreate = true;
-                    // Update an existing child.
-                    if (is_object($childData)) {
-                        $child = $childAdapter->findEntity($childData);
-                        $isCreate = false;
-                    } elseif (isset($childData['o:id'])) {
-                        $child = $childAdapter->findEntity($childData['o:id']);
-                        $isCreate = false;
-                    }
-                    // Create a new child.
-                    else {
-                        $child = new $class;
-                    }
-                    // The child data related to the resource should be the same
-                    // than Annotation in order to do good search on them.
-                    // Nevertheless, keep thumbnail, because there is no search
-                    // on it, and resource type.
-                    $child->setAnnotation($entity);
-                    $child->setOwner($entity->getOwner());
-                    $child->setResourceClass($entity->getResourceClass());
-                    $child->setResourceTemplate($entity->getResourceTemplate());
-                    $child->setIsPublic($entity->isPublic());
-                    $child->setCreated($entity->getCreated());
-                    $child->setModified($entity->getModified());
-
-                    $subrequest = new Request($isCreate ? Request::CREATE : Request::UPDATE, $resourceName);
-                    $subrequest->setContent($childData);
-                    try {
-                        $childAdapter->hydrateEntity($subrequest, $child, $subErrorStore);
-                    } catch (Exception\ValidationException $e) {
-                        $errorStore->mergeErrors($e->getErrorStore(), $jsonName);
-                    }
-                    if ($isCreate) {
-                        $this->getCollection($entity, $resourceName)->add($child);
-                    }
-                    $retainChildren[] = $child;
+        // Flatten body properties into top-level.
+        $bodies = $data['oa:hasBody'] ?? [];
+        unset($data['oa:hasBody']);
+        foreach ($bodies as $ordinal => $body) {
+            foreach ($body as $term => $values) {
+                if (!is_array($values)) {
+                    continue;
                 }
-
-                // Remove child not included in request.
-                $children = $this->getCollection($entity, $resourceName);
-                foreach ($children as $child) {
-                    if (!in_array($child, $retainChildren, true)) {
-                        $children->removeElement($child);
-                    }
+                if (!isset($data[$term])) {
+                    $data[$term] = [];
+                }
+                foreach ($values as $v) {
+                    $data[$term][] = $v;
+                    $partMapping[$term][] = [
+                        'field' => 'body',
+                        'ordinal' => (int) $ordinal + 1,
+                    ];
                 }
             }
         }
+
+        // Flatten target properties into top-level.
+        $targets = $data['oa:hasTarget'] ?? [];
+        unset($data['oa:hasTarget']);
+        foreach ($targets as $ordinal => $target) {
+            foreach ($target as $term => $values) {
+                if (!is_array($values)) {
+                    continue;
+                }
+                if (!isset($data[$term])) {
+                    $data[$term] = [];
+                }
+                foreach ($values as $v) {
+                    $data[$term][] = $v;
+                    $partMapping[$term][] = [
+                        'field' => 'target',
+                        'ordinal' => (int) $ordinal + 1,
+                    ];
+                }
+            }
+        }
+
+        $request->setContent($data);
+
+        parent::hydrate($request, $entity, $errorStore);
+
+        $this->syncAnnotationValues($entity, $partMapping, $easyMeta);
     }
 
     /**
-     * Returns bodies or targets of the annotations.
-     *
-     * @param Annotation $annotation
-     * @param string $collection
-     * @return ArrayCollection
+     * Sync annotation_value rows after parent hydration.
      */
-    protected function getCollection(Annotation $annotation, $collection)
-    {
-        switch ($collection) {
-            case 'oa:hasBody':
-            case 'annotation_bodies':
-                return $annotation->getBodies();
-            case 'oa:hasTarget':
-            case 'annotation_targets':
-                return $annotation->getTargets();
+    protected function syncAnnotationValues(
+        EntityInterface $entity,
+        array $partMapping,
+        $easyMeta
+    ): void {
+        $em = $this->getEntityManager();
+
+        // Remove existing AnnotationValue rows on update.
+        $existing = $em->getRepository(AnnotationValue::class)
+            ->findBy(['annotation' => $entity]);
+        foreach ($existing as $av) {
+            $em->remove($av);
+        }
+        $em->flush();
+
+        // Create new AnnotationValue entries by matching values to partMapping
+        // by term and index order.
+        $counters = [];
+        foreach ($entity->getValues() as $value) {
+            $propertyId = $value->getProperty()->getId();
+            $term = $easyMeta->propertyTerm($propertyId);
+
+            $idx = $counters[$term] ?? 0;
+            $counters[$term] = $idx + 1;
+
+            $info = $partMapping[$term][$idx]
+                ?? ['field' => 'annotation', 'ordinal' => 0];
+
+            $av = new AnnotationValue();
+            $av->setAnnotation($entity);
+            $av->setValue($value);
+            $av->setField($info['field']);
+            $av->setOrdinal($info['ordinal']);
+            $em->persist($av);
         }
     }
 

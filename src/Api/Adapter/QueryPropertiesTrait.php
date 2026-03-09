@@ -662,8 +662,8 @@ trait QueryPropertiesTrait
 
             $sqAlias = $this->adapter->createAlias();
             $qb
-                ->select("DISTINCT IDENTITY($sqAlias.annotation)")
-                ->from(\Annotate\Entity\AnnotationPart::class, $sqAlias);
+                ->select("DISTINCT $sqAlias.id")
+                ->from(\Annotate\Entity\Annotation::class, $sqAlias);
             if ($joinConditions) {
                 $qb->leftJoin("$sqAlias.values", $valuesAlias, Join::WITH, $expr->andX(...$joinConditions));
             } else {
@@ -674,7 +674,12 @@ trait QueryPropertiesTrait
 
             // TODO For now, "where" are concatenated manually.
             $qbPartialResult = $qb->getQuery()->getScalarResult();
-            $qbPartialResult = $qbPartialResult ? array_column($qbPartialResult, '1', '1') : [];
+            if ($qbPartialResult) {
+                $key = array_key_first($qbPartialResult[0]);
+                $qbPartialResult = array_column($qbPartialResult, $key, $key);
+            } else {
+                $qbPartialResult = [];
+            }
             if ($partialResults === null) {
                 $partialResults = $qbPartialResult;
             } elseif ($joiner === 'or') {

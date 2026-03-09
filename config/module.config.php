@@ -5,40 +5,26 @@ namespace Annotate;
 return [
     'entity_manager' => [
         'resource_discriminator_map' => [
-            // The three entities are sub-classes of the abstract class Entity\AnnotationPart,
-            // that is a subclass of Resource.
-            // This solution allows to search the property values in the three parts simpler.
-            // The other solution is to make the main annotation a sub-part too, and to do
-            // the search inside the abstract part, and to use an adapter for it (like Resource).
-            // It is cleaner, even it may be more complex because bodies and targets
-            // depends on the main annotation part. So if needed later. Note that the ids
-            // should be stable.
-
+            /*
+             * Unlike previous versions, use a single resource type to manage
+             * the annotation, the bodies and the targets. The values are
+             * attached to the different part via a field in a specific table (annotation_value).
+             * It's quicker, simpler and more versatile, because there is no
+             * need for a predefined mapping of properties to each part, even if
+             * it is still used for common use cases. It allows to create any
+             * number of sub-resources too, so all the data-model can be
+             * implemented.
+             *
+             * Furthermore, it avoids the doctrine mechanism that joins all
+             * inherited resources in all cases, even when it is useless (for
+             * example in many cases only the id is needed, that is unique among
+             * all sub-resources), that has a big performance issue on some orm
+             * queries.
+             * @see https://github.com/doctrine/orm/issues/5961
+             * @see https://github.com/doctrine/orm/issues/5980
+             * @see https://github.com/doctrine/orm/pull/8704
+             */
             Entity\Annotation::class => Entity\Annotation::class,
-            // oa:hasBody can be used by oa:Annotation only.
-            Entity\AnnotationBody::class => Entity\AnnotationBody::class,
-            // oa:hasTarget can be used by oa:Annotation only.
-            Entity\AnnotationTarget::class => Entity\AnnotationTarget::class,
-            // May be added for full coverage of data model (useless for current modules):
-            // oa:hasSelector can be used by body (rare) or target (mainly for
-            // cartographic annotation here). The selector is not a Resource,
-            // but depends on oa:ResourceSelection.
-            // oa:refinedBy can be used by oa:hasSelector and oa:hasState only.
-            // The oa:refinedBy is another selector or state.
-            // oa:hasSource (for body (rare) or target).
-            // as:items
-            // oa:hasState
-            // oa:hasStartSelector
-            // oa:hasEndSelector
-            // oa:renderedVia
-            // oa:styledBy
-            // as:generator
-            // dcterms:creator
-            // schema:audience
-            // @link https://www.w3.org/TR/annotation-vocab/#as-application
-            // TODO Any property can be another resource (uri), so it may be genericized, but the structure of
-            // Omeka is not designed in such a way (and all values must be in the table value). Use datatype to bypass? So oa:resource:item?
-            // The current desing simplifies search queries too.
         ],
         'mapping_classes_paths' => [
             dirname(__DIR__) . '/src/Entity',
@@ -80,14 +66,6 @@ return [
         'invokables' => [
             Controller\Admin\AnnotationController::class => Controller\Admin\AnnotationController::class,
             Controller\Site\AnnotationController::class => Controller\Site\AnnotationController::class,
-        ],
-    ],
-    'controller_plugins' => [
-        'factories' => [
-            'annotationPartMapper' => Service\ControllerPlugin\AnnotationPartMapperFactory::class,
-            /** @deprecated Use right form to get values instead using plugin divideMergedValues. */
-            'divideMergedValues' => Service\ControllerPlugin\DivideMergedValuesFactory::class,
-            'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
         ],
     ],
     'column_types' => [
