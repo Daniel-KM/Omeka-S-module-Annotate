@@ -237,11 +237,14 @@ TODO
 - [ ] Remove dependency with CustomVocab?
 - [ ] Keep "literal" as value type instead of a custom vocab?
 - [x] Does the annotation need to be in the same json of the item? An item doesn't know annotations about itself, they are independant, so to be removed: just keep a link.
-- [ ] Check the validity of multiple contexts omeka + annotation inside json-ld of annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
+- [x] Check the validity of multiple contexts omeka + annotation inside json-ld of annotations (see https://www.w3.org/TR/json-ld/#advanced-context-usage).
+- [ ] Create standard endpoint /annotations/ and header request check for /api/annotations/.
 - [x] Targets and bodies should not have rest api access (they are created with the annotation). Upgrade them like value hydrator.
 - [ ] Make compatible with module Group (user page).
 - [x] Clean labels of oa vocabulary.
 - [ ] Normalize sub-selector as value annotation of the target?
+- [ ] Public annotation as a list of resource blocks.
+- [ ] Replace role Annotator by Guest.
 
 
 Warning
@@ -288,15 +291,11 @@ conditions as regards security.
 The fact that you are presently reading this means that you have had knowledge
 of the CeCILL license and that you accept its terms.
 
-* The library [`webui-popover`] is published under the license [MIT].
-
 
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2017-2023 (see [Daniel-KM] on GitLab)
-
-* Library [webui-popover]: Sandy Walker
+* Copyright Daniel Berthereau, 2017-2026 (see [Daniel-KM] on GitLab)
 
 This module was built first for the French École des hautes études en sciences
 sociales [EHESS]. It was upgraded and improved for [Enssib].
@@ -320,8 +319,6 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: https://opensource.org
-[MIT]: https://github.com/sandywalker/webui-popover/blob/master/LICENSE.txt
-[webui-popover]: https://github.com/sandywalker/webui-popover
 [EHESS]: https://www.ehess.fr
 [Enssib]: https://www.enssib.fr
 [GitLab]: https://gitlab.com/Daniel-KM
