@@ -81,8 +81,41 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
 
         $jsonLd['@context'] = [
             'oa' => 'http://www.w3.org/ns/anno.jsonld',
-            'o' => 'http://localhost/OmekaS/api-context',
+            'o' => $this->getViewHelper('serverUrl')('')
+                . $this->getViewHelper('basePath')()
+                . '/api-context',
         ];
+
+        // Remove body/target values from the flat representation to avoid
+        // duplication with oa:hasBody / oa:hasTarget.
+        $parts = $this->loadPartValues();
+        $bodyTargetTerms = [];
+        foreach (['body', 'target'] as $field) {
+            foreach ($parts[$field] ?? [] as $valuesByTerm) {
+                foreach (array_keys($valuesByTerm) as $term) {
+                    $bodyTargetTerms[$term] = true;
+                }
+            }
+        }
+        // Keep annotation-level terms even if they also appear in body/target.
+        foreach ($parts['annotation'] ?? [] as $valuesByTerm) {
+            foreach (array_keys($valuesByTerm) as $term) {
+                unset($bodyTargetTerms[$term]);
+            }
+        }
+        foreach (array_keys($bodyTargetTerms) as $term) {
+            unset($jsonLd[$term]);
+        }
+
+        // Move oa:hasBody and oa:hasTarget to the end so annotation-level
+        // properties appear first.
+        foreach (['oa:hasBody', 'oa:hasTarget'] as $key) {
+            if (isset($jsonLd[$key])) {
+                $tmp = $jsonLd[$key];
+                unset($jsonLd[$key]);
+                $jsonLd[$key] = $tmp;
+            }
+        }
 
         return $jsonLd;
     }
