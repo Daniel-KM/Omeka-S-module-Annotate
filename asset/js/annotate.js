@@ -1,21 +1,19 @@
 $(document).ready(function() {
 
-if ( $.isFunction($.fn.webuiPopover) ) {
-    $('a.popover').webuiPopover('destroy').webuiPopover({
-        placement: 'auto-bottom',
-        content: function (element) {
-            var target = $('[data-target=' + element.id + ']');
-            var content = target.closest('.webui-popover-parent').find('.webui-popover-current');
-            $(content).removeClass('truncate').show();
-            return content;
-        },
-        title: '',
-        arrow: false,
-        backdrop: true,
-        onShow: function(element) { element.css({left: 0}); }
+    /**
+     * Display full annotation value in a dialog.
+     */
+    $('#content').on('click', 'button.popover', function() {
+        var message = $(this).closest('.annotation-popover-parent')
+            .find('.annotation-popover-current').text();
+        if (typeof CommonDialog !== 'undefined') {
+            CommonDialog.dialogAlert({
+                message: message,
+                nl2br: true,
+            });
+        } else {
+            alert(message);
+        }
     });
-
-    $('a.popover').webuiPopover();
-}
 
 });

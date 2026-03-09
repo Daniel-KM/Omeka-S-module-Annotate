@@ -13,10 +13,8 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()
-    ->appendStylesheet($assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
     ->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()
-    ->appendFile($assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'), 'text/javascript', ['defer' => 'defer'])
     ->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
@@ -113,8 +111,7 @@ $annotationBodies = $annotation->bodies();
 
     <?php foreach ($annotationBodies as $annotationBody): ?>
     <tr class="annotation-body">
-        <td class="webui-popover-parent">
-            <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
+        <td class="annotation-popover-parent">
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
@@ -125,22 +122,19 @@ $annotationBodies = $annotation->bodies();
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-body-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
+                        <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
+            <?php if ($isLong): ?>
             <ul class="actions">
-                <?php if ($isLong): ?>
-                <li><?= $hyperlink('', '#', [
-                    'class' => 'o-icon- fa fa-expand popover',
-                    'title' => $translate('Full value'),
-                ]) ?>
-                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?= nl2br($escape($text)) ?></div>
+                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                    <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
                 </li>
-                <?php endif; ?>
             </ul>
+            <?php endif; ?>
             <?php endforeach;?>
         </td>
         <td>
@@ -206,7 +200,7 @@ foreach ($annotationTargets as $annotationTarget) {
 <tbody>
     <?php foreach ($annotationTargets as $annotationTarget): ?>
     <tr class="annotation-target">
-        <td class="webui-popover-parent">
+        <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
@@ -217,22 +211,19 @@ foreach ($annotationTargets as $annotationTarget) {
                     <?php $text = $value; ?>
                     <?php $isLong = mb_strlen($text) > 240; ?>
                     <?php if ($isLong): ?>
-                        <div class="annotation-target-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
+                        <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
                 <?php endif; ?>
             </div>
+            <?php if ($isLong): ?>
             <ul class="actions">
-                <?php if ($isLong): ?>
-                <li><?= $hyperlink('', '#', [
-                    'class' => 'o-icon- fa fa-expand popover',
-                    'title' => $translate('Full value'),
-                ]) ?>
-                    <div class="annotation-body-full webui-popover-content webui-popover-current"><?= nl2br($escape($text)) ?></div>
+                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                    <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
                 </li>
-                <?php endif; ?>
             </ul>
+            <?php endif; ?>
             <?php endforeach; ?>
         </td>
         <td>

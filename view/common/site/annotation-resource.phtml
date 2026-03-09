@@ -15,11 +15,9 @@ $translate = $plugins->get('translate');
 
 $this->headLink()
     ->appendStylesheet($assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'))
-    ->appendStylesheet($assetUrl('vendor/webui-popover/jquery.webui-popover.min.css', 'Annotate'))
     ->appendStylesheet($assetUrl('css/annotate.css', 'Annotate'));
 $this->headScript()
     ->appendFile($assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'), 'text/javascript', ['defer' => 'defer'])
-    ->appendFile($assetUrl('vendor/webui-popover/jquery.webui-popover.min.js', 'Annotate'), 'text/javascript', ['defer' => 'defer'])
     ->appendFile($assetUrl('js/annotate.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
@@ -88,7 +86,7 @@ $annotationBodies = $annotation->bodies();
 
     <?php foreach ($annotationBodies as $annotationBody): ?>
     <tr class="annotation-body">
-        <td class="webui-popover-parent">
+        <td class="annotation-popover-parent">
             <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
@@ -146,7 +144,7 @@ foreach ($annotationTargets as $annotationTarget) {
 <tbody>
     <?php foreach ($annotationTargets as $annotationTarget): ?>
     <tr class="annotation-target">
-        <td class="webui-popover-parent">
+        <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
             <div class="rdf-value">
