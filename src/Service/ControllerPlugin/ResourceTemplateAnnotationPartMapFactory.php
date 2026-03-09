@@ -3,7 +3,7 @@
 namespace Annotate\Service\ControllerPlugin;
 
 use Annotate\Mvc\Controller\Plugin\ResourceTemplateAnnotationPartMap;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ResourceTemplateAnnotationPartMapFactory implements FactoryInterface

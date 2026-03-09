@@ -3,7 +3,7 @@
 namespace Annotate\Service\Media\Ingester;
 
 use Annotate\Media\Ingester\AnnotationBody;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class AnnotationBodyFactory implements FactoryInterface

@@ -3,7 +3,7 @@
 namespace Annotate\Service\ControllerPlugin;
 
 use Annotate\Mvc\Controller\Plugin\AnnotationPartMapper;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class AnnotationPartMapperFactory implements FactoryInterface
