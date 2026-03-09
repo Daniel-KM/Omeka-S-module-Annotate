@@ -148,29 +148,6 @@ return [
             ],
         ],
     ],
-    'navigation' => [
-        'AdminResource' => [
-            'annotate' => [
-                'label' => 'Annotations', // @translate
-                'class' => 'o-icon- annotations o-icon- fa-hand-point-up fa-hand-o-up',
-                'route' => 'admin/annotate/default',
-                'resource' => Controller\Admin\AnnotationController::class,
-                'privilege' => 'browse',
-                'pages' => [
-                    [
-                        'route' => 'admin/annotate/id',
-                        'controller' => Controller\Admin\AnnotationController::class,
-                        'visible' => false,
-                    ],
-                    [
-                        'route' => 'admin/annotate/default',
-                        'controller' => Controller\Admin\AnnotationController::class,
-                        'visible' => false,
-                    ],
-                ],
-            ],
-        ],
-    ],
     'router' => [
         'routes' => [
             'site' => [
@@ -258,6 +235,31 @@ return [
                                 ],
                             ],
                         ],
+                    ],
+                ],
+            ],
+        ],
+    ],
+    'navigation' => [
+        'AdminModule' => [
+            'annotate' => [
+                'label' => 'Annotations', // @translate
+                'class' => 'o-icon- fa-hand-point-up',
+                'route' => 'admin/annotate/default',
+                'controller' => Controller\Admin\AnnotationController::class,
+                'action' => 'browse',
+                'resource' => Controller\Admin\AnnotationController::class,
+                'admin_section' => 'users',
+                'pages' => [
+                    [
+                        'route' => 'admin/annotate/id',
+                        'controller' => Controller\Admin\AnnotationController::class,
+                        'visible' => false,
+                    ],
+                    [
+                        'route' => 'admin/annotate/default',
+                        'controller' => Controller\Admin\AnnotationController::class,
+                        'visible' => false,
                     ],
                 ],
             ],
