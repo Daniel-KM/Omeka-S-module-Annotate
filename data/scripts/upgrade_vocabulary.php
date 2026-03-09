@@ -17,7 +17,7 @@ if (!method_exists($this, 'getManageModuleAndResources')) {
     $translate = $plugins->get('translate');
     $message = new \Omeka\Stdlib\Message(
         $translate('This module requires module %1$s version %2$s or greater.'), // @translate
-        'Common', '3.4.72'
+        'Common', '3.4.81'
     );
     throw new ModuleCannotInstallException((string) $message);
 }
