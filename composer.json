@@ -1,33 +1,32 @@
 {
     "name": "daniel-km/omeka-s-module-annotate",
-    "description": "Annotate, module for Omeka S, that allows to annotate (comment, highlight, tag...) any resources with the W3C Annotation data model and vocabulary.",
-    "type": "library",
+    "type": "omeka-s-module",
+    "description": "Module for Omeka S: Implement the W3C Web Annotation Ontology to let users annotate, tag, comment, rate, highlight, draw, etc. any resource in a normalized way.",
+    "keywords": [
+        "Omeka S",
+        "Omeka S module",
+	"Web Annotation Ontology",
+        "annotation",
+        "tag",
+        "comment",
+        "rating",
+        "linked data"
+    ],
     "license": "CECILL-2.1",
+    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate",
     "authors": [
         {
             "name": "Daniel Berthereau",
             "email": "Daniel.packagist@Berthereau.net"
         }
     ],
-    "homepage": "https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate",
     "support": {
         "issues": "https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/issues",
         "forum": "https://forum.omeka.org/"
     },
-    "keywords": [
-        "Omeka S",
-        "module",
-        "annotate",
-        "W3C Recommandation",
-        "Web Annotation Ontology",
-        "annotating",
-        "tagging",
-        "commenting",
-        "rating"
-    ],
-    "require": {
-        "grimmlink/webui-popover": "^1.2",
-        "oomphinc/composer-installers-extender": "^2.0"
+    "_require (not set until Omeka S merges PR #2432)": {
+        "omeka/omeka-s": "^4.1",
+        "daniel-km/omeka-s-module-common": "*"
     },
     "autoload": {
         "psr-4": {
@@ -36,46 +35,10 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "AnnotateTest\\": "test/AnnotateTest/"
+            "AnnotateTest\\": "tests/AnnotateTest/"
         }
     },
     "extra": {
-        "installer-types": ["omeka-addon-asset"],
-        "installer-paths": {
-            "asset/vendor/{$name}/": [
-                "type:omeka-addon-asset"
-            ]
-        }
-    },
-    "repositories": [
-        {
-            "type": "package",
-            "package": {
-                "name": "grimmlink/webui-popover",
-                "version": "1.2.18",
-                "type": "omeka-addon-asset",
-                "dist": {
-                    "type": "tar",
-                    "url": "https://github.com/grimmlink/webui-popover/archive/refs/heads/master.tar.gz"
-                },
-                "extra": {
-                    "installer-name": "webui-popover-full"
-                }
-            }
-        }
-    ],
-    "scripts": {
-        "post-install-cmd": "@build",
-        "post-update-cmd": "@build",
-        "build": [
-            "@php -r '@rename(__DIR__ . \"/asset/vendor/webui-popover-full/dist\", __DIR__ . \"/asset/vendor/webui-popover\");'",
-            "@php -r 'exec(sprintf(\"rm -rf %s\", escapeshellarg(__DIR__ . \"/asset/vendor/webui-popover-full\")));'"
-        ]
-    },
-    "config": {
-        "allow-plugins": {
-            "composer/installers": true,
-            "oomphinc/composer-installers-extender": true
-        }
+        "installer-name": "Annotate"
     }
 }
