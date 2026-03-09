@@ -558,7 +558,11 @@ class Module extends AbstractModule
             'Omeka\Controller\Site\Media',
         ];
         foreach ($controllers as $controller) {
-            // Add the annotations to the resource show public pages.
+            $sharedEventManager->attach(
+                $controller,
+                'view.show.before',
+                [$this, 'displayPublic']
+            );
             $sharedEventManager->attach(
                 $controller,
                 'view.show.after',
@@ -681,6 +685,13 @@ class Module extends AbstractModule
             \Omeka\Form\SettingForm::class,
             'form.add_elements',
             [$this, 'handleMainSettings']
+        );
+
+        // Site settings form.
+        $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_elements',
+            [$this, 'handleSiteSettings']
         );
 
         // Module Csv Import.
@@ -1137,6 +1148,21 @@ class Module extends AbstractModule
     {
         $view = $event->getTarget();
         $resource = $view->resource;
+        $resourceName = $resource->resourceName();
+
+        $eventName = $event->getName();
+        $position = $eventName === 'view.show.before'
+            ? 'before'
+            : 'after';
+
+        $placements = $view->siteSetting(
+            'annotate_placement',
+            []
+        );
+        if (!in_array($position . '/' . $resourceName, $placements)) {
+            return;
+        }
+
         echo $view->annotations($resource);
     }
 

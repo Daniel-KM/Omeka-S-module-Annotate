@@ -58,6 +58,7 @@ return [
     'form_elements' => [
         'invokables' => [
             Form\SettingsFieldset::class => Form\SettingsFieldset::class,
+            Form\SiteSettingsFieldset::class => Form\SiteSettingsFieldset::class,
         ],
         'factories' => [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
@@ -304,6 +305,9 @@ return [
         ],
         'settings' => [
             'annotate_jsonld_old_format' => false,
+        ],
+        'site_settings' => [
+            'annotate_placement' => [],
         ],
     ],
     'csvimport' => [
