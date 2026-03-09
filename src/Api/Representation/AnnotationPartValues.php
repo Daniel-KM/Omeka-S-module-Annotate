@@ -156,6 +156,16 @@ class AnnotationPartValues
     public function jsonSerialize(): array
     {
         $result = [];
+        // Add @type per W3C Annotation Model.
+        if ($this->field === 'body'
+            && isset($this->valuesByTerm['rdf:value'])
+        ) {
+            $result['@type'] = 'oa:TextualBody';
+        } elseif ($this->field === 'target'
+            && isset($this->valuesByTerm['oa:hasSource'])
+        ) {
+            $result['@type'] = 'oa:SpecificResource';
+        }
         foreach ($this->valuesByTerm as $term => $values) {
             foreach ($values as $v) {
                 $result[$term][] = $v;
