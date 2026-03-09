@@ -213,21 +213,23 @@ trait QueryPropertiesTrait
         // properties for adapter and connection.
         $this->adapter = $this;
 
-        /**
-         * @see \Doctrine\ORM\QueryBuilder::expr().
-         * @var \Doctrine\ORM\EntityManager $entityManager
-         */
+        /** @see \Doctrine\ORM\QueryBuilder::expr(). */
         $expr = $qb->expr();
-        $entityManager = $this->adapter->getEntityManager();
 
-        $this->connection = $entityManager->getConnection();
+        $services = $this->adapter->getServiceLocator();
+        $this->connection = $services->get('Omeka\Connection');
+
+        // Since Omeka S 4.2, use adapter->createQueryBuilder().
+        $qbCreator = method_exists($this->adapter, 'createQueryBuilder')
+            ? $this->adapter
+            : $this->adapter->getEntityManager();
 
         $escapeSqlLike = function ($string) {
             return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], (string) $string);
         };
 
         /** @var \Common\Stdlib\EasyMeta $easyMeta */
-        $easyMeta = $this->adapter->getServiceLocator()->get('Common\EasyMeta');
+        $easyMeta = $services->get('Common\EasyMeta');
 
         $mainQb = $qb;
 
@@ -239,7 +241,7 @@ trait QueryPropertiesTrait
         // TODO Find a better way to aggregate sub-queries sub queries with parameters. Use sql? Add a  table with source (but problem will remain for other properties but most of them are in bodies)?
         $partialResults = null;
         $smqAlias = $this->adapter->createAlias();
-        $smq = $entityManager->createQueryBuilder();
+        $smq = $qbCreator->createQueryBuilder();
         $smqParameters = $smq->getParameters();
         // To fix issues with doctrine subqueries and parameters, execute
         // queries directly. Most of the time, it is to find annotation of an
@@ -313,7 +315,7 @@ trait QueryPropertiesTrait
             $positive = true;
             $incorrectValue = false;
 
-            $qb = $entityManager->createQueryBuilder();
+            $qb = $qbCreator->createQueryBuilder();
 
             switch ($queryType) {
                 case 'neq':
@@ -322,7 +324,7 @@ trait QueryPropertiesTrait
                 case 'eq':
                     $param = $this->adapter->createNamedParameter($qb, $value);
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -340,7 +342,7 @@ trait QueryPropertiesTrait
                 case 'in':
                     $param = $this->adapter->createNamedParameter($qb, '%' . $escapeSqlLike($value) . '%');
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -359,7 +361,7 @@ trait QueryPropertiesTrait
                     $param = $this->adapter->createNamedParameter($qb, $value);
                     $qb->setParameter(substr($param, 1), $value, Connection::PARAM_STR_ARRAY);
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -377,7 +379,7 @@ trait QueryPropertiesTrait
                 case 'sw':
                     $param = $this->adapter->createNamedParameter($qb, $escapeSqlLike($value) . '%');
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -395,7 +397,7 @@ trait QueryPropertiesTrait
                 case 'ew':
                     $param = $this->adapter->createNamedParameter($qb, '%' . $escapeSqlLike($value));
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -416,7 +418,7 @@ trait QueryPropertiesTrait
                     // done with a static value from the php soundex() function.
                     $param = $this->adapter->createNamedParameter($qb, $value);
                     $subqueryAlias = $this->adapter->createAlias();
-                    $subquery = $entityManager
+                    $subquery = $qbCreator
                         ->createQueryBuilder()
                         ->select("$subqueryAlias.id")
                         ->from('Omeka\Entity\Resource', $subqueryAlias)
@@ -546,7 +548,7 @@ trait QueryPropertiesTrait
                     $subValuesAlias = $this->adapter->createAlias();
                     $subResourceAlias = $this->adapter->createAlias();
                     // Use a subquery so rights are automatically managed.
-                    $subQb = $entityManager
+                    $subQb = $qbCreator
                         ->createQueryBuilder()
                         ->select("IDENTITY($subValuesAlias.valueResource)")
                         ->from(\Omeka\Entity\Value::class, $subValuesAlias)
@@ -696,7 +698,7 @@ trait QueryPropertiesTrait
 
         // Properties are one argument to append as a whole.
         if ($where) {
-            $smq = $entityManager->createQueryBuilder();
+            $smq = $qbCreator->createQueryBuilder();
             $smqAlias = $this->adapter->createAlias();
             $smqParameters = $smq->getParameters();
             $smq
