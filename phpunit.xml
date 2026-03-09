@@ -2,24 +2,18 @@
 <!DOCTYPE phpunit>
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/7.5/phpunit.xsd"
-    bootstrap="test/bootstrap.php"
-    backupGlobals="false"
+    xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/9.5/phpunit.xsd"
     colors="true"
-    verbose="true"
-    forceCoversAnnotation="true"
-    beStrictAboutCoversAnnotation="true"
-    beStrictAboutOutputDuringTests="true"
-    beStrictAboutTodoAnnotatedTests="true"
+    backupGlobals="false"
+    bootstrap="tests/bootstrap.php"
     >
     <testsuites>
         <testsuite name="Annotate">
-            <directory suffix="Test.php">test/AnnotateTest</directory>
+            <directory suffix="Test.php">tests/AnnotateTest</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
-        </whitelist>
-    </filter>
+    <php>
+        <env name="APPLICATION_ENV" value="testing"/>
+        <includePath>./tests</includePath>
+    </php>
 </phpunit>
