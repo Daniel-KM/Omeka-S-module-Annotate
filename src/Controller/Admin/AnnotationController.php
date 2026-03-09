@@ -25,11 +25,7 @@ class AnnotationController extends AbstractActionController
 
     public function browseAction()
     {
-        $isOldOmeka = version_compare(\Omeka\Module::VERSION, '4', '<');
-
-        $isOldOmeka
-            ? $this->setBrowseDefaults('created')
-            : $this->browse()->setDefaults('annotations');
+        $this->browse()->setDefaults('annotations');
         $response = $this->api()->search('annotations', $this->params()->fromQuery());
         $this->paginator($response->getTotalResults(), $this->params()->fromQuery('page'));
 
@@ -74,9 +70,6 @@ class AnnotationController extends AbstractActionController
             'formDeleteSelected' => $formDeleteSelected,
             'formDeleteAll' => $formDeleteAll,
         ]);
-        if ($isOldOmeka) {
-            $view->setTemplate('annotate/admin/annotation/browse-v3');
-        }
         return $view;
     }
 

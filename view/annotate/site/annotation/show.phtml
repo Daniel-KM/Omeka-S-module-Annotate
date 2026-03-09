@@ -9,7 +9,7 @@ $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
 $translate = $plugins->get('translate');
 
-$this->htmlElement('body')->appendAttribute('class', 'annotations show' . (version_compare(\Omeka\Module::VERSION, '4', '<') ? ' v3' : ''));
+$this->htmlElement('body')->appendAttribute('class', 'annotations show');
 
 ?>
 <?= $this->pageTitle($annotation->displayTitle(), 2) ?>

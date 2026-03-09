@@ -11,17 +11,8 @@ $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 
 $this->headLink()->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
-// $this->headScript()->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
-$this->htmlElement('body')->appendAttribute('class', 'annotations show' . (version_compare(\Omeka\Module::VERSION, '4', '<') ? ' v3' : ''));
-
-/*
-$sectionNavs = [
-    'annotation-metadata' => $translate('Metadata'),
-    'annotation-bodies' => $translate('Bodies'),
-    'annotation-targets' => $translate('Targets'),
-];
-*/
+$this->htmlElement('body')->appendAttribute('class', 'annotations show');
 ?>
 
 <?= $this->pageTitle($annotation->displayTitle(), 1, $translate('Annotations')) ?>
@@ -31,63 +22,63 @@ $sectionNavs = [
     <?php endif; ?>
 </div>
 
-<?php // Currently, the bodies and the targets are on the same tab. ?>
-<?php // echo $this->sectionNav($sectionNavs, 'view.show.section_nav', $annotation); ?>
-
 <div id="annotation-metadata" class="active section">
     <?= $annotation->displayValues() ?>
 </div>
 
+<hr/>
+
 <div id="annotation-bodies" class="active section annotation-parts">
+    <h3><?= $translate('Bodies') ?></h3>
     <?php $bodies = $annotation->bodies(); ?>
-    <div class="meta-group">
-        <h4 class="annotation-caption"><?= $translate('Bodies') ?></h4>
-        <?php if (count($bodies)): ?>
-            <?php $i = 0; ?>
-            <?php foreach ($bodies as $body): ?>
-                <div class="value annotation-body">#<?= ++$i ?></div>
-                <?php if ($body->resourceClass()): ?>
-                    <div class="meta-group">
-                        <h4><?= $translate('Class') ?></h4>
-                        <div class="value"><?= $escape($translate($body->resourceClass()->label())) ?></div>
-                    </div>
-                <?php endif; ?>
-                <?= $body->displayValues() ?>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="no-resources"><?= $translate('This annotation has no bodies.') ?></p>
-        <?php endif; ?>
-    </div>
+    <?php if (count($bodies)): ?>
+        <?php $i = 0; ?>
+        <?php foreach ($bodies as $body): ?>
+        <div class="annotation-body">
+            <h4><?= sprintf($translate('Body #%d'), ++$i) ?></h4>
+            <?php if ($body->resourceClass()): ?>
+            <div class="meta-group">
+                <h4><?= $translate('Class') ?></h4>
+                <div class="value"><?= $escape($translate($body->resourceClass()->label())) ?></div>
+            </div>
+            <?php endif; ?>
+            <?= $body->displayValues() ?>
+        </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="no-resources"><?= $translate('This annotation has no bodies.') ?></p>
+    <?php endif; ?>
 </div>
 
+<hr/>
+
 <div id="annotation-targets" class="active section annotation-parts">
+    <h3><?= $translate('Targets') ?></h3>
     <?php $targets = $annotation->targets(); ?>
-    <div class="meta-group">
-        <h4 class="annotation-caption"><?= $translate('Targets') ?></h4>
-        <?php if (count($targets)): ?>
-            <?php $i = 0; ?>
-            <?php foreach ($targets as $target): ?>
-                <div class="value annotation-target">#<?= ++$i ?></div>
-                <?php if ($target->resourceClass()): ?>
-                    <div class="meta-group">
-                        <h4><?= $translate('Class') ?></h4>
-                        <div class="value"><?= $escape($translate($target->resourceClass()->label())) ?></div>
-                    </div>
-                <?php endif; ?>
-                <?php // Note: when type + value, it is a selector. ?>
-                <?= $target->displayValues() ?>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="no-resources"><?= $translate('This annotation has no targets.') ?></p>
-        <?php endif; ?>
-    </div>
+    <?php if (count($targets)): ?>
+        <?php $i = 0; ?>
+        <?php foreach ($targets as $target): ?>
+        <div class="annotation-target">
+            <h4><?= sprintf($translate('Target #%d'), ++$i) ?></h4>
+            <?php if ($target->resourceClass()): ?>
+            <div class="meta-group">
+                <h4><?= $translate('Class') ?></h4>
+                <div class="value"><?= $escape($translate($target->resourceClass()->label())) ?></div>
+            </div>
+            <?php endif; ?>
+            <?= $target->displayValues() ?>
+        </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="no-resources"><?= $translate('This annotation has no targets.') ?></p>
+    <?php endif; ?>
 </div>
 
 <div class="sidebar active">
     <?= $this->thumbnail($annotation, 'square') ?>
     <div class="meta-group">
         <h4><?= $translate('Visibility') ?></h4>
-        <div class="value"><?= ($annotation->isPublic()) ? $escape($translate('Public')) : $escape($translate('Private')) ?></div>
+        <div class="value"><?= $annotation->isPublic() ? $escape($translate('Public')) : $escape($translate('Private')) ?></div>
     </div>
     <div class="meta-group">
         <h4><?= $translate('Created') ?></h4>
