@@ -458,17 +458,24 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         }
 
         // Group the resource values by field/ordinal/term.
+        // ValueRepresentation has no id() method, so build
+        // representations from entities directly.
         $grouped = [];
-        foreach ($this->values() as $term => $data) {
-            foreach ($data['values'] as $valueRep) {
-                $vid = $valueRep->id();
-                if (!isset($valueMap[$vid])) {
-                    continue;
-                }
-                $info = $valueMap[$vid];
-                $grouped[$info['field']][$info['ordinal']][$term][]
-                    = $valueRep;
+        foreach ($this->resource->getValues() as $valueEntity) {
+            $vid = $valueEntity->getId();
+            if (!isset($valueMap[$vid])) {
+                continue;
             }
+            $info = $valueMap[$vid];
+            $property = $valueEntity->getProperty();
+            $term = $property->getVocabulary()->getPrefix()
+                . ':' . $property->getLocalName();
+            $valueRep = new \Omeka\Api\Representation\ValueRepresentation(
+                $valueEntity,
+                $services
+            );
+            $grouped[$info['field']][$info['ordinal']][$term][]
+                = $valueRep;
         }
 
         $this->partValuesCache = $grouped;
