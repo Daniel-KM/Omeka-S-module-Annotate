@@ -687,6 +687,11 @@ class Module extends AbstractModule
     /**
      * Add the annotation data to the resource JSON-LD.
      */
+    /**
+     * @var array|null Cached map [resource_id => [annotation refs]].
+     */
+    protected $annotationsByResource;
+
     public function filterJsonLd(Event $event): void
     {
         if (!$this->userCanRead()) {
@@ -696,49 +701,68 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $settings = $services->get('Omeka\Settings');
 
-        // Respect the global setting to disable @reverse.
         if ($settings->get('disable_jsonld_reverse')) {
             return;
         }
 
         $resource = $event->getTarget();
-        $entityColumnName = $this->columnNameOfRepresentation($resource);
-        $api = $services->get('Omeka\ApiManager');
-        $annotations = $api
-            ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
-            ->getContent();
-        if ($annotations) {
-            $jsonLd = $event->getParam('jsonLd');
+        $resourceId = $resource->id();
 
-            // Previous versions used "o:annotation" to link annotations to
-            // resources, but it was incorrect because the relation goes from
-            // annotation to resource.
-            // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
-            // Note: Omeka uses singular for "o:item_set" (array for item), but
-            // plural for "o:items" (a link for item sets), but singular "o:item"
-            // for medias. "o:site" uses singular (array for items).
-            // Anyway, all other terms are singular (dublin core, etc.).
-
-            // But since then, the json-ld 1.1 (2020) spec introduced @reverse,
-            // that should be used, with oa:hasTarget.
-            /** @see https://www.w3.org/TR/json-ld11/ */
-
-            if ($settings->get('annotate_jsonld_old_format')) {
-                $jsonLd['o:annotation'] = $annotations;
-                /*
-                $jsonLd['o:annotations'] = [
-                    '@id' => $this->getServiceLocator()->get('ViewHelperManager')->get('url')
-                        ->__invoke('api/default', ['resource' => 'annotations'], ['query' => ['resource_id' => $resource->id()], 'force_canonical' => true]),
-                ];
-                */
-            } else {
-                if (!isset($jsonLd['@reverse'])) {
-                    $jsonLd['@reverse'] = [];
+        // Batch-load all annotation→resource mappings on first
+        // call to avoid N+1 queries on browse pages.
+        if ($this->annotationsByResource === null) {
+            $this->annotationsByResource = [];
+            $conn = $services->get('Omeka\EntityManager')
+                ->getConnection();
+            $easyMeta = $services->get('Common\EasyMeta');
+            $hasSourceId = $easyMeta->propertyId('oa:hasSource');
+            if ($hasSourceId) {
+                $serverUrl = $services->get('ViewHelperManager')
+                    ->get('serverUrl');
+                $basePath = $services->get('ViewHelperManager')
+                    ->get('basePath');
+                $baseApiUrl = $serverUrl('') . $basePath()
+                    . '/api/annotations/';
+                $rows = $conn->executeQuery(<<<'SQL'
+                    SELECT v.value_resource_id AS resource_id,
+                        a.id AS annotation_id
+                    FROM annotation a
+                    INNER JOIN value v
+                        ON v.resource_id = a.id
+                    WHERE v.property_id = ?
+                        AND v.value_resource_id IS NOT NULL
+                    ORDER BY a.id
+                    SQL,
+                    [$hasSourceId]
+                )->fetchAllAssociative();
+                foreach ($rows as $row) {
+                    $aId = (int) $row['annotation_id'];
+                    $rId = (int) $row['resource_id'];
+                    $this->annotationsByResource[$rId][] = [
+                        '@id' => $baseApiUrl . $aId,
+                        'o:id' => $aId,
+                    ];
                 }
-                $jsonLd['@reverse']['oa:hasTarget'] = $annotations;
             }
-            $event->setParam('jsonLd', $jsonLd);
         }
+
+        $annotations = $this->annotationsByResource[$resourceId]
+            ?? [];
+        if (!$annotations) {
+            return;
+        }
+
+        $jsonLd = $event->getParam('jsonLd');
+        // @see https://www.w3.org/TR/json-ld11/
+        if ($settings->get('annotate_jsonld_old_format')) {
+            $jsonLd['o:annotation'] = $annotations;
+        } else {
+            if (!isset($jsonLd['@reverse'])) {
+                $jsonLd['@reverse'] = [];
+            }
+            $jsonLd['@reverse']['oa:hasTarget'] = $annotations;
+        }
+        $event->setParam('jsonLd', $jsonLd);
     }
 
     /**
