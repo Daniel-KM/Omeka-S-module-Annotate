@@ -1,43 +1,39 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-03-09 00:00+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2026-03-09 00:00+0000\n"
+"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
+"Language-Team: \n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
 
 #: data/scripts/upgrade_vocabulary.php:19
 #, php-format
 msgid "This module requires module %1$s version %2$s or greater."
-msgstr ""
+msgstr "Ce module requiert le module %1$s version %2$s ou supérieure."
 
 #: data/scripts/upgrade.php:29 Module.php:88
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
-msgstr ""
+msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieure."
 
 #: data/scripts/upgrade.php:33
 msgid "Missing requirement. Unable to upgrade."
-msgstr ""
+msgstr "Pré-requis absent. Impossible de mettre à jour."
 
 #: Module.php:183
 msgid "WARNING"
-msgstr ""
+msgstr "ATTENTION"
 
 #: Module.php:188
 msgid "All the annotations will be removed."
-msgstr ""
+msgstr "Toutes les annotations seront supprimées."
 
 #: Module.php:193
 #, php-format
@@ -45,21 +41,25 @@ msgid ""
 "If checked, the values of the vocabularies \"%s\" will be removed too. The "
 "class of the resources that use a class of these vocabularies will be reset."
 msgstr ""
+"Si coché, les valeurs des vocabulaires « %s » seront également supprimées. "
+"La classe des ressources qui utilisent l’une de ces classes de vocabulaires "
+"sera réinitialisée."
 
 #: Module.php:198
 #, php-format
 msgid "Remove the vocabularies \"%s\""
-msgstr ""
+msgstr "Supprimer les vocabulaires « %s »"
 
 #: Module.php:203
 #, php-format
 msgid "If checked, the custom vocabs \"%s\" will be removed too."
 msgstr ""
+"Si coché, les vocabulaires personnalisés « %s » seront également supprimés."
 
 #: Module.php:208
 #, php-format
 msgid "Remove the custom vocabs \"%s\""
-msgstr ""
+msgstr "Supprimer les vocabulaires personnalisés « %s »"
 
 #: Module.php:213
 #, php-format
@@ -67,75 +67,77 @@ msgid ""
 "If checked, the resource templates \"%s\" will be removed too. The resource "
 "template of the resources that use it will be reset."
 msgstr ""
+"Si coché, les modèles de ressource « %s » seront également supprimés. Les "
+"modèles des ressources qui les utilisent seront réinitialisés."
 
 #: Module.php:218
 #, php-format
 msgid "Remove the resource templates \"%s\""
-msgstr ""
+msgstr "Supprimer les modèles de ressources « %s »"
 
 #: Module.php:906 Module.php:913
 #: view/common/advanced-search/date-time-annotation.phtml:80
 msgid "after"
-msgstr ""
+msgstr "après"
 
 #: Module.php:907 Module.php:912
 #: view/common/advanced-search/date-time-annotation.phtml:81
 msgid "after or on"
-msgstr ""
+msgstr "après ou le"
 
 #: Module.php:908 Module.php:914
 #: view/common/advanced-search/date-time-annotation.phtml:82
 msgid "on"
-msgstr ""
+msgstr "sur"
 
 #: Module.php:909 Module.php:915
 #: view/common/advanced-search/date-time-annotation.phtml:83
 msgid "not on"
-msgstr ""
+msgstr "pas sur"
 
 #: Module.php:910 Module.php:916
 #: view/common/advanced-search/date-time-annotation.phtml:84
 msgid "before or on"
-msgstr ""
+msgstr "avant ou le"
 
 #: Module.php:911 Module.php:917
 #: view/common/advanced-search/date-time-annotation.phtml:85
 msgid "before"
-msgstr ""
+msgstr "avant"
 
 #: Module.php:918 view/common/advanced-search/date-time-annotation.phtml:86
 msgid "has any date / time"
-msgstr ""
+msgstr "a une date / heure"
 
 #: Module.php:919 view/common/advanced-search/date-time-annotation.phtml:87
 msgid "has no date / time"
-msgstr ""
+msgstr "n’a pas de date / heure"
 
 #: src/Api/Representation/AnnotationPartValues.php:115
 #, php-format
 msgid "[%s]"
-msgstr ""
+msgstr "[%s]"
 
 #: src/Api/Representation/AnnotationRepresentation.php:290
 #: view/common/site/annotation-resource.phtml:32
 #, php-format
 msgid "[Annotation #%d]"
-msgstr ""
+msgstr "[Annotation #%d]"
 
 #: view/annotate/admin/annotation/batch-delete-confirm.phtml:11
 #: view/annotate/admin/annotation/browse.phtml:148
 #: view/annotate/admin/annotation/browse.phtml:166
 msgid "Delete annotations"
-msgstr ""
+msgstr "Supprimer les annotations"
 
 #: view/annotate/admin/annotation/batch-delete-confirm.phtml:12
 #: view/annotate/admin/annotation/browse.phtml:149
 msgid "Are you sure you would like to delete the selected annotations?"
-msgstr ""
+msgstr "Êtes-vous sûr de vouloir supprimer les annotations sélectionnées ?"
 
 #: view/annotate/admin/annotation/browse.phtml:36
 msgid "Quick Search"
-msgstr ""
+msgstr "Recherche rapide"
 
 #: view/annotate/admin/annotation/browse.phtml:151
 #: view/annotate/admin/annotation/browse.phtml:169
@@ -143,111 +145,115 @@ msgstr ""
 msgid ""
 "%s: this action will permanently delete %s annotations and cannot be undone."
 msgstr ""
+"%s : cette action supprimera définitivement les annotations %s et ne pourra "
+"pas être annulée."
 
 #: view/annotate/admin/annotation/browse.phtml:167
 msgid ""
 "Are you sure you would like to delete all annotations on all pages of this "
 "result?"
 msgstr ""
+"Êtes-vous sûr de vouloir supprimer toutes les annotations sur toutes les "
+"pages de ce résultat ?"
 
 #: view/annotate/admin/annotation/browse.phtml:208
 #: view/annotate/site/annotation/browse.phtml:88
 msgid "Your query returned no annotations."
-msgstr ""
+msgstr "Votre requête ne correspond à aucune annotation."
 
 #: view/annotate/admin/annotation/browse.phtml:220
 msgid "Search annotations"
-msgstr ""
+msgstr "Rechercher des annotations"
 
 #: view/annotate/admin/annotation/show-details.phtml:19
 #: view/annotate/site/annotation/browse.phtml:44
 msgid "Annotator"
-msgstr ""
+msgstr "Annotateur"
 
 #: view/annotate/admin/annotation/show-details.phtml:19
 msgid "(public)"
-msgstr ""
+msgstr "(public)"
 
 #: view/annotate/admin/annotation/show-details.phtml:50
 msgid "[no owner]"
-msgstr ""
+msgstr "[pas de propriétaire]"
 
 #: view/annotate/admin/annotation/show-details.phtml:55
 #: view/annotate/admin/annotation/show.phtml:35
 #: view/annotate/site/annotation/show.phtml:42
 msgid "Bodies"
-msgstr ""
+msgstr "Corps"
 
 #: view/annotate/admin/annotation/show-details.phtml:61
 #: view/annotate/admin/annotation/show.phtml:52
 #: view/annotate/site/annotation/show.phtml:59
 msgid "This annotation has no bodies."
-msgstr ""
+msgstr "Cette annotation ne contient aucun corps."
 
 #: view/annotate/admin/annotation/show-details.phtml:67
 #: view/annotate/admin/annotation/show.phtml:59
 #: view/annotate/site/annotation/browse.phtml:43
 #: view/annotate/site/annotation/show.phtml:66
 msgid "Targets"
-msgstr ""
+msgstr "Cibles"
 
 #: view/annotate/admin/annotation/show-details.phtml:75
 #: view/annotate/admin/annotation/show.phtml:76
 #: view/annotate/site/annotation/show.phtml:83
 msgid "This annotation has no targets."
-msgstr ""
+msgstr "Cette annotation n’a pas de cible."
 
 #: view/annotate/admin/annotation/show.phtml:21
 #: view/common/admin/annotation-resource-list.phtml:55
 msgid "Edit annotation"
-msgstr ""
+msgstr "Modifier l’annotation"
 
 #: view/annotate/admin/annotation/show.phtml:41
 #: view/annotate/site/annotation/show.phtml:48
 #, php-format
 msgid "Body #%d"
-msgstr ""
+msgstr "Corps #%d"
 
 #: view/annotate/admin/annotation/show.phtml:65
 #: view/annotate/site/annotation/show.phtml:72
 #, php-format
 msgid "Target #%d"
-msgstr ""
+msgstr "Cible #%d"
 
 #: view/annotate/site/annotation/browse.phtml:41
 #: view/annotate/site/annotation/show.phtml:19
 msgid "Annotation"
-msgstr ""
+msgstr "Annotation"
 
 #: view/annotate/site/annotation/browse.phtml:45
 msgid "Date annotated"
-msgstr ""
+msgstr "Date de l’annotation"
 
 #: view/annotate/site/annotation/browse.phtml:65
 msgid "Removed"
-msgstr ""
+msgstr "Supprimé"
 
 #: view/annotate/site/annotation/show.phtml:29
 msgid "Date created"
-msgstr ""
+msgstr "Date de création"
 
 #: view/common/admin/annotation-resource-list.phtml:26
 #: view/common/site/annotation-resource.phtml:25
 msgid "There are no annotations for this resource."
-msgstr ""
+msgstr "Il n’y a aucune annotation pour cette ressource."
 
 #: view/common/admin/annotation-resource-list.phtml:51
 msgid "Show annotation"
-msgstr ""
+msgstr "Voir l’annotation"
 
 #: view/common/admin/annotation-resource-list.phtml:66
 msgid "Delete annotation"
-msgstr ""
+msgstr "Supprimer l’annotation"
 
 #: view/common/admin/annotation-resource-list.phtml:85
 #: view/common/site/annotation-resource.phtml:53
 msgid "Purpose"
-msgstr ""
+msgstr "But"
 
 #: view/common/admin/annotation-resource-list.phtml:128
 #: view/common/admin/annotation-resource-list.phtml:220
@@ -255,128 +261,135 @@ msgstr ""
 #: view/common/site/annotation-resource.phtml:95
 #: view/common/site/annotation-resource.phtml:160
 msgid "Full value"
-msgstr ""
+msgstr "Valeur complète"
 
 #: view/common/admin/annotation-resource-list.phtml:199
 #: view/common/site/annotation-resource.phtml:140
 msgid "Target selector"
-msgstr ""
+msgstr "Sélecteur de cible"
 
 #: view/common/admin/annotation-resource-list.phtml:200
 #: view/common/site/annotation-resource.phtml:141
 msgid "Selector type"
-msgstr ""
+msgstr "Type de sélecteur"
 
 #: view/common/admin/annotation-resource.phtml:23
 #, php-format
 msgid "Annotations (%d)"
-msgstr ""
+msgstr "Annotations (%d)"
 
 #: view/common/advanced-search/date-time-annotation.phtml:40
 msgid "Date / time"
-msgstr ""
+msgstr "Date / heure"
 
 #: view/common/advanced-search/date-time-annotation.phtml:46
 msgid "Search by date / time"
-msgstr ""
+msgstr "Recherche par date / heure"
 
 #: view/common/advanced-search/date-time-annotation.phtml:50
 msgid ""
 "Date / time can be full like \"2018-01-23 12:34:56\", or partial like "
 "\"2018-12-25\" or \"2017-11\"."
 msgstr ""
+"La date / heure peut être complète, comme \"2018-01-23 12:34:56\", ou "
+"partielle, comme \"2018-12-25\" ou \"2017-11\"."
 
 #: view/common/advanced-search/date-time-annotation.phtml:62
 msgid "And"
-msgstr ""
+msgstr "Et"
 
 #: view/common/advanced-search/date-time-annotation.phtml:63
 msgid "Or"
-msgstr ""
+msgstr "Ou"
 
 #: view/common/advanced-search/date-time-annotation.phtml:75
 msgid "Creation or modification date / time"
-msgstr ""
+msgstr "Date / heure de création ou de modification"
 
 #: view/common/advanced-search/date-time-annotation.phtml:90
 msgid "Remove date / time"
-msgstr ""
+msgstr "Supprimer la date / heure"
 
 #: view/common/advanced-search/date-time-annotation.phtml:96
 msgid "Add new date / time"
-msgstr ""
+msgstr "Ajouter une date / heure"
 
 #: view/common/advanced-search/resource-template-annotation.phtml:27
 msgid "Searches for items that use any of these templates."
-msgstr ""
+msgstr "Recherche les éléments qui utilisent l’un de ces modèles."
 
 #: view/common/annotate-form.phtml:19
 msgid "New annotation"
-msgstr ""
+msgstr "Nouvelle annotation"
 
 #: view/common/annotate-form.phtml:22
 msgid "Warning: the resource is already an annotation."
-msgstr ""
+msgstr "Avertissement : la ressource est déjà une annotation."
 
 #: view/common/annotate-form.phtml:23
 msgid ""
 "Go to the tab \"Metadata\" to find and to annotate the original target "
 "resource."
 msgstr ""
+"Accédez à l'onglet « Métadonnées » pour rechercher et annoter la ressource "
+"cible d'origine."
 
 #: view/csv-import/mapping.phtml:5
 msgid "Close Me"
-msgstr ""
+msgstr "Fermer"
 
 #: view/csv-import/mapping.phtml:6
 msgid "Mapping Info"
-msgstr ""
+msgstr "Informations cartographiques"
 
 #: view/csv-import/mapping.phtml:9
 msgid "Latitude"
-msgstr ""
+msgstr "Latitude"
 
 #: view/csv-import/mapping.phtml:12
 msgid "Longitude"
-msgstr ""
+msgstr "Longitude"
 
 #: view/csv-import/mapping.phtml:15
 msgid "Latitude/Longitude"
-msgstr ""
+msgstr "Latitude/Longitude"
 
 #: view/csv-import/mapping.phtml:19
 msgid "Default View Settings"
-msgstr ""
+msgstr "Paramètres d’affichage par défaut"
 
 #: view/csv-import/mapping.phtml:22
 msgid "Default Latitude"
-msgstr ""
+msgstr "Latitude par défaut"
 
 #: view/csv-import/mapping.phtml:25
 msgid "Default Longitude"
-msgstr ""
+msgstr "Longitude par défaut"
 
 #: view/csv-import/mapping.phtml:28
 msgid "Default Zoom"
-msgstr ""
+msgstr "Zoom par défaut"
 
 #: view/csv-import/mapping.phtml:34
 msgid "Use multivalue separator"
-msgstr ""
+msgstr "Utiliser un séparateur de valeurs multiples"
 
 #: view/csv-import/mapping.phtml:35
 msgid "(Only applies to Latitude/Longitude)"
-msgstr ""
+msgstr "(S’applique uniquement à latitude/longitude)"
 
 #: data/scripts/upgrade_vocabulary.php:36
 msgid "The vocabulary \"{vocabulary}\" was updated successfully."
-msgstr ""
+msgstr "Le vocabulaire « {vocabulary} » a été correctement mis à jour."
 
 #: data/scripts/upgrade.php:256
 msgid ""
 "A resource block has been added for new themes. A new site setting "
 "\"Annotations placement\" has been added for old themes."
 msgstr ""
+"Un bloc de ressources a été ajouté pour les nouveaux thèmes. Un nouveau "
+"paramètre de site « Position des annotations » a été ajouté pour les anciens "
+"thèmes."
 
 #: data/scripts/upgrade.php:260
 msgid ""
@@ -384,207 +397,225 @@ msgid ""
 "\"@reverse.oa:hasTarget\" for W3C conformance. Update any client code that "
 "depends on the old key. A main setting allows to keep the old format."
 msgstr ""
+"La clé JSON-LD « o:annotation » associée aux ressources a été remplacée par "
+"« @reverse.oa:hasTarget » afin d’assurer la conformité aux normes du W3C. "
+"Veuillez mettre à jour tout code client qui utilise l’ancienne clé. Un "
+"paramètre général permet de conserver l’ancien format."
 
 #: data/scripts/upgrade.php:289
 msgid "Migrating annotations to new single-entity model."
-msgstr ""
+msgstr "Migration des annotations vers le modèle à entité unique."
 
 #: data/scripts/upgrade.php:418
 msgid "Annotations migrated successfully to single-entity model."
 msgstr ""
+"Les annotations ont été migrées avec succès vers le modèle à entité unique."
 
 #: Module.php:122
 msgid ""
 "The settings to manage the annotation template are not saved. You shoud edit "
 "the resource template \"Annotation\" manually."
 msgstr ""
+"Les paramètres pour gérer le modèle d’annotation ne sont pas enregistrés. "
+"Vous devez modifier manuellement le modèle de ressource « Annotation »."
 
 #: src/Form/SiteSettingsFieldset.php:10 src/Form/SiteSettingsFieldset.php:13
 #: src/Form/SettingsFieldset.php:10 src/Form/SettingsFieldset.php:13
 msgid "Annotate"
-msgstr ""
+msgstr "Annoter"
 
 #: src/Form/SiteSettingsFieldset.php:27
 msgid "Display annotations (old themes)"
-msgstr ""
+msgstr "Afficher les annotations (anciens thèmes)"
 
 #: src/Form/SiteSettingsFieldset.php:28
 msgid "If unchecked, use the resource page block \"Annotations\" instead."
 msgstr ""
+"Si non coché, utilisez plutôt le bloc de page de ressources « Annotations »."
 
 #: src/Form/SiteSettingsFieldset.php:30
 msgid "Item show"
-msgstr ""
+msgstr "Vue contenu"
 
 #: src/Form/SiteSettingsFieldset.php:31
 msgid "Media show"
-msgstr ""
+msgstr "Vue média"
 
 #: src/Form/SiteSettingsFieldset.php:32
 msgid "Item set show"
-msgstr ""
+msgstr "Vue collection"
 
 #: src/Form/SiteSettingsFieldset.php:33
 msgid "Item show: top"
-msgstr ""
+msgstr "Vue contenu : haut"
 
 #: src/Form/SiteSettingsFieldset.php:34
 msgid "Media show: top"
-msgstr ""
+msgstr "Vue média : haut"
 
 #: src/Form/SiteSettingsFieldset.php:35
 msgid "Item set show: top"
-msgstr ""
+msgstr "Vue collection : haut"
 
 #: src/Form/AnnotateForm.php:54
 msgid "Motivated by"
-msgstr ""
+msgstr "Motivé par"
 
 #: src/Form/AnnotateForm.php:56 src/Form/AnnotateForm.php:62
 msgid "Select the motivation of this annotation…"
-msgstr ""
+msgstr "Sélectionnez la motivationde cette annotation…"
 
 #: src/Form/AnnotateForm.php:103
 msgid "Annotate it!"
-msgstr ""
+msgstr "Annotatez !"
 
 #: src/Form/AnnotateForm.php:138
 msgid "Content of the annotation"
-msgstr ""
+msgstr "Contenu de l’annotation"
 
 #: src/Form/AnnotateForm.php:139
 msgid ""
 "The value of the body is generally the textual content of the annotation."
 msgstr ""
+"Le corps du texte correspond généralement au contenu textuel de l’annotation."
 
 #: src/Form/AnnotateForm.php:145
 msgid "Any plain text or html…"
-msgstr ""
+msgstr "Tout texte brut ou html…"
 
 #: src/Form/AnnotateForm.php:169
 msgid "Purpose of this content"
-msgstr ""
+msgstr "But de ce contenu"
 
 #: src/Form/AnnotateForm.php:171 src/Form/AnnotateForm.php:177
 msgid "Select the purpose of this body content, if needed…"
-msgstr ""
+msgstr "Sélectionnez le but de ce contenu, si nécessaire…"
 
 #: src/Form/AnnotateForm.php:228
 msgid "Type of the target selector"
-msgstr ""
+msgstr "Type du sélecteur de cible"
 
 #: src/Form/AnnotateForm.php:230 src/Form/AnnotateForm.php:236
 msgid ""
 "Select the selector type to specify a subpart of the resource, if needed…"
 msgstr ""
+"Sélectionnez le type de sélecteur pour préciser une sous-partie de la "
+"ressource, si nécessaire…"
 
 #: src/Form/AnnotateForm.php:259
 msgid ""
 "Allows to delimit a portion of the resource (part of a text, an image or an "
 "item…)."
 msgstr ""
+"Permet de délimiter une partie de la ressource (partie d’un texte, d’une "
+"image ou d’un élément…)."
 
 #: src/Form/AnnotateForm.php:265
 msgid ""
 "Any xml, json, svg, media api url, media id, etc. according to the type of "
 "selector."
 msgstr ""
+"Tout fichier xml, json, svg, url d’api média, id média, etc., selon le type "
+"de sélecteur."
 
 #: src/Form/SettingsFieldset.php:27
 msgid "Use old api format (o:annotation instead of @reverse)"
-msgstr ""
+msgstr "Utiliser l’ancien format api (o:annotation au lieu de @reverse)"
 
 #: src/Form/SettingsFieldset.php:28
 msgid ""
 "Check this to keep the deprecated \"o:annotation\" key on resources for "
 "backward compatibility with old clients."
 msgstr ""
+"Cochez cette case pour conserver la clé « o:annotation », désormais "
+"obsolète, sur les ressources afin d’assurer la compatibilité ascendante avec "
+"les anciens clients."
 
 #: src/Form/QuickSearchForm.php:32
 msgid "Set a date with optional comparator…"
-msgstr ""
+msgstr "Indiquer une date avec un signe éventuel de comparaison…"
 
 #: src/Form/QuickSearchForm.php:52
 msgid "Select a user…"
-msgstr ""
+msgstr "Choisir un utilisateur…"
 
 #: src/Api/Adapter/AnnotationAdapter.php:422
 msgid "Annotation body must be an array."
-msgstr ""
+msgstr "Le corps de l’annotation doit être un tableau."
 
 #: src/Api/Adapter/AnnotationAdapter.php:428
 msgid "There must be one annotation target at least."
-msgstr ""
+msgstr "Il doit y avoir au moins une cible d’annotation."
 
 #: src/Api/Adapter/AnnotationAdapter.php:431
 msgid "Annotation target must be an array."
-msgstr ""
+msgstr "La cible de l’annotation doit être un tableau."
 
 #: src/Api/Representation/AnnotationPartValues.php:112
 #: src/Media/Ingester/AnnotationBody.php:63 config/module.config.php:286
 msgid "Annotation body"
-msgstr ""
+msgstr "Corps de l’annotation"
 
 #: src/Api/Representation/AnnotationPartValues.php:113
 #: config/module.config.php:288
 msgid "Annotation target"
-msgstr ""
+msgstr "Cible de l’annotation"
 
 #: src/Mapping/AnnotationMapping.php:10
 msgid "Annotation data"
-msgstr ""
+msgstr "Données d’annotation"
 
 #: src/Mapping/AnnotationMapping.php:48
 msgid "type"
-msgstr ""
+msgstr "type"
 
 #: src/Mapping/AnnotationMapping.php:68
 #, php-format
 msgid "\"%s\" (%s) is not a valid annotation."
-msgstr ""
+msgstr "« %s » (%s) n’est pas une annotation valide."
 
 #: src/ColumnType/Id.php:9
 msgid "Annotation id"
-msgstr ""
+msgstr "Id de l’annotation"
 
 #: src/ColumnType/AnnotatedResource.php:13
 msgid "Annotated resource"
-msgstr ""
+msgstr "Ressource annotée"
 
 #: src/Controller/Admin/AnnotationController.php:130
 msgid "Only a resource can be annotated."
-msgstr ""
+msgstr "Seule une ressource peut être annotée."
 
 #: src/Controller/Admin/AnnotationController.php:138
 #: src/Controller/Admin/AnnotationController.php:140
 msgid "Unauthorized access."
-msgstr ""
+msgstr "Accès interdit."
 
 #: src/Controller/Admin/AnnotationController.php:151
 #: src/Controller/Admin/AnnotationController.php:153
 #: src/Controller/Admin/AnnotationController.php:163
 msgid "Resource not found."
-msgstr ""
+msgstr "Ressource non trouvée."
 
 #: src/Controller/Admin/AnnotationController.php:165
 msgid "Resource not found"
-msgstr ""
+msgstr "Ressource introuvable"
 
 #: src/Controller/Admin/AnnotationController.php:194
 msgid "The annotation is empty."
-msgstr ""
+msgstr "L’annotation est vide."
 
 #: src/Controller/Admin/AnnotationController.php:238
 msgid "A resource can’t have the same resource as selector."
-msgstr ""
+msgstr "Une ressource ne peut pas avoir la même ressource comme sélecteur."
 
 #: src/Controller/Admin/AnnotationController.php:247
 msgid "A media can’t have a resource selector."
-msgstr ""
+msgstr "Un média ne peut pas avoir de sélecteur de ressource."
 
 #: src/Controller/Admin/AnnotationController.php:256
 msgid "An item can’t have an item set selector."
-msgstr ""
+msgstr "Un contenu ne peut pas avoir une collection en sélecteur."
 
 #: src/Controller/Admin/AnnotationController.php:281
 #, php-format
@@ -592,45 +623,49 @@ msgid ""
 "The target selector \"%s\" cannot be identified: it should be a resource id "
 "or a resource api url."
 msgstr ""
+"Le sélecteur de cible « %s » ne peut pas être identifié : il doit s’agir "
+"d’un identifiant de ressource ou d’une url api de ressource."
 
 #: src/Controller/Admin/AnnotationController.php:295
 #, php-format
 msgid "There is no %s with id #%s."
-msgstr ""
+msgstr "Il n’existe aucun %s portant l’identifiant #%s."
 
 #: src/Controller/Admin/AnnotationController.php:323
 #, php-format
 msgid "There is no %s with id #%s that belongs to resource #%s."
-msgstr ""
+msgstr "Il n’existe aucun %s avec l’id #%s appartenant à la ressource #%s."
 
 #: src/Controller/Admin/AnnotationController.php:367
 #, php-format
 msgid "Resource #%d successfully annotated."
-msgstr ""
+msgstr "La ressource #%d a été annotée avec succès."
 
 #: src/Controller/Admin/AnnotationController.php:410
 msgid "Annotation successfully updated"
-msgstr ""
+msgstr "L’annotation a été mise à jour avec succès"
 
 #: src/Controller/Admin/AnnotationController.php:456
 msgid "Annotation successfully deleted."
-msgstr ""
+msgstr "L’annotation a été supprimée avec succès."
 
 #: src/Controller/Admin/AnnotationController.php:495
 msgid "You must select at least one annotation to batch delete."
-msgstr ""
+msgstr "Vous devez choisir au moins une annotation à supprimer."
 
 #: src/Controller/Admin/AnnotationController.php:505
 msgid "Annotations successfully deleted."
-msgstr ""
+msgstr "Les annotations ont été supprimées avec succès."
 
 #: src/Controller/Admin/AnnotationController.php:515
 msgid "Delete of all annotations is not supported currently."
 msgstr ""
+"La suppression de toutes les annotations n’est pas prise en charge pour le "
+"moment."
 
 #: config/module.config.php:287
 msgid "Annotation part"
-msgstr ""
+msgstr "Partie Annotation"
 
 #: config/module.config.php:290
 msgid ""
@@ -638,32 +673,41 @@ msgid ""
 "the property should be attached to the target, but the description of a link "
 "should be attached to the body."
 msgstr ""
+"Par exemple, pour ajouter une indication concernant l'incertitude d'un "
+"segment mis en évidence, la propriété doit être associée à la cible, mais la "
+"description d'un lien doit être associée au corps."
 
 #: config/module.config.php:291
 msgid ""
 "It can be the annotation itself (default), but the body or the target too."
 msgstr ""
+"Il peut s’agir de l'annotation elle-même (par défaut), mais aussi du corps "
+"ou de la cible."
 
 #: config/module.config.php:293
 msgid "Standard non-ambivalent properties are automatically managed."
-msgstr ""
+msgstr "Les propriétés standard non ambivalentes sont gérées automatiquement."
 
 #: config/module.config.php:294
 msgid "This option cannot be imported/exported currently."
-msgstr ""
+msgstr "Cette option ne peut pas être importée/exportée pour le moment."
 
 #: config/module.config.php:295
 msgid ""
 "To comply with Annotation data model, select the part of the annotation this "
 "property will belong to."
 msgstr ""
+"Pour respecter le modèle de données des annotations, sélectionnez la partie "
+"de l’annotation à laquelle cette propriété appartiendra."
 
 #: config/module.config.php:296
 msgid "Web Open Annotation"
-msgstr ""
+msgstr "Web Open Annotation"
 
 #: config/module.config.php:297
 msgid ""
 "With the class <code>oa:Annotation</code>, it’s important to choose the part "
 "of the annotation to which the property is attached:"
 msgstr ""
+"Avec la classe <code>oa:Annotation</code>, il est important de choisir la "
+"partie de l’annotation à laquelle la propriété est associée :"
