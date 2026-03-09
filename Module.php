@@ -686,26 +686,47 @@ class Module extends AbstractModule
             return;
         }
 
+        $services = $this->getServiceLocator();
+
+        // Respect the global setting to disable @reverse.
+        $settings = $services->get('Omeka\Settings');
+        if ($settings->get('disable_jsonld_reverse')) {
+            return;
+        }
+
         $resource = $event->getTarget();
         $entityColumnName = $this->columnNameOfRepresentation($resource);
-        $api = $this->getServiceLocator()->get('Omeka\ApiManager');
+        $api = $services->get('Omeka\ApiManager');
         $annotations = $api
             ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
             ->getContent();
         if ($annotations) {
-            $jsonLd = $event->getParam('jsonLd');
+            // Previous versions used "o:annotation" to link annotations to
+            // resources, but it was incorrect because the relation goes from
+            // annotation to resource.
             // It must be a property, not a class. Cf. iiif too, that uses annotations = iiif_prezi:annotations
             // Note: Omeka uses singular for "o:item_set" (array for item), but
             // plural for "o:items" (a link for item sets), but singular "o:item"
             // for medias. "o:site" uses singular (array for items).
             // Anyway, all other terms are singular (dublin core, etc.).
-            $jsonLd['o:annotation'] = $annotations;
+
+            // But since then, the json-ld 1.1 (2020) spec introduced @reverse,
+            // that should be used, with oa:hasTarget.
+            /** @see https://www.w3.org/TR/json-ld11/ */
+
+            // $jsonLd['o:annotation'] = $annotations;
             /*
             $jsonLd['o:annotations'] = [
                 '@id' => $this->getServiceLocator()->get('ViewHelperManager')->get('url')
                     ->__invoke('api/default', ['resource' => 'annotations'], ['query' => ['resource_id' => $resource->id()], 'force_canonical' => true]),
             ];
             */
+
+            $jsonLd = $event->getParam('jsonLd');
+            if (!isset($jsonLd['@reverse'])) {
+                $jsonLd['@reverse'] = [];
+            }
+            $jsonLd['@reverse']['oa:hasTarget'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
     }
