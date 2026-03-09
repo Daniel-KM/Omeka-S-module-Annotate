@@ -42,14 +42,14 @@ class AnnotationTest extends TestCase
 
     public function testSetCreated(): void
     {
-        $created = new \DateTime('2024-01-15 10:30:00');
+        $created = new \DateTime('2026-01-15 10:30:00');
         $this->annotation->setCreated($created);
         $this->assertSame($created, $this->annotation->getCreated());
     }
 
     public function testSetModified(): void
     {
-        $modified = new \DateTime('2024-01-16 14:00:00');
+        $modified = new \DateTime('2026-01-16 14:00:00');
         $this->annotation->setModified($modified);
         $this->assertSame($modified, $this->annotation->getModified());
     }
