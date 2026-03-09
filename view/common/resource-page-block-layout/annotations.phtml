@@ -1,0 +1,12 @@
+<?php
+/**
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var \Omeka\Api\Representation\AbstractResourceEntityRepresentation $resource
+ */
+
+$annotations = $this->annotations($resource);
+?>
+
+<div class="block block-annotations">
+    <?= $annotations ?>
+</div>

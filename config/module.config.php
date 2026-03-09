@@ -71,6 +71,11 @@ return [
             Controller\Site\AnnotationController::class => Controller\Site\AnnotationController::class,
         ],
     ],
+    'resource_page_block_layouts' => [
+        'invokables' => [
+            'annotations' => Site\ResourcePageBlockLayout\Annotations::class,
+        ],
+    ],
     'column_types' => [
         'invokables' => [
             'annotation_id' => ColumnType\Id::class,
