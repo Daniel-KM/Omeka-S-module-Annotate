@@ -80,8 +80,8 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         $jsonLd = parent::jsonSerialize();
 
         $jsonLd['@context'] = [
-            'oa' => 'http://www.w3.org/ns/anno.jsonld',
-            'o' => $this->getViewHelper('serverUrl')('')
+            'http://www.w3.org/ns/anno.jsonld',
+            $this->getViewHelper('serverUrl')('')
                 . $this->getViewHelper('basePath')()
                 . '/api-context',
         ];
