@@ -1106,7 +1106,6 @@ class Module extends AbstractModule
 
         $services = $this->getServiceLocator();
         $viewHelpers = $services->get('ViewHelperManager');
-        $api = $viewHelpers->get('api');
         $url = $viewHelpers->get('url');
 
         $options = [];
@@ -1127,12 +1126,11 @@ class Module extends AbstractModule
         //     $data = $params()->fromPost();
         // }
         $data = [];
-        // TODO Make the property id of oa:hasTarget/oa:hasSource static or integrate it to avoid a double query.
-        $property = $api->searchOne('properties', ['term' => 'oa:hasSource'])->getContent();
-        if (!$property) {
+        $easyMeta = $services->get('Common\EasyMeta');
+        $propertyId = $easyMeta->propertyId('oa:hasSource');
+        if (!$propertyId) {
             return;
         }
-        $propertyId = $property->id();
         // TODO Make the form use fieldset.
         $data['oa:hasTarget[0][oa:hasSource][0][property_id]'] = $propertyId;
         $data['oa:hasTarget[0][oa:hasSource][0][type]'] = 'resource';

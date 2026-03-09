@@ -16,6 +16,18 @@ use Omeka\Stdlib\Message;
 
 class AnnotationController extends AbstractActionController
 {
+    /**
+     * Get a safe redirect URL from query params.
+     */
+    protected function safeRedirect(): ?string
+    {
+        $redirect = $this->safeRedirect();
+        if ($redirect && !str_starts_with($redirect, '/')) {
+            return null;
+        }
+        return $redirect;
+    }
+
     public function searchAction()
     {
         return new ViewModel([
@@ -111,7 +123,7 @@ class AnnotationController extends AbstractActionController
      */
     public function annotateAction()
     {
-        $redirect = $this->params()->fromQuery('redirect');
+        $redirect = $this->safeRedirect();
 
         $isAjax = $this->getRequest()->isXmlHttpRequest();
         if (!$redirect && !$isAjax) {
@@ -419,7 +431,7 @@ class AnnotationController extends AbstractActionController
             ->setTerminal(true);
 
         // With a redirect, the Omeka view helper deleteConfirm cannot be used.
-        $redirect = $this->params()->fromQuery('redirect');
+        $redirect = $this->safeRedirect();
         if ($redirect) {
             /** @var \Omeka\Form\ConfirmForm $form */
             $form = $this->getForm(ConfirmForm::class);
@@ -448,7 +460,7 @@ class AnnotationController extends AbstractActionController
             }
         }
 
-        $redirect = $this->params()->fromQuery('redirect');
+        $redirect = $this->safeRedirect();
         return $redirect
             ? $this->redirect()->toUrl($redirect)
             : $this->redirect()->toRoute('admin/annotate');

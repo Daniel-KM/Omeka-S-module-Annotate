@@ -35,21 +35,21 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
 if (version_compare($oldVersion, '3.0.1', '<')) {
     // The media-type is not standard, but application/wkt seems better.
     $sql = <<<'SQL'
-UPDATE custom_vocab
-SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
-UPDATE value
-SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
-SQL;
+        UPDATE custom_vocab
+        SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
+        UPDATE value
+        SET terms = REPLACE(terms, 'text/wkt', 'application/wkt');
+        SQL;
     $connection->executeStatement($sql);
 }
 
 if (version_compare($oldVersion, '3.0.3', '<')) {
     // Change the name of a custom vocab.
     $sql = <<<'SQL'
-UPDATE `custom_vocab`
-SET `label` = 'Annotation oa:motivatedBy'
-WHERE `label` = 'Annotation oa:Motivation';
-SQL;
+        UPDATE `custom_vocab`
+        SET `label` = 'Annotation oa:motivatedBy'
+        WHERE `label` = 'Annotation oa:Motivation';
+        SQL;
     $connection->executeStatement($sql);
 
     // Complete the annotation custom vocabularies with Omeka resource types.
@@ -87,12 +87,12 @@ if (version_compare($oldVersion, '3.0.5', '<')) {
         ->searchOne('properties', ['term' => 'oa:hasBody'])->getContent()
         ->id();
     $sql = <<<SQL
-UPDATE value
-JOIN annotation_body ON value.resource_id = annotation_body.id
-SET property_id = $oaHasBodyId
-WHERE value.property_id = $rdfValueId
-AND value.type = "resource"
-SQL;
+        UPDATE value
+        JOIN annotation_body ON value.resource_id = annotation_body.id
+        SET property_id = $oaHasBodyId
+        WHERE value.property_id = $rdfValueId
+        AND value.type = "resource"
+        SQL;
     $connection->executeStatement($sql);
 
     // Unlike bodies, targets are saved in oa:hasSource (items in Cartography),
@@ -102,66 +102,66 @@ SQL;
         ->searchOne('properties', ['term' => 'oa:hasSelector'])->getContent()
         ->id();
     $sql = <<<SQL
-UPDATE value
-JOIN annotation_target ON value.resource_id = annotation_target.id
-SET property_id = $oaHasSelectorId
-WHERE value.property_id = $rdfValueId
-AND value.type = "resource"
-SQL;
+        UPDATE value
+        JOIN annotation_target ON value.resource_id = annotation_target.id
+        SET property_id = $oaHasSelectorId
+        WHERE value.property_id = $rdfValueId
+        AND value.type = "resource"
+        SQL;
     $connection->executeStatement($sql);
 }
 
 if (version_compare($oldVersion, '3.0.6', '<')) {
     $sql = <<<'SQL'
-CREATE TABLE annotation_part (
-    id INT NOT NULL,
-    annotation_id INT DEFAULT NULL,
-    part VARCHAR(190) NOT NULL,
-    INDEX IDX_4ABEA042E075FC54 (annotation_id),
-    INDEX idx_part (part),
-    PRIMARY KEY(id)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
+        CREATE TABLE annotation_part (
+            id INT NOT NULL,
+            annotation_id INT DEFAULT NULL,
+            part VARCHAR(190) NOT NULL,
+            INDEX IDX_4ABEA042E075FC54 (annotation_id),
+            INDEX idx_part (part),
+            PRIMARY KEY(id)
+        ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB;
 
-ALTER TABLE annotation DROP FOREIGN KEY FK_2E443EF2BF396750;
-ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36E075FC54;
-ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36BF396750;
-ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6E075FC54;
-ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6BF396750;
+        ALTER TABLE annotation DROP FOREIGN KEY FK_2E443EF2BF396750;
+        ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36E075FC54;
+        ALTER TABLE annotation_body DROP FOREIGN KEY FK_D819DB36BF396750;
+        ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6E075FC54;
+        ALTER TABLE annotation_target DROP FOREIGN KEY FK_9F53A3D6BF396750;
 
-INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
-SELECT `id`, `id`, "Annotate\\Entity\\Annotation"
-FROM `annotation`;
+        INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+        SELECT `id`, `id`, "Annotate\\Entity\\Annotation"
+        FROM `annotation`;
 
-INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
-SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationBody"
-FROM `annotation_body`;
+        INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+        SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationBody"
+        FROM `annotation_body`;
 
-INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
-SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationTarget"
-FROM `annotation_target`;
+        INSERT INTO `annotation_part` (`id`, `annotation_id`, `part`)
+        SELECT `id`, `annotation_id`, "Annotate\\Entity\\AnnotationTarget"
+        FROM `annotation_target`;
 
-ALTER TABLE `annotation_body` DROP `annotation_id`;
-ALTER TABLE `annotation_target` DROP `annotation_id`;
+        ALTER TABLE `annotation_body` DROP `annotation_id`;
+        ALTER TABLE `annotation_target` DROP `annotation_id`;
 
-UPDATE `resource`
-INNER JOIN `annotation_part` annotation_part
-    ON annotation_part.id = resource.id
-        AND annotation_part.part <> "Annotate\\Entity\\Annotation"
-LEFT JOIN `resource` parent ON parent.id = annotation_part.annotation_id
-SET
-    resource.resource_class_id = parent.resource_class_id,
-    resource.resource_template_id = parent.resource_template_id,
-    resource.is_public = parent.is_public,
-    resource.created = parent.created,
-    resource.modified = parent.modified
-;
+        UPDATE `resource`
+        INNER JOIN `annotation_part` annotation_part
+            ON annotation_part.id = resource.id
+                AND annotation_part.part <> "Annotate\\Entity\\Annotation"
+        LEFT JOIN `resource` parent ON parent.id = annotation_part.annotation_id
+        SET
+            resource.resource_class_id = parent.resource_class_id,
+            resource.resource_template_id = parent.resource_template_id,
+            resource.is_public = parent.is_public,
+            resource.created = parent.created,
+            resource.modified = parent.modified
+        ;
 
-ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042E075FC54 FOREIGN KEY (annotation_id) REFERENCES annotation (id) ON DELETE CASCADE;
-ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
-ALTER TABLE annotation ADD CONSTRAINT FK_2E443EF2BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
-ALTER TABLE annotation_body ADD CONSTRAINT FK_D819DB36BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
-ALTER TABLE annotation_target ADD CONSTRAINT FK_9F53A3D6BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
-SQL;
+        ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042E075FC54 FOREIGN KEY (annotation_id) REFERENCES annotation (id) ON DELETE CASCADE;
+        ALTER TABLE annotation_part ADD CONSTRAINT FK_4ABEA042BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+        ALTER TABLE annotation ADD CONSTRAINT FK_2E443EF2BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+        ALTER TABLE annotation_body ADD CONSTRAINT FK_D819DB36BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+        ALTER TABLE annotation_target ADD CONSTRAINT FK_9F53A3D6BF396750 FOREIGN KEY (id) REFERENCES resource (id) ON DELETE CASCADE;
+        SQL;
     foreach (array_filter(explode(';', $sql)) as $sql) {
         $connection->executeStatement($sql);
     }
@@ -178,8 +178,8 @@ if (version_compare($oldVersion, '3.3', '<')) {
     $messenger->addWarning($message);
 
     $sql = <<<'SQL'
-ALTER TABLE `annotation_part` CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL;
-SQL;
+        ALTER TABLE `annotation_part` CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL;
+        SQL;
     $connection->executeStatement($sql);
 }
 
@@ -196,13 +196,13 @@ if (version_compare($oldVersion, '3.3.3.6', '<')) {
     }
 
     $sql = <<<SQL
-DELETE FROM `site_setting`
-WHERE `id` IN (
-    "annotate_append_item_set_show",
-    "annotate_append_item_show",
-    "annotate_append_media_show"
-)
-SQL;
+        DELETE FROM `site_setting`
+        WHERE `id` IN (
+            "annotate_append_item_set_show",
+            "annotate_append_item_show",
+            "annotate_append_media_show"
+        )
+        SQL;
     $connection->executeStatement($sql);
 
     $messenger->addWarning($message);

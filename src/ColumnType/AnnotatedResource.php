@@ -43,7 +43,12 @@ class AnnotatedResource implements ColumnTypeInterface
     public function renderContent(PhpRenderer $view, AbstractEntityRepresentation $resource, array $data) : ?string
     {
         /** @var \Annotate\Api\Representation\AnnotationRepresentation $resource */
-        $annotatedResource = $resource->primaryTargetSource();
+        // Use value() directly to avoid loadPartValues() N+1.
+        $sourceValue = $resource->value('oa:hasSource');
+        if (!$sourceValue) {
+            return null;
+        }
+        $annotatedResource = $sourceValue->valueResource();
         if (!$annotatedResource) {
             return null;
         }

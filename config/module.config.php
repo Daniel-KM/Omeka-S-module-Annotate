@@ -282,20 +282,19 @@ return [
         ],
     ],
     'js_translate_strings' => [
-        'Search annotations', // @translate
-        'Annotations', // @translate
-        'Web Open Annotation', // @translate
-        'With the class <code>oa:Annotation</code>, it’s important to choose the part of the annotation to which the property is attached:', // @translate
-        'It can be the annotation itself (default), but the body or the target too.', // @translate
-        'For example, to add an indication on a uncertainty of  a highlighted segment, the property should be attached to the target, but the description of a link should be attached to the body.', // @translate
-        'Standard non-ambivalent properties are automatically managed.', // @translate
-        'Annotation', // @translate
-        'Annotation part', // @translate
-        'To comply with Annotation data model, select the part of the annotation this property will belong to.', // @translate
-        'This option cannot be imported/exported currently.', // @translate
         'Annotation', // @translate
         'Annotation body', // @translate
+        'Annotation part', // @translate
         'Annotation target', // @translate
+        'Annotations', // @translate
+        'For example, to add an indication on a uncertainty of  a highlighted segment, the property should be attached to the target, but the description of a link should be attached to the body.', // @translate
+        'It can be the annotation itself (default), but the body or the target too.', // @translate
+        'Search annotations', // @translate
+        'Standard non-ambivalent properties are automatically managed.', // @translate
+        'This option cannot be imported/exported currently.', // @translate
+        'To comply with Annotation data model, select the part of the annotation this property will belong to.', // @translate
+        'Web Open Annotation', // @translate
+        'With the class <code>oa:Annotation</code>, it’s important to choose the part of the annotation to which the property is attached:', // @translate
     ],
     'annotate' => [
         'config' => [
