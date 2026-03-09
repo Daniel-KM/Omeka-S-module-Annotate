@@ -13,8 +13,10 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()
+    ->appendStylesheet($assetUrl('css/common-dialog-admin.css', 'Common'))
     ->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()
+    ->appendFile($assetUrl('js/common-dialog.js', 'Common'), 'text/javascript', ['defer' => 'defer'])
     ->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
@@ -32,7 +34,9 @@ $this->headScript()
 <caption class="annotation-caption">
     <?= $annotation->linkPretty() ?>
     <span class="annotation-created"><?= $annotation->created()->format('Y-m-d H:i:s') ?></span>
-    <span class="annotation-owner"><?= $annotation->owner()->name() ?></span>
+    <?php if ($annotation->owner()): ?>
+    <span class="annotation-owner"><?= $escape($annotation->owner()->name()) ?></span>
+    <?php endif; ?>
     <?php if (!$annotation->isPublic()): ?>
     <span class="o-icon-private" aria-label="Private"></span>
     <?php endif; ?>
@@ -44,15 +48,11 @@ $this->headScript()
     <?php endforeach; ?>
     <ul class="actions">
         <li>
-            <span>
-            <?= $annotation->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation')]) ?>
-            </span>
+            <?= $annotation->link('', 'show', ['class' => 'o-icon- fas fa-hand-point-up', 'title' => $translate('Show annotation')]) ?>
         </li>
         <?php if ($annotation->userIsAllowed('update')): ?>
         <li>
-            <span>
             <?= $annotation->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $translate('Edit annotation')]) ?>
-            </span>
         </li>
         <?php endif; ?>
         <?php if ($annotation->userIsAllowed('delete')): ?>
@@ -114,26 +114,29 @@ $annotationBodies = $annotation->bodies();
         <td class="annotation-popover-parent">
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <div class="rdf-value">
-                <?php if ($value && $value->type() === 'resource'): ?>
-                    <?php $isLong = false; ?>
-                    <?= $value->valueResource()->linkPretty() ?>
-                <?php else: ?>
-                    <?php $text = $value; ?>
-                    <?php $isLong = mb_strlen($text) > 240; ?>
+            <?php if ($value && $value->type() === 'resource'): ?>
+                <?php $isLong = false; ?>
+                <?php $vr = $value->valueResource(); ?>
+                <div class="value resource <?= $vr->resourceName() ?>">
+                    <span class="value-content"><?= $vr->linkPretty() ?></span>
+                </div>
+            <?php else: ?>
+                <?php $text = $value; ?>
+                <?php $isLong = mb_strlen($text) > 240; ?>
+                <?php if ($isLong): ?>
+                <ul class="actions">
+                    <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                        <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
+                    </li>
+                </ul>
+                <?php endif; ?>
+                <div class="rdf-value">
                     <?php if ($isLong): ?>
                         <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </div>
-            <?php if ($isLong): ?>
-            <ul class="actions">
-                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
-                    <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
-                </li>
-            </ul>
+                </div>
             <?php endif; ?>
             <?php endforeach;?>
         </td>
@@ -148,7 +151,7 @@ $annotationBodies = $annotation->bodies();
             <ul class="actions">
                 <li>
                     <span>
-                    <?= $annotationBody->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation body')]) ?>
+                    <?= $annotationBody->link('', 'show', ['class' => 'o-icon- fas fa-hand-point-up', 'title' => $translate('Show annotation body')]) ?>
                     </span>
                 </li>
                 <?php if ($annotation->userIsAllowed('update')): ?>
@@ -203,26 +206,29 @@ foreach ($annotationTargets as $annotationTarget) {
         <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <div class="rdf-value">
-                <?php if ($value && $value->type() === 'resource'): ?>
-                    <?php $isLong = false; ?>
-                    <?= $value->valueResource()->linkPretty() ?>
-                <?php else: ?>
-                    <?php $text = $value; ?>
-                    <?php $isLong = mb_strlen($text) > 240; ?>
+            <?php if ($value && $value->type() === 'resource'): ?>
+                <?php $isLong = false; ?>
+                <?php $vr = $value->valueResource(); ?>
+                <div class="value resource <?= $vr->resourceName() ?>">
+                    <span class="value-content"><?= $vr->linkPretty() ?></span>
+                </div>
+            <?php else: ?>
+                <?php $text = $value; ?>
+                <?php $isLong = mb_strlen($text) > 240; ?>
+                <?php if ($isLong): ?>
+                <ul class="actions">
+                    <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                        <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
+                    </li>
+                </ul>
+                <?php endif; ?>
+                <div class="rdf-value">
                     <?php if ($isLong): ?>
                         <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </div>
-            <?php if ($isLong): ?>
-            <ul class="actions">
-                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
-                    <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
-                </li>
-            </ul>
+                </div>
             <?php endif; ?>
             <?php endforeach; ?>
         </td>
@@ -237,7 +243,7 @@ foreach ($annotationTargets as $annotationTarget) {
             <ul class="actions">
                 <li>
                     <span>
-                    <?= $annotationTarget->link('', 'show', ['class' => 'o-icon-annotation', 'title' => $translate('Show annotation target')]) ?>
+                    <?= $annotationTarget->link('', 'show', ['class' => 'o-icon- fas fa-hand-point-up', 'title' => $translate('Show annotation target')]) ?>
                     </span>
                 </li>
                 <?php if ($annotation->userIsAllowed('update')): ?>

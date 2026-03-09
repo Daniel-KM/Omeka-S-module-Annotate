@@ -121,6 +121,17 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
     }
 
     /**
+     * Get the annotation-level values (not body, not target).
+     *
+     * @return AnnotationPartValues|null
+     */
+    public function annotationPart(): ?AnnotationPartValues
+    {
+        $parts = $this->partsByField('annotation');
+        return $parts ? reset($parts) : null;
+    }
+
+    /**
      * Get the bodies assigned to this annotation.
      *
      * @return AnnotationPartValues[]

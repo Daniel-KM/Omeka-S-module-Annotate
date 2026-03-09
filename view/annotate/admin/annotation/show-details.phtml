@@ -23,10 +23,15 @@ $annotation = $resource;
                 $owner->email(),
                 $this->url('admin/id', ['controller' => 'user', 'action' => 'show', 'id' => $owner->id()])
             ) ?></span>
-            <span class="annotation-name"><?= $owner->name() ?></span>
+            <span class="annotation-name"><?= $escape($owner->name()) ?></span>
             <?php else: ?>
-            <span class="annotation-email annotation-public"><?= $hyperlink($annotation->email(), 'mailto:' . $annotation->email()) ?></span>
-            <span class="annotation-name"><?= $annotation->name() ?></span>
+            <?php $annotator = $annotation->annotator(); ?>
+            <?php if (is_array($annotator) && !empty($annotator['email'])): ?>
+            <span class="annotation-email annotation-public"><?= $hyperlink($escape($annotator['email']), 'mailto:' . rawurlencode($annotator['email'])) ?></span>
+            <?php endif; ?>
+            <?php if (is_array($annotator) && !empty($annotator['name'])): ?>
+            <span class="annotation-name"><?= $escape($annotator['name']) ?></span>
+            <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

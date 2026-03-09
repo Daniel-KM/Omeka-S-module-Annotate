@@ -135,19 +135,11 @@ class AnnotationPartValues
      */
     public function displayValues(): string
     {
-        $escape = $this->services->get('ViewHelperManager')
-            ->get('escapeHtml');
-        $html = '';
-        foreach ($this->valuesByTerm as $term => $values) {
-            $html .= '<div class="property">';
-            $html .= '<h4>' . $escape($term) . '</h4>';
-            foreach ($values as $v) {
-                $html .= '<div class="value">'
-                    . $v->asHtml() . '</div>';
-            }
-            $html .= '</div>';
-        }
-        return $html;
+        $view = $this->services->get('ViewRenderer');
+        return $view->partial(
+            'common/annotation-part-values',
+            ['valuesByTerm' => $this->valuesByTerm]
+        );
     }
 
     /**

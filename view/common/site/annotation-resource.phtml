@@ -6,49 +6,42 @@
  * @var int $totalAnnotations
  */
 
-// TODO Use paginator like linked resources.
-
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
 $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 
 $this->headLink()
-    ->appendStylesheet($assetUrl('vendor/tablesaw/tablesaw.stackonly.css', 'Omeka'))
+    ->appendStylesheet($assetUrl('css/common-dialog.css', 'Common'))
     ->appendStylesheet($assetUrl('css/annotate.css', 'Annotate'));
 $this->headScript()
-    ->appendFile($assetUrl('vendor/tablesaw/tablesaw.stackonly.jquery.js', 'Omeka'), 'text/javascript', ['defer' => 'defer'])
+    ->appendFile($assetUrl('js/common-dialog.js', 'Common'), 'text/javascript', ['defer' => 'defer'])
     ->appendFile($assetUrl('js/annotate.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 ?>
 
 <div id="annotations" class="annotations">
-<h3><?= $translate('Annotations') ?></h3>
+<h3><?= $escape($translate('Annotations')) ?></h3>
 <?php if (empty($annotations)): ?>
-    <div class="no-resources">
-        <p><?= $translate('There are no annotations for this resource.') ?></p>
-    </div>
+    <p><?= $escape($translate('There are no annotations for this resource.')) ?></p>
 <?php else: ?>
     <?php foreach ($annotations as $annotation): ?>
     <?php // A table can have one thead only, but there need to distinct bodies and targets, so there may be three tables instead of nested tables. ?>
-<div class="annotation">
+    <div class="annotation">
 
-<table>
-<caption class="annotation-caption">
-    <?= sprintf($translate('[Annotation #%d]'), $annotation->id()) ?>
-    <span class="annotation-created"><?= $annotation->created()->format('Y-m-d H:i:s') ?></span>
-    <span class="annotation-owner"><?= $annotation->owner()->name() ?></span>
-    <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true]); ?>
-    <?php foreach ($motivatedByValues as $value): ?>
-    <span class="oa-motivated-by">
-        <?= $escape($value) ?>
-    </span>
-    <?php endforeach; ?>
-</caption>
-</table>
+        <h4>
+            <?= sprintf($translate('[Annotation #%d]'), $annotation->id()) ?>
+            <span class="annotation-created"><?= $annotation->created()->format('Y-m-d H:i:s') ?></span>
+            <?php if ($annotation->owner()): ?>
+            <span class="annotation-owner"><?= $escape($annotation->owner()->name()) ?></span>
+            <?php endif; ?>
+            <?php $motivatedByValues = $annotation->value('oa:motivatedBy', ['all' => true]); ?>
+            <?php foreach ($motivatedByValues as $value): ?>
+            <span class="oa-motivated-by"><?= $escape($value) ?></span>
+            <?php endforeach; ?>
+        </h4>
 
 <?php
-// Manage full bodies. If there are embedded body values, there must not be a
-// body [w3c av 2.2.2].
+// Manage full bodies. If there are embedded body values, there must not be a  body [w3c av 2.2.2].
 /** @var \Annotate\Api\Representation\AnnotationPartValues[] $annotationBodies */
 $annotationBodies = $annotation->bodies();
 ?>
@@ -62,9 +55,8 @@ $annotationBodies = $annotation->bodies();
 </thead>
 <tbody>
     <?php
-    // Manage embedded textual body values (when the annotation and the body are
-    // not separated). Implies a string value only [w3c av 2.2.2], and the same
-    // purposes, if any.
+    // Manage embedded textual body values (when the annotation and the body are not separated).
+    // Implies a string value only [w3c av 2.2.2], and the same purposes, if any.
     /** @var \Omeka\Api\Representation\ValueRepresentation[] $bodyValues */
     $bodyValues = $annotation->value('oa:bodyValue', ['type' => 'literal', 'all' => true]);
     $hasPurposeValues = $annotation->value('oa:hasPurpose', ['all' => true]);
@@ -90,28 +82,35 @@ $annotationBodies = $annotation->bodies();
             <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <div class="rdf-value">
-                <?php if ($value && $value->type() === 'resource'): ?>
-                    <?php $isLong = false; ?>
-                    <?= $value->valueResource()->linkPretty() ?>
-                <?php else: ?>
-                    <?php $text = $value; ?>
-                    <?php $isLong = mb_strlen($text) > 240; ?>
+            <?php if ($value && $value->type() === 'resource'): ?>
+                <?php $vr = $value->valueResource(); ?>
+                <div class="value resource <?= $vr->resourceName() ?>">
+                    <span class="value-content"><?= $vr->linkPretty() ?></span>
+                </div>
+            <?php else: ?>
+                <?php $text = $value; ?>
+                <?php $isLong = mb_strlen($text) > 240; ?>
+                <?php if ($isLong): ?>
+                <ul class="actions">
+                    <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                        <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
+                    </li>
+                </ul>
+                <?php endif; ?>
+                <div class="rdf-value">
                     <?php if ($isLong): ?>
-                        <div class="annotation-body-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
+                        <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </div>
-            <?php endforeach;?>
+                </div>
+            <?php endif; ?>
+            <?php endforeach; ?>
         </td>
         <td>
             <?php $values = $annotationBody->value('oa:hasPurpose', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <span class="oa-has-purpose">
-                <?= $escape($value) ?>
-            </span>
+            <span class="oa-has-purpose"><?= $escape($value) ?></span>
             <?php endforeach; ?>
         </td>
     </tr>
@@ -126,12 +125,13 @@ $annotationTargets = $annotation->targets();
 // Check if there are data to display too (there is at least one target, but may be just the source).
 $hasTargetData = false;
 foreach ($annotationTargets as $annotationTarget) {
-    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => '']) || $annotationTarget->value('rdf:type', ['all' => true])) {
+    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => ''])
+        || $annotationTarget->value('rdf:type', ['all' => true])
+    ) {
         $hasTargetData = true;
         break;
     }
 }
-
 ?>
 <?php if ($hasTargetData): ?>
 <table class="tablesaw tablesaw-stack" data-tablesaw-mode="stack">
@@ -147,28 +147,35 @@ foreach ($annotationTargets as $annotationTarget) {
         <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <div class="rdf-value">
-                <?php if ($value && $value->type() === 'resource'): ?>
-                    <?php $isLong = false; ?>
-                    <?= $value->valueResource()->linkPretty() ?>
-                <?php else: ?>
-                    <?php $text = $value; ?>
-                    <?php $isLong = mb_strlen($text) > 240; ?>
+            <?php if ($value && $value->type() === 'resource'): ?>
+                <?php $vr = $value->valueResource(); ?>
+                <div class="value resource <?= $vr->resourceName() ?>">
+                    <span class="value-content"><?= $vr->linkPretty() ?></span>
+                </div>
+            <?php else: ?>
+                <?php $text = $value; ?>
+                <?php $isLong = mb_strlen($text) > 240; ?>
+                <?php if ($isLong): ?>
+                <ul class="actions">
+                    <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                        <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
+                    </li>
+                </ul>
+                <?php endif; ?>
+                <div class="rdf-value">
                     <?php if ($isLong): ?>
-                        <div class="annotation-target-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></div>
+                        <span class="annotation-value-truncated truncate"><?= nl2br($escape(substr($text, 0, 240))) . '…' ?></span>
                     <?php else: ?>
                         <?= nl2br($escape($text)) ?>
                     <?php endif; ?>
-                <?php endif; ?>
-            </div>
+                </div>
+            <?php endif; ?>
             <?php endforeach; ?>
         </td>
         <td>
             <?php $values = $annotationTarget->value('rdf:type', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <span class="rdf-type">
-                <?= $escape($value) ?>
-            </span>
+            <span class="rdf-type"><?= $escape($value) ?></span>
             <?php endforeach; ?>
         </td>
     </tr>
@@ -177,8 +184,7 @@ foreach ($annotationTargets as $annotationTarget) {
 </table>
 <?php endif; ?>
 
-</div>
-<?php endforeach; ?>
-
+    </div>
+    <?php endforeach; ?>
 <?php endif; ?>
 </div>

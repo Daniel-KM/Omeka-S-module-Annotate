@@ -1042,6 +1042,7 @@ class Module extends AbstractModule
         echo '<div id="annotate" class="section annotate">';
         $this->displayResourceAnnotations($event, $resource, false);
         if ($allowed) {
+            echo '<hr>';
             $this->displayForm($event);
         }
         echo '</div>';

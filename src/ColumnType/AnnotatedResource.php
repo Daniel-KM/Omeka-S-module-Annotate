@@ -44,6 +44,13 @@ class AnnotatedResource implements ColumnTypeInterface
     {
         /** @var \Annotate\Api\Representation\AnnotationRepresentation $resource */
         $annotatedResource = $resource->primaryTargetSource();
-        return $annotatedResource ? $annotatedResource->linkPretty() : null;
+        if (!$annotatedResource) {
+            return null;
+        }
+        return '<div class="value resource '
+            . $annotatedResource->resourceName() . '">'
+            . '<span class="value-content">'
+            . $annotatedResource->linkPretty()
+            . '</span></div>';
     }
 }

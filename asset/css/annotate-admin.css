@@ -1,13 +1,13 @@
 @media all {
     header nav .annotations::before,
     .annotations .subhead::before {
-        content:"";
+        content: "";
     }
     .annotations .no-resources:before {
-        content:"";
+        content: "";
     }
     #annotate .no-resources:before {
-        content:"";
+        content: "";
     }
 
     /* Annotation browse */
@@ -15,7 +15,6 @@
         display: inline-block;
         font-style: normal;
         font-variant: normal;
-        /* font-weight: normal; */
         line-height: 1;
         vertical-align: -.125em;
         font-family: "Font Awesome 5 Free";
@@ -58,34 +57,11 @@
     }
     .annotations .annotation-caption {
         background-color: rgba(0,0,0,0.04);
-        font-family: bold;
         padding: 6px;
-        font-family: "Lato", sans-serif;
         font-weight: bold;
         text-align: left;
     }
-    /* Omeka S v3 */
-    body.annotations.show.v3 .annotation-parts .meta-group .meta-group {
-        overflow: hidden;
-        display: -webkit-box;
-        display: flex;
-        -webkit-box-pack: end;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-    }
-    body.annotations.show.v3 .annotation-parts .meta-group .meta-group h4 {
-        width: 22.22222%;
-        vertical-align: top;
-        padding: 6px 0;
-    }
-    body.annotations.show.v3 .annotation-parts .meta-group .value {
-        padding: 6px;
-        margin-bottom: 0;
-        word-wrap: break-word;
-        width: 77.77778%;
-    }
-    /* Omeka S v4 */
-    body.annotations.show:not(.v3) .annotation-parts .meta-group {
+    .annotation-parts .meta-group {
         justify-content: initial;
         flex-wrap: initial;
         padding-bottom: 6px;
@@ -101,10 +77,8 @@
         display: inline-block;
         vertical-align: bottom;
         margin-left: .5em;
-        opacity: .5;
     }
 
-    /* Adapted from core _screen.scss #linked-resources and .linked-resource */
     #annotations table {
         margin-bottom: 0;
     }
@@ -113,11 +87,13 @@
     }
     #annotations caption {
         background-color: rgba(0,0,0,0.04);
-        font-family: bold;
         padding: 6px;
-        font-family: "Lato", sans-serif;
         font-weight: bold;
         text-align: left;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0 6px;
     }
     #annotations caption span:not(.resource-name) {
         font-weight: normal;
@@ -141,20 +117,44 @@
         border-bottom: 1px solid #dfdfdf;
     }
 
-    #annotations .actions {
+    .annotation-popover-content {
+        display: none;
+    }
+    .annotation-popover-parent .actions {
         float: right;
+        margin: 0 0 0 auto;
     }
-    #annotations .o-icon-annotation::before {
-        content: "";
+
+    #annotations .value.resource,
+    #annotations .value.resource .value-content {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
     }
-    #annotations .o-icon-item-set::before {
-        content: "";
+    #annotations .value .resource-name:after {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        display: inline-block;
+        margin-left: .5em;
     }
-    #annotations .o-icon-item::before {
+    #annotations .value.items .resource-name:after {
         content: "";
     }
-    #annotations .o-icon-media::before {
+    #annotations .value.media .resource-name:after {
         content: "";
+    }
+    #annotations .value.item_sets .resource-name:after {
+        content: "";
+    }
+    #annotations .value.annotations .resource-name:after {
+        content: "";
+    }
+
+    #annotations .actions a {
+        color: #a91919;
+    }
+    #annotations .actions a:hover {
+        color: #e11717;
     }
 
     span.oa-motivated-by,
@@ -176,15 +176,6 @@
     caption.annotation-body span.oa-motivated-by {
         font-style: italic;
         font-weight: normal;
-    }
-
-    .annotation .single-action {
-        margin-top: -6px;
-        float: right;
-        opacity: .5;
-    }
-    .annotation .single-action:hover {
-        opacity: 1;
     }
 
     .show .annotations table th:first-of-type,

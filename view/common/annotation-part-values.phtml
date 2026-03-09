@@ -1,0 +1,59 @@
+<?php
+/**
+ * Display values for an annotation part (annotation, body, or target).
+ *
+ * @var \Laminas\View\Renderer\PhpRenderer $this
+ * @var array $valuesByTerm [term => ValueRepresentation[]]
+ */
+
+$plugins = $this->getHelperPluginManager();
+$escape = $plugins->get('escapeHtml');
+$translate = $plugins->get('translate');
+
+$maxLength = 240;
+?>
+<?php if (!empty($valuesByTerm)): ?>
+<dl>
+<?php foreach ($valuesByTerm as $term => $values): ?>
+    <div class="property">
+        <dt><?= $escape($term) ?></dt>
+        <?php foreach ($values as $value): ?>
+        <?php
+        $valueType = $value->type();
+        $isResource = $valueType === 'resource'
+            || strpos($valueType, 'resource') !== false;
+        $class = ['value'];
+        if ($isResource) {
+            $vr = $value->valueResource();
+            if ($vr) {
+                $class[] = 'resource';
+                $class[] = $vr->resourceName();
+            }
+        }
+        $text = (string) $value;
+        $isLong = !$isResource && mb_strlen($text) > $maxLength;
+        if ($isLong) {
+            $class[] = 'annotation-popover-parent';
+        }
+        ?>
+        <dd class="<?= implode(' ', $class) ?>">
+            <?php if ($isLong): ?>
+            <ul class="actions">
+                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                    <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
+                </li>
+            </ul>
+            <?php endif; ?>
+            <span class="value-content">
+            <?php if ($isLong): ?>
+                <?= nl2br($escape(mb_substr($text, 0, $maxLength))) ?>…
+            <?php else: ?>
+                <?= $value->asHtml() ?>
+            <?php endif; ?>
+            </span>
+        </dd>
+        <?php endforeach; ?>
+    </div>
+<?php endforeach; ?>
+</dl>
+<?php endif; ?>

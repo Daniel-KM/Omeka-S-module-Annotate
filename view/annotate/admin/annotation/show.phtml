@@ -23,7 +23,10 @@ $this->htmlElement('body')->appendAttribute('class', 'annotations show');
 </div>
 
 <div id="annotation-metadata" class="active section">
-    <?= $annotation->displayValues() ?>
+    <?php $annotationPart = $annotation->annotationPart(); ?>
+    <?php if ($annotationPart): ?>
+    <?= $annotationPart->displayValues() ?>
+    <?php endif; ?>
 </div>
 
 <hr/>
