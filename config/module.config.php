@@ -56,6 +56,9 @@ return [
         ],
     ],
     'form_elements' => [
+        'invokables' => [
+            Form\SettingsFieldset::class => Form\SettingsFieldset::class,
+        ],
         'factories' => [
             Form\AnnotateForm::class => Service\Form\AnnotateFormFactory::class,
             Form\QuickSearchForm::class => Service\Form\QuickSearchFormFactory::class,
@@ -291,6 +294,9 @@ return [
             'annotate_public_allow_view' => true,
             'annotate_public_allow_annotate' => false,
             'annotate_resource_template_data' => [],
+        ],
+        'settings' => [
+            'annotate_jsonld_old_format' => false,
         ],
     ],
     'csvimport' => [

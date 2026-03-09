@@ -669,6 +669,13 @@ class Module extends AbstractModule
             [$this, 'warnUninstall']
         );
 
+        // Main settings form.
+        $sharedEventManager->attach(
+            \Omeka\Form\SettingForm::class,
+            'form.add_elements',
+            [$this, 'handleMainSettings']
+        );
+
         // Module Csv Import.
         $sharedEventManager->attach(
             \CSVImport\Form\MappingForm::class,
@@ -687,9 +694,9 @@ class Module extends AbstractModule
         }
 
         $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
 
         // Respect the global setting to disable @reverse.
-        $settings = $services->get('Omeka\Settings');
         if ($settings->get('disable_jsonld_reverse')) {
             return;
         }
@@ -701,6 +708,8 @@ class Module extends AbstractModule
             ->search('annotations', [$entityColumnName => $resource->id()], ['responseContent' => 'reference'])
             ->getContent();
         if ($annotations) {
+            $jsonLd = $event->getParam('jsonLd');
+
             // Previous versions used "o:annotation" to link annotations to
             // resources, but it was incorrect because the relation goes from
             // annotation to resource.
@@ -714,19 +723,20 @@ class Module extends AbstractModule
             // that should be used, with oa:hasTarget.
             /** @see https://www.w3.org/TR/json-ld11/ */
 
-            // $jsonLd['o:annotation'] = $annotations;
-            /*
-            $jsonLd['o:annotations'] = [
-                '@id' => $this->getServiceLocator()->get('ViewHelperManager')->get('url')
-                    ->__invoke('api/default', ['resource' => 'annotations'], ['query' => ['resource_id' => $resource->id()], 'force_canonical' => true]),
-            ];
-            */
-
-            $jsonLd = $event->getParam('jsonLd');
-            if (!isset($jsonLd['@reverse'])) {
-                $jsonLd['@reverse'] = [];
+            if ($settings->get('annotate_jsonld_old_format')) {
+                $jsonLd['o:annotation'] = $annotations;
+                /*
+                $jsonLd['o:annotations'] = [
+                    '@id' => $this->getServiceLocator()->get('ViewHelperManager')->get('url')
+                        ->__invoke('api/default', ['resource' => 'annotations'], ['query' => ['resource_id' => $resource->id()], 'force_canonical' => true]),
+                ];
+                */
+            } else {
+                if (!isset($jsonLd['@reverse'])) {
+                    $jsonLd['@reverse'] = [];
+                }
+                $jsonLd['@reverse']['oa:hasTarget'] = $annotations;
             }
-            $jsonLd['@reverse']['oa:hasTarget'] = $annotations;
             $event->setParam('jsonLd', $jsonLd);
         }
     }
