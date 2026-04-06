@@ -333,6 +333,9 @@ return [
         'settings' => [
             'annotate_public_allow_annotate' => false,
             'annotate_jsonld_old_format' => false,
+            'annotate_w3c_creator_fields' => [
+                'name',
+            ],
         ],
         'site_settings' => [
             'annotate_placement' => [],

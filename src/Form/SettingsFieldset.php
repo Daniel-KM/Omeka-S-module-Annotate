@@ -43,6 +43,24 @@ class SettingsFieldset extends Fieldset
                     'id' => 'annotate-jsonld-old-format',
                 ],
             ])
+
+            ->add([
+                'name' => 'annotate_w3c_creator_fields',
+                'type' => Element\MultiCheckbox::class,
+                'options' => [
+                    'element_group' => 'annotate',
+                    'label' => 'W3C endpoint: creator fields', // @translate
+                    'info' => 'Fields to include in the creator object of the /annotations/ endpoint. The user id (API URL) is always included.', // @translate
+                    'value_options' => [
+                        'name' => 'Name', // @translate
+                        'email' => 'Email', // @translate
+                        'email_sha1' => 'Email SHA1 (pseudonymized)', // @translate
+                    ],
+                ],
+                'attributes' => [
+                    'id' => 'annotate-w3c-creator-fields',
+                ],
+            ])
         ;
     }
 }

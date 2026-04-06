@@ -14,8 +14,13 @@ class W3cAnnotationControllerFactory implements FactoryInterface
         $requestedName,
         ?array $options = null
     ) {
-        return new W3cAnnotationController(
-            new W3cAnnotation()
+        $settings = $services->get('Omeka\Settings');
+        $creatorFields = $settings->get(
+            'annotate_w3c_creator_fields', ['name']
         );
+        $serializer = new W3cAnnotation(
+            is_array($creatorFields) ? $creatorFields : ['name']
+        );
+        return new W3cAnnotationController($serializer);
     }
 }

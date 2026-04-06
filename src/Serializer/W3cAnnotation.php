@@ -18,6 +18,18 @@ class W3cAnnotation
     const CONTAINER_TYPE = 'http://www.w3.org/ns/ldp#BasicContainer';
 
     /**
+     * Creator fields to include: "name", "email", "email_sha1".
+     *
+     * @var array
+     */
+    protected $creatorFields;
+
+    public function __construct(array $creatorFields = ['name'])
+    {
+        $this->creatorFields = $creatorFields;
+    }
+
+    /**
      * Serialize one annotation to W3C JSON-LD.
      */
     public function serialize(
@@ -63,14 +75,23 @@ class W3cAnnotation
         }
         $owner = $annotation->owner();
         if ($owner) {
-            $result['creator'] = [
+            $creator = [
                 'type' => 'Person',
-                'name' => $owner->name(),
+                'id' => $owner->apiUrl(),
             ];
             $email = $owner->email();
-            if ($email) {
-                $result['creator']['email'] = $email;
+            foreach ($this->creatorFields as $field) {
+                if ($field === 'name') {
+                    $creator['name'] = $owner->name();
+                } elseif ($field === 'email' && $email) {
+                    $creator['email']
+                        = 'mailto:' . $email;
+                } elseif ($field === 'email_sha1' && $email) {
+                    $creator['email_sha1']
+                        = sha1('mailto:' . $email);
+                }
             }
+            $result['creator'] = $creator;
         }
 
         // Bodies.
