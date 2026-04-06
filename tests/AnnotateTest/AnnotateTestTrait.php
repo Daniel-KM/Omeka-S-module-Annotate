@@ -272,6 +272,28 @@ trait AnnotateTestTrait
 
         $em->flush();
 
+        // Clear identity map so the representation reads fresh
+        // data including annotation_value entries.
+        $id = $annotation->getId();
+        $em->clear();
+
+        // Re-set the authenticated identity so subsequent
+        // operations find a managed User entity.
+        $auth = $this->getServiceLocator()
+            ->get('Omeka\AuthenticationService');
+        $identity = $auth->getIdentity();
+        if ($identity) {
+            $user = $em->find(
+                \Omeka\Entity\User::class,
+                $identity->getId()
+            );
+            $auth->getStorage()->write($user);
+        }
+
+        $annotation = $em->find(
+            \Annotate\Entity\Annotation::class, $id
+        );
+
         $adapter = $this->getAnnotationAdapter();
         return $adapter->getRepresentation($annotation);
     }
