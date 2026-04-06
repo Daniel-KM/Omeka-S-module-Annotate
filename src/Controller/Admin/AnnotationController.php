@@ -21,11 +21,16 @@ class AnnotationController extends AbstractActionController
      */
     protected function safeRedirect(): ?string
     {
-        $redirect = $this->safeRedirect();
-        if ($redirect && !str_starts_with($redirect, '/')) {
+        $redirect = $this->params()->fromQuery('redirect');
+        if (!$redirect) {
             return null;
         }
-        return $redirect;
+        if (str_starts_with($redirect, '/')) {
+            return $redirect;
+        }
+        $base = $this->getRequest()->getUri()->getScheme() . '://'
+            . $this->getRequest()->getUri()->getHost();
+        return str_starts_with($redirect, $base . '/') ? $redirect : null;
     }
 
     public function searchAction()
