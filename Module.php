@@ -293,6 +293,11 @@ class Module extends AbstractModule
                 null,
                 [Controller\Site\AnnotationController::class],
                 ['index', 'browse', 'show', 'search', 'flag']
+            )
+            ->allow(
+                null,
+                [Controller\W3cAnnotationController::class],
+                ['get', 'options']
             );
     }
 
@@ -316,6 +321,11 @@ class Module extends AbstractModule
                 null,
                 [Controller\Site\AnnotationController::class],
                 ['index', 'browse', 'show', 'search', 'add', 'flag']
+            )
+            ->allow(
+                null,
+                [Controller\W3cAnnotationController::class],
+                ['get', 'post', 'options']
             );
     }
 
@@ -421,6 +431,10 @@ class Module extends AbstractModule
                 $annotators,
                 [Controller\Site\AnnotationController::class]
             )
+            ->allow(
+                $annotators,
+                [Controller\W3cAnnotationController::class]
+            )
         ;
         // Unset guest in admin.
         $guestId = array_search('guest', $annotators);
@@ -469,6 +483,10 @@ class Module extends AbstractModule
             ->allow(
                 $approbators,
                 [Controller\Site\AnnotationController::class]
+            )
+            ->allow(
+                $approbators,
+                [Controller\W3cAnnotationController::class]
             )
             ->allow(
                 $approbators,
@@ -522,6 +540,7 @@ class Module extends AbstractModule
                     Api\Adapter\AnnotationAdapter::class,
                     Controller\Site\AnnotationController::class,
                     Controller\Admin\AnnotationController::class,
+                    Controller\W3cAnnotationController::class,
                 ]
             );
     }

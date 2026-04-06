@@ -71,6 +71,9 @@ return [
             Controller\Admin\AnnotationController::class => Controller\Admin\AnnotationController::class,
             Controller\Site\AnnotationController::class => Controller\Site\AnnotationController::class,
         ],
+        'factories' => [
+            Controller\W3cAnnotationController::class => Service\Controller\W3cAnnotationControllerFactory::class,
+        ],
     ],
     'resource_page_block_layouts' => [
         'invokables' => [
@@ -156,6 +159,33 @@ return [
     ],
     'router' => [
         'routes' => [
+            // W3C Web Annotation Protocol endpoint.
+            'w3c-annotations' => [
+                'type' => \Laminas\Router\Http\Literal::class,
+                'options' => [
+                    'route' => '/annotations',
+                    'defaults' => [
+                        '__KEYAUTH__' => true,
+                        'controller' => Controller\W3cAnnotationController::class,
+                        'action' => 'get',
+                    ],
+                ],
+                'may_terminate' => true,
+                'child_routes' => [
+                    'id' => [
+                        'type' => \Laminas\Router\Http\Segment::class,
+                        'options' => [
+                            'route' => '/:id',
+                            'constraints' => [
+                                'id' => '\d+',
+                            ],
+                            'defaults' => [
+                                'action' => 'get',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
             'site' => [
                 'child_routes' => [
                     'annotate' => [
