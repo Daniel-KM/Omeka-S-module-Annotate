@@ -254,6 +254,7 @@ class W3cAnnotationController extends AbstractActionController
 
             $httpResponse = $this->getResponse();
             $this->addProtocolHeaders($httpResponse, false);
+            $this->addContainerEtag($httpResponse, $total);
             $httpResponse->getHeaders()
                 ->addHeaderLine(
                     'Content-Type',
@@ -284,6 +285,7 @@ class W3cAnnotationController extends AbstractActionController
 
         $httpResponse = $this->getResponse();
         $this->addProtocolHeaders($httpResponse, false);
+        $this->addContainerEtag($httpResponse, $total, $page);
         $httpResponse->getHeaders()
             ->addHeaderLine(
                 'Content-Type',
@@ -323,11 +325,33 @@ class W3cAnnotationController extends AbstractActionController
         }
         $headers->addHeaderLine('Link', $links);
         $headers->addHeaderLine('Vary', 'Accept');
+
+        $allow = $isItem
+            ? 'GET, HEAD, OPTIONS, PUT, DELETE'
+            : 'GET, HEAD, OPTIONS, POST';
+        $headers->addHeaderLine('Allow', $allow);
+
+        if (!$isItem) {
+            $headers->addHeaderLine(
+                'Accept-Post',
+                'application/ld+json, application/json'
+            );
+        }
     }
 
     protected function addEtag($response, $annotation): void
     {
         $etag = $this->computeEtag($annotation);
+        $response->getHeaders()
+            ->addHeaderLine('ETag', '"' . $etag . '"');
+    }
+
+    protected function addContainerEtag(
+        $response,
+        int $total,
+        int $page = -1
+    ): void {
+        $etag = md5('container-' . $total . '-' . $page);
         $response->getHeaders()
             ->addHeaderLine('ETag', '"' . $etag . '"');
     }
