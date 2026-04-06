@@ -17,6 +17,7 @@ use Common\Stdlib\PsrMessage;
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
 $plugins = $services->get('ControllerPluginManager');
+$url = $plugins->get('url');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
@@ -33,8 +34,8 @@ if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActi
     throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $translate('Missing requirement. Unable to upgrade.')); // @translate
 }
 
-// All old upgrade steps are wrapped in try/catch to allow
-// upgrading from any old version directly to 3.4.12+.
+// All old upgrade steps are wrapped in try/catch to allow upgrading from any
+// old version directly to 3.4.12+.
 
 if (version_compare($oldVersion, '3.0.1', '<')) {
     try {
@@ -418,4 +419,257 @@ if (version_compare($oldVersion, '3.4.12', '<')) {
             'Annotations migrated successfully to single-entity model.' // @translate
         );
     }
+}
+
+if (version_compare($oldVersion, '3.4.13', '<')) {
+    $settings->set('annotate_w3c_creator_fields', ['name']);
+    $settings->delete('annotate_public_allow_view');
+
+    // Convert Glyphicon icon names to Font Awesome 5 in oa:styledBy values.
+    $glyphiconMap = [
+        'glyphicon-map-marker' => 'fa-map-marker-alt',
+        'glyphicon-adjust' => 'fa-adjust',
+        'glyphicon-align-justify' => 'fa-align-justify',
+        'glyphicon-plus' => 'fa-plus',
+        'glyphicon-arrow-right' => 'fa-arrow-right',
+        'glyphicon-bullhorn' => 'fa-bullhorn',
+        'glyphicon-search' => 'fa-search',
+        'glyphicon-record' => 'fa-dot-circle',
+        'glyphicon-camera' => 'fa-camera',
+        'glyphicon-asterisk' => 'fa-asterisk',
+        'glyphicon-star' => 'fa-star',
+        'glyphicon-heart' => 'fa-heart',
+        'glyphicon-home' => 'fa-home',
+        'glyphicon-flag' => 'fa-flag',
+        'glyphicon-bookmark' => 'fa-bookmark',
+        'glyphicon-tag' => 'fa-tag',
+        'glyphicon-tags' => 'fa-tags',
+        'glyphicon-eye-open' => 'fa-eye',
+        'glyphicon-pencil' => 'fa-pencil-alt',
+        'glyphicon-lock' => 'fa-lock',
+        'glyphicon-cog' => 'fa-cog',
+        'glyphicon-envelope' => 'fa-envelope',
+        'glyphicon-music' => 'fa-music',
+        'glyphicon-film' => 'fa-film',
+        'glyphicon-print' => 'fa-print',
+        'glyphicon-trash' => 'fa-trash-alt',
+        'glyphicon-cloud' => 'fa-cloud',
+        'glyphicon-globe' => 'fa-globe-americas',
+        'glyphicon-road' => 'fa-road',
+        'glyphicon-user' => 'fa-user',
+    ];
+    foreach ($glyphiconMap as $old => $new) {
+        $connection->executeStatement(
+            "UPDATE value SET value = REPLACE(value, ?, ?) WHERE value LIKE CONCAT('%', ?, '%')",
+            [$old, $new, $old]
+        );
+    }
+
+    // Remove rdf:type values from annotations: redundant with structural @type.
+    $rdfTypePropertyId = $connection->executeQuery(
+        <<<'SQL'
+            SELECT p.id FROM property p
+            JOIN vocabulary v ON v.id = p.vocabulary_id
+            WHERE v.prefix = 'rdf' AND p.local_name = 'type'
+            SQL
+    )->fetchOne();
+
+    if ($rdfTypePropertyId) {
+        try {
+            $connection->executeStatement(
+                <<<'SQL'
+                    DELETE av FROM annotation_value av
+                    JOIN value val ON val.id = av.id
+                    JOIN resource r ON r.id = val.resource_id
+                    WHERE val.property_id = ?
+                    AND r.resource_type = 'Annotate\\Entity\\Annotation'
+                    SQL,
+                [$rdfTypePropertyId]
+            );
+        } catch (\Throwable $e) {
+            // Table annotation_value may not exist on very old upgrades.
+        }
+        $connection->executeStatement(
+            <<<'SQL'
+                DELETE val FROM value val
+                JOIN resource r ON r.id = val.resource_id
+                WHERE val.property_id = ?
+                AND r.resource_type = 'Annotate\\Entity\\Annotation'
+                SQL,
+            [$rdfTypePropertyId]
+        );
+        $messenger->addSuccess(
+            'Removed redundant rdf:type values from annotations.' // @translate
+        );
+    }
+
+    // Remove the CustomVocab "Annotation Target rdf:type".
+    try {
+        $connection->executeStatement(
+            "DELETE FROM custom_vocab WHERE label = 'Annotation Target rdf:type'"
+        );
+    } catch (\Throwable $e) {
+    }
+
+    // Merge custom vocabs "Annotation oa:motivatedBy" and "Annotation Body
+    // oa:hasPurpose" into a single "Annotation Motivation". According to the
+    // W3C Annotation Data Model, both properties share the same controlled
+    // vocabulary, so two vocabs are redundant.
+
+    $canonicalTerms = [
+        'assessing',
+        'bookmarking',
+        'classifying',
+        'commenting',
+        'describing',
+        'editing',
+        'highlighting',
+        'identifying',
+        'linking',
+        'moderating',
+        'questioning',
+        'replying',
+        'tagging',
+    ];
+    $newLabel = 'Annotation Motivation';
+    $oldMotivatedByLabel = 'Annotation oa:motivatedBy';
+    $oldHasPurposeLabel = 'Annotation Body oa:hasPurpose';
+
+    // Since CustomVocab module v2, terms are stored as a JSON array; older
+    // versions used a newline-separated string. Support both formats.
+    $readTerms = function (string $label) use ($connection): ?array {
+        try {
+            $row = $connection->executeQuery(
+                'SELECT id, terms FROM custom_vocab WHERE label = ?',
+                [$label]
+            )->fetchAssociative();
+        } catch (\Throwable $e) {
+            return null;
+        }
+        if (!$row) {
+            return null;
+        }
+        $raw = (string) $row['terms'];
+        $trim = ltrim($raw);
+        $isJson = $trim !== '' && $trim[0] === '[';
+        if ($isJson) {
+            $decoded = json_decode($raw, true);
+            $terms = is_array($decoded) ? $decoded : [];
+        } else {
+            $terms = explode("\n", $raw);
+        }
+        $terms = array_values(array_filter(array_map('trim', $terms), 'strlen'));
+        return ['id' => (int) $row['id'], 'terms' => $terms, 'isJson' => $isJson];
+    };
+
+    $encodeTerms = function (array $terms, bool $isJson): string {
+        return $isJson
+            ? json_encode(array_values($terms), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            : implode("\n", $terms);
+    };
+
+    $motivatedBy = $readTerms($oldMotivatedByLabel);
+    $hasPurpose = $readTerms($oldHasPurposeLabel);
+
+    // If a previous upgrade already renamed the vocab, nothing to do.
+    $alreadyMerged = $readTerms($newLabel);
+    if ($alreadyMerged && !$motivatedBy && !$hasPurpose) {
+        // Ensure canonical terms are still present.
+        $merged = array_values(array_unique(
+            array_merge($alreadyMerged['terms'], $canonicalTerms)
+        ));
+        if (count($merged) !== count($alreadyMerged['terms'])) {
+            $connection->executeStatement(
+                'UPDATE custom_vocab SET terms = ? WHERE id = ?',
+                [$encodeTerms($merged, $alreadyMerged['isJson']), $alreadyMerged['id']]
+            );
+        }
+    } elseif ($motivatedBy) {
+        // Merge: union of existing + W3C canonical terms (restore missing
+        // canonical terms and preserve any local additions).
+        $existing = $motivatedBy['terms'];
+        if ($hasPurpose) {
+            $existing = array_merge($existing, $hasPurpose['terms']);
+        }
+        $merged = array_values(array_unique(
+            array_merge($existing, $canonicalTerms)
+        ));
+
+        // Rename and update terms on the kept vocab.
+        $connection->executeStatement(
+            'UPDATE custom_vocab SET label = ?, terms = ? WHERE id = ?',
+            [$newLabel, $encodeTerms($merged, $motivatedBy['isJson']), $motivatedBy['id']]
+        );
+
+        // Migrate all references from the hasPurpose vocab to the kept one.
+        if ($hasPurpose && $hasPurpose['id'] !== $motivatedBy['id']) {
+            $oldType = 'customvocab:' . $hasPurpose['id'];
+            $newType = 'customvocab:' . $motivatedBy['id'];
+
+            // Values: data_type is a plain column.
+            $connection->executeStatement(
+                'UPDATE value SET type = ? WHERE type = ?',
+                [$newType, $oldType]
+            );
+
+            // Resource template properties: data_type is a json array, the
+            // value is always surrounded by double quotes so REPLACE is safe.
+            $connection->executeStatement(
+                'UPDATE resource_template_property SET data_type = REPLACE(data_type, ?, ?) WHERE data_type LIKE ?',
+                ['"' . $oldType . '"', '"' . $newType . '"', '%"' . $oldType . '"%']
+            );
+
+            // Remove the hasPurpose vocab.
+            $connection->executeStatement(
+                'DELETE FROM custom_vocab WHERE id = ?',
+                [$hasPurpose['id']]
+            );
+        }
+
+        $messenger->addSuccess(new PsrMessage(
+            'Custom vocabs "{old_1}" and "{old_2}" were merged into "{new}".', // @translate
+            [
+                'old_1' => $oldMotivatedByLabel,
+                'old_2' => $oldHasPurposeLabel,
+                'new' => $newLabel,
+            ]
+        ));
+    }
+
+    // Refresh all custom vocabs from the module json files: this adds any new
+    // canonical term (e.g. "application/geo+json" on Annotation Target
+    // dcterms:format) without removing local additions.
+    $installResources = $this->getManageModuleAndResources();
+    foreach (glob(dirname(__DIR__) . '/custom-vocabs/*.json') as $filepath) {
+        try {
+            $installResources->updateCustomVocab($filepath);
+        } catch (\Throwable $e) {
+            try {
+                $installResources->createCustomVocab($filepath);
+            } catch (\Throwable $e) {
+            }
+        }
+    }
+
+    $messenger->addSuccess(
+        'The module was fully rewritten, fixed and improved. Fixes include the json-ld representation of annotations, that uses now "@reverse", and a single Motivation custom vocabulary.' // @translate
+    );
+
+
+    $messenger->addSuccess((new PsrMessage(
+        'A w3c endpoint that fully supports the {link}Web Annotation Protocol{link_end} is available at {link_2}/annotations/{link_end}.', // @translate
+        [
+            'link' => '<a href="https://www.w3.org/TR/annotation-protocol/" target="_blank" rel="noopener">',
+            'link_2' => sprintf('<a href="%s" target="_blank">', rtrim($url->fromRoute('top'), '/') . '/annotations/'),
+            'link_end' => '</a>',
+        ]
+    ))->setEscapeHtml(false));
+
+    $messenger->addWarning(
+        'Some settings were added to manage GDPR for the display of the authors of annotations.' // @translate
+    );
+
+    $messenger->addWarning(
+        'The recommendation is fully implemented, but the normalization of annotations from other modules (cartography, rating, comment…) will be done in next version.' // @translate
+    );
 }
