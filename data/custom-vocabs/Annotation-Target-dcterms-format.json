@@ -2,6 +2,7 @@
     "o:label": "Annotation Target dcterms:format",
     "o:lang": "",
     "o:terms": [
+        "application/geo+json",
         "application/json",
         "application/xml",
         "image/svg+xml",
