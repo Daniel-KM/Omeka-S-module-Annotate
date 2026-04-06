@@ -750,10 +750,16 @@ class Module extends AbstractModule
         // call to avoid N+1 queries on browse pages.
         if ($this->annotationsByResource === null) {
             $this->annotationsByResource = [];
-            $conn = $services->get('Omeka\EntityManager')
-                ->getConnection();
-            $easyMeta = $services->get('Common\EasyMeta');
-            $hasSourceId = $easyMeta->propertyId('oa:hasSource');
+            // Best-effort: skip silently if the connection was
+            // lost (e.g. during a long-running job).
+            try {
+                $conn = $services->get('Omeka\EntityManager')
+                    ->getConnection();
+                $easyMeta = $services->get('Common\EasyMeta');
+                $hasSourceId = $easyMeta->propertyId('oa:hasSource');
+            } catch (\Doctrine\DBAL\Exception\ConnectionLost $e) {
+                return;
+            }
             if ($hasSourceId) {
                 $serverUrl = $services->get('ViewHelperManager')
                     ->get('serverUrl');
@@ -761,18 +767,22 @@ class Module extends AbstractModule
                     ->get('basePath');
                 $baseApiUrl = $serverUrl('') . $basePath()
                     . '/api/annotations/';
-                $rows = $conn->executeQuery(<<<'SQL'
-                    SELECT v.value_resource_id AS resource_id,
-                        a.id AS annotation_id
-                    FROM annotation a
-                    INNER JOIN value v
-                        ON v.resource_id = a.id
-                    WHERE v.property_id = ?
-                        AND v.value_resource_id IS NOT NULL
-                    ORDER BY a.id
-                    SQL,
-                    [$hasSourceId]
-                )->fetchAllAssociative();
+                try {
+                    $rows = $conn->executeQuery(<<<'SQL'
+                        SELECT v.value_resource_id AS resource_id,
+                            a.id AS annotation_id
+                        FROM annotation a
+                        INNER JOIN value v
+                            ON v.resource_id = a.id
+                        WHERE v.property_id = ?
+                            AND v.value_resource_id IS NOT NULL
+                        ORDER BY a.id
+                        SQL,
+                        [$hasSourceId]
+                    )->fetchAllAssociative();
+                } catch (\Doctrine\DBAL\Exception\ConnectionLost $e) {
+                    return;
+                }
                 foreach ($rows as $row) {
                     $aId = (int) $row['annotation_id'];
                     $rId = (int) $row['resource_id'];
