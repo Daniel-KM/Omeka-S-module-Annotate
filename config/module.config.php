@@ -331,7 +331,6 @@ return [
             'annotate_resource_template_data' => [],
         ],
         'settings' => [
-            'annotate_public_allow_view' => false,
             'annotate_public_allow_annotate' => false,
             'annotate_jsonld_old_format' => false,
         ],

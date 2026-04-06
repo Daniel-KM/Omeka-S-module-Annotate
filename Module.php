@@ -245,17 +245,13 @@ class Module extends AbstractModule
             ->addRole(Acl::ROLE_ANNOTATOR)
             ->addRoleLabel(Acl::ROLE_ANNOTATOR, 'Annotator'); // @translate
 
+        // Public annotations are visible via is_public on each resource.
+        $this->addRulesForVisitors($acl);
+
         $settings = $services->get('Omeka\Settings');
-        // TODO Set rights to false when the visibility filter will be ready.
-        // TODO Check if public can annotate and flag, and read annotations and own ones.
-        $publicViewAnnotate = $settings->get('annotate_public_allow_view', true);
-        if ($publicViewAnnotate) {
-            $publicAllowAnnotate = $settings->get('annotate_public_allow_annotate', false);
-            if ($publicAllowAnnotate) {
-                $this->addRulesForVisitorAnnotators($acl);
-            } else {
-                $this->addRulesForVisitors($acl);
-            }
+        $publicAllowAnnotate = $settings->get('annotate_public_allow_annotate', false);
+        if ($publicAllowAnnotate) {
+            $this->addRulesForVisitorAnnotators($acl);
         }
 
         // Identified users can annotate. Reviewer and above can approve. Admins
