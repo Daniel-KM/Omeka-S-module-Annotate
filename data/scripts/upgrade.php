@@ -43,7 +43,7 @@ if (version_compare($oldVersion, '3.0.1', '<')) {
             SET terms = REPLACE(terms, 'text/wkt', 'application/wkt')
             SQL
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // Table or column may not exist.
     }
 
@@ -54,7 +54,7 @@ if (version_compare($oldVersion, '3.0.1', '<')) {
             WHERE value = 'text/wkt';
             SQL
             );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // Table or column may not exist.
     }
 }
@@ -67,7 +67,7 @@ if (version_compare($oldVersion, '3.0.3', '<')) {
             WHERE `label` = 'Annotation oa:Motivation'
             SQL
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
     }
     try {
         $label = 'Annotation Target rdf:type';
@@ -87,7 +87,7 @@ if (version_compare($oldVersion, '3.0.3', '<')) {
             'o:label' => $label,
             'o:terms' => implode(PHP_EOL, $terms),
         ], [], ['isPartial' => true]);
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // CustomVocab module may not be installed yet.
     }
 }
@@ -115,7 +115,7 @@ if (version_compare($oldVersion, '3.0.5', '<')) {
             SQL,
             [$oaHasSelectorId, $rdfValueId]
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // Tables annotation_body/annotation_target may not exist.
     }
 }
@@ -193,7 +193,7 @@ if (version_compare($oldVersion, '3.0.6', '<')) {
     foreach ($sqls as $sql) {
         try {
             $connection->executeStatement($sql);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
         }
     }
 }
@@ -205,7 +205,7 @@ if (version_compare($oldVersion, '3.3', '<')) {
             CHANGE `annotation_id` `annotation_id` INT DEFAULT NULL
             SQL
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
     }
 }
 
@@ -220,14 +220,14 @@ if (version_compare($oldVersion, '3.3.3.6', '<')) {
             )
             SQL
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
     }
 }
 
 if (version_compare($oldVersion, '3.4.3.8', '<')) {
     try {
         require_once __DIR__ . '/upgrade_vocabulary.php';
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
     }
 }
 
@@ -273,7 +273,7 @@ if (version_compare($oldVersion, '3.4.12', '<')) {
             WHERE value = 'text/wkt';
             SQL
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // Table or column may not exist.
     }
 
@@ -319,7 +319,7 @@ if (version_compare($oldVersion, '3.4.12', '<')) {
                     ON DELETE CASCADE
                 SQL
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
         }
         try {
             $connection->executeStatement(<<<'SQL'
@@ -329,7 +329,7 @@ if (version_compare($oldVersion, '3.4.12', '<')) {
                     ON DELETE CASCADE
                 SQL
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
         }
 
         // Step 2: Populate annotation_value from annotation_part.
