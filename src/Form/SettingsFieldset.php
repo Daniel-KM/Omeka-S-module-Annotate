@@ -20,6 +20,29 @@ class SettingsFieldset extends Fieldset
             ->setOption('element_groups', $this->elementGroups)
 
             ->add([
+                'name' => 'annotate_public_allow_view',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'annotate',
+                    'label' => 'Allow public to view annotations', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'annotate-public-allow-view',
+                ],
+            ])
+            ->add([
+                'name' => 'annotate_public_allow_annotate',
+                'type' => Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'annotate',
+                    'label' => 'Allow public to annotate', // @translate
+                    'info' => 'Allow anonymous visitors to create annotations.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'annotate-public-allow-annotate',
+                ],
+            ])
+            ->add([
                 'name' => 'annotate_jsonld_old_format',
                 'type' => Element\Checkbox::class,
                 'options' => [
