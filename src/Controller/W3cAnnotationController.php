@@ -391,8 +391,8 @@ class W3cAnnotationController extends AbstractActionController
             $motivations = (array) $w3c['motivation'];
             foreach ($motivations as $m) {
                 $data['oa:motivatedBy'][] = [
-                    'type' => 'customvocab:Annotation oa:motivatedBy',
-                    'o:label' => 'Annotation oa:motivatedBy',
+                    'type' => 'customvocab:Annotation Motivation',
+                    'o:label' => 'Annotation Motivation',
                     '@value' => str_contains($m, ':')
                         ? $m : 'oa:' . $m,
                 ];
@@ -420,8 +420,8 @@ class W3cAnnotationController extends AbstractActionController
                     }
                     if (isset($body['purpose'])) {
                         $part['oa:hasPurpose'][] = [
-                            'type' => 'customvocab:Annotation Body oa:hasPurpose',
-                            'o:label' => 'Annotation Body oa:hasPurpose',
+                            'type' => 'customvocab:Annotation Motivation',
+                            'o:label' => 'Annotation Motivation',
                             '@value' => str_contains(
                                 $body['purpose'], ':'
                             )

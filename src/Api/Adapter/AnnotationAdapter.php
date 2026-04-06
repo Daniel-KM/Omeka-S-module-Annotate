@@ -467,15 +467,17 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         $data['o:resource_template'] = $resourceTemplateId ? ['o:id' => $resourceTemplateId] : null;
         $data['o:resource_class'] = $resourceClassId ? ['o:id' => $resourceClassId] : null;
 
-        $dataTypeCustomVocabMotivatedBy = $easyMeta->dataTypeName('Annotation oa:motivatedBy');
-        $dataTypeCustomVocabHasPurpose = $easyMeta->dataTypeName('Annotation Body oa:hasPurpose');
+        // Since v3.4.14, motivatedBy and hasPurpose share the same custom vocab
+        // "Annotation Motivation" (W3C: both use the oa:Motivation controlled
+        // vocabulary).
+        $dataTypeCustomVocabMotivation = $easyMeta->dataTypeName('Annotation Motivation');
         $hasNumericDataTypes = $easyMeta->dataTypeName('numeric:integer') ? true : false;
 
         $motivation = $data['oa:motivatedBy'][0]['@value'] ?? 'undefined';
         $data['oa:motivatedBy'] = [[
             '@value' => $motivation,
             'property_id' => $easyMeta->propertyId('oa:motivatedBy'),
-            'type' => $dataTypeCustomVocabMotivatedBy ?: 'literal',
+            'type' => $dataTypeCustomVocabMotivation ?: 'literal',
         ]];
 
         $entityManager = $this->getEntityManager();

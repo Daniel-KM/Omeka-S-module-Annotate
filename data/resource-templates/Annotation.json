@@ -8,7 +8,7 @@
             "data_types": [
                 {
                     "name": "customvocab:1",
-                    "label": "Annotation oa:motivatedBy"
+                    "label": "Annotation Motivation"
                 }
             ],
             "vocabulary_namespace_uri": "http://www.w3.org/ns/oa#",
@@ -37,8 +37,8 @@
             "o:is_required": false,
             "data_types": [
                 {
-                    "name": "customvocab:2",
-                    "label": "Annotation Body oa:hasPurpose"
+                    "name": "customvocab:1",
+                    "label": "Annotation Motivation"
                 }
             ],
             "vocabulary_namespace_uri": "http://www.w3.org/ns/oa#",

@@ -146,9 +146,7 @@ class Module extends AbstractModule
         }
 
         if (!empty($_POST['remove-custom-vocab'])) {
-            $customVocab = 'Annotation oa:motivatedBy';
-            $installResources->removeCustomVocab($customVocab);
-            $customVocab = 'Annotation Body oa:hasPurpose';
+            $customVocab = 'Annotation Motivation';
             $installResources->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target dcterms:format';
             $installResources->removeCustomVocab($customVocab);
@@ -172,7 +170,7 @@ class Module extends AbstractModule
         $t = $services->get('MvcTranslator');
 
         $vocabularyLabels = 'RDF Concepts" / "Web Annotation Ontology';
-        $customVocabs = 'Annotation oa:motivatedBy" / "oa:hasPurpose" / "dcterms:format';
+        $customVocabs = 'Annotation Motivation" / "Annotation Target dcterms:format';
         $resourceTemplates = 'Annotation';
 
         $html = '<p>';

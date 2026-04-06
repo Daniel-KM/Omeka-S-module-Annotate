@@ -43,7 +43,7 @@ class AnnotateForm extends Form
 
         // Motivated by.
         /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
-        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation oa:motivatedBy'])->getContent();
+        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Motivation'])->getContent();
         $terms = $customVocab->terms();
         $terms = array_combine($terms, $terms);
         $this
@@ -123,9 +123,10 @@ class AnnotateForm extends Form
 
     protected function initAnnotationBody(): void
     {
-        // Has purpose (only for the body, so different of motivated by).
+        // Has purpose shares the same controlled vocabulary as motivatedBy
+        // (W3C: both use oa:Motivation values).
         /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
-        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Body oa:hasPurpose'])->getContent();
+        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Motivation'])->getContent();
         $terms = $customVocab->terms();
         $terms = array_combine($terms, $terms);
 
