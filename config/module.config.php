@@ -161,6 +161,20 @@ return [
         'routes' => [
             // W3C Web Annotation Protocol endpoint.
             'w3c-annotations' => [
+                'type' => \Laminas\Router\Http\Segment::class,
+                'options' => [
+                    'route' => '/annotations/[:id]',
+                    'constraints' => [
+                        'id' => '\d+',
+                    ],
+                    'defaults' => [
+                        '__KEYAUTH__' => true,
+                        'controller' => Controller\W3cAnnotationController::class,
+                        'action' => 'get',
+                    ],
+                ],
+            ],
+            'w3c-annotations-noslash' => [
                 'type' => \Laminas\Router\Http\Literal::class,
                 'options' => [
                     'route' => '/annotations',
@@ -168,21 +182,6 @@ return [
                         '__KEYAUTH__' => true,
                         'controller' => Controller\W3cAnnotationController::class,
                         'action' => 'get',
-                    ],
-                ],
-                'may_terminate' => true,
-                'child_routes' => [
-                    'id' => [
-                        'type' => \Laminas\Router\Http\Segment::class,
-                        'options' => [
-                            'route' => '/:id',
-                            'constraints' => [
-                                'id' => '\d+',
-                            ],
-                            'defaults' => [
-                                'action' => 'get',
-                            ],
-                        ],
                     ],
                 ],
             ],

@@ -26,7 +26,7 @@ class W3cAnnotation
     ): array {
         $result = [
             '@context' => self::CONTEXT,
-            'id' => $baseUrl . '/' . $annotation->id(),
+            'id' => rtrim($baseUrl, '/') . '/' . $annotation->id(),
             'type' => 'Annotation',
         ];
 

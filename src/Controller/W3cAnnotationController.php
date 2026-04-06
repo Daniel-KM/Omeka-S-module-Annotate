@@ -506,11 +506,11 @@ class W3cAnnotationController extends AbstractActionController
     protected function containerUrl(): string
     {
         $url = $this->url();
-        return $url->fromRoute(
+        return rtrim($url->fromRoute(
             'w3c-annotations',
             [],
             ['force_canonical' => true]
-        );
+        ), '/') . '/';
     }
 
     /**
