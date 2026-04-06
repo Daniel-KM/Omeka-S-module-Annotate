@@ -11,6 +11,7 @@ class SiteSettingsFieldset extends Fieldset
 
     protected $elementGroups = [
         'annotate' => 'Annotate', // @translate
+        'themes_old' => 'Old themes', // @translate
     ];
 
     public function init(): void
@@ -23,7 +24,7 @@ class SiteSettingsFieldset extends Fieldset
                 'name' => 'annotate_placement',
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
-                    'element_group' => 'annotate',
+                    'element_group' => 'themes_old',
                     'label' => 'Display annotations (old themes)', // @translate
                     'info' => 'If unchecked, use the resource page block "Annotations" instead.', // @translate
                     'value_options' => [
