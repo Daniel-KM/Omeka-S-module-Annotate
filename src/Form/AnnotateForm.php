@@ -116,7 +116,7 @@ class AnnotateForm extends Form
                 'required' => false,
             ])
             ->add([
-                'name' => 'oa:hasTarget[0][rdf:type][0][@value]',
+                'name' => 'selector_type',
                 'required' => false,
             ]);
     }
@@ -195,12 +195,18 @@ class AnnotateForm extends Form
 
     protected function initAnnotationTarget(): void
     {
-        // Note, oa:hasSelector references an entity that have a rdf:type and a
-        // rdf:value, or it is a simple uri.
-        /** @var \CustomVocab\Api\Representation\CustomVocabRepresentation $customVocab */
-        $customVocab = $this->api->read('custom_vocabs', ['label' => 'Annotation Target rdf:type'])->getContent();
-        $terms = $customVocab->terms();
-        $terms = array_combine($terms, $terms);
+        // Selector type: field used in ui only, not stored as useless rdf:type.
+        $selectorTypes = [
+            'o:Item' => 'Item',
+            'o:ItemSet' => 'Item set',
+            'o:Media' => 'Media',
+            'oa:CssSelector' => 'CSS selector',
+            'oa:FragmentSelector' => 'Fragment selector',
+            'oa:SvgSelector' => 'SVG selector',
+            'oa:TextPositionSelector' => 'Text position selector',
+            'oa:TextQuoteSelector' => 'Text quote selector',
+            'oa:XPathSelector' => 'XPath selector',
+        ];
 
         // The source of the annotation target is the current resource.
         $this
@@ -223,31 +229,16 @@ class AnnotateForm extends Form
 
             ->add([
                 'type' => Element\Select::class,
-                'name' => 'oa:hasTarget[0][rdf:type][0][@value]',
+                'name' => 'selector_type',
                 'options' => [
                     'label' => 'Type of the target selector', // @translate
-                    'value_options' => $terms,
+                    'value_options' => $selectorTypes,
                     'empty_option' => 'Select the selector type to specify a subpart of the resource, if needed…', // @translate
                 ],
                 'attributes' => [
-                    'rows' => 15,
-                    'id' => 'oa:motivatedBy[0][@value]',
+                    'id' => 'selector-type',
                     'class' => 'chosen-select',
                     'data-placeholder' => 'Select the selector type to specify a subpart of the resource, if needed…', // @translate
-                ],
-            ])
-            ->add([
-                'type' => Element\Hidden::class,
-                'name' => 'oa:hasTarget[0][rdf:type][0][property_id]',
-                'attributes' => [
-                    'value' => $this->easyMeta->propertyId('rdf:type'),
-                ],
-            ])
-            ->add([
-                'type' => Element\Hidden::class,
-                'name' => 'oa:hasTarget[0][rdf:type][0][type]',
-                'attributes' => [
-                    'value' => 'customvocab:' . $customVocab->id(),
                 ],
             ])
 

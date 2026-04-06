@@ -67,7 +67,7 @@ return [
     'foaf:mbox_sha1sum' => 'oa:Annotation',
     'foaf:name' => 'oa:Annotation',
     'foaf:nick' => 'oa:Annotation',
-    'rdf:type' => ['oa:hasBody', 'oa:hasTarget', 'oa:Annotation'],
+    // rdf:type removed: redundant with structural @type.
     'rdf:value' => ['oa:hasBody', 'oa:hasTarget'],
     'rdfs:label' => 'oa:hasTarget',
     'schema:accessibilityFeature' => 'oa:hasTarget',

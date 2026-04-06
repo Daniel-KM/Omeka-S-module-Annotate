@@ -77,21 +77,6 @@
             "label": "hasSource"
         },
         {
-            "o:alternate_label": "Rdf type",
-            "o:alternate_comment": "The type of the selector, if any.",
-            "o:is_required": false,
-             "data_types": [
-                {
-                    "name": "customvocab:4",
-                    "label": "Annotation Target rdf:type"
-                }
-            ],
-            "vocabulary_namespace_uri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-            "vocabulary_label": "The RDF Concepts Vocabulary (RDF)",
-            "local_name": "type",
-            "label": "type"
-        },
-        {
             "o:alternate_label": null,
             "o:alternate_comment": "The format of the selector, if any",
             "o:is_required": false,

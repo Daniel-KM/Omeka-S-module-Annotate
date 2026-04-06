@@ -236,7 +236,7 @@ class AnnotationController extends AbstractActionController
                 ];
             }
 
-            $targetSelectorType = $data['oa:hasTarget'][0]['rdf:type'][0]['@value'];
+            $targetSelectorType = $data['selector_type'] ?? '';
             if (in_array($targetSelectorType, ['o:Item', 'o:ItemSet', 'o:Media'])) {
                 $resourceType = $resource->getResourceJsonLdType();
                 if ($targetSelectorType === $resourceType) {

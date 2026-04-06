@@ -125,9 +125,7 @@ $annotationTargets = $annotation->targets();
 // Check if there are data to display too (there is at least one target, but may be just the source).
 $hasTargetData = false;
 foreach ($annotationTargets as $annotationTarget) {
-    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => ''])
-        || $annotationTarget->value('rdf:type', ['all' => true])
-    ) {
+    if ($annotationTarget->value('rdf:value', ['all' => false, 'default' => ''])) {
         $hasTargetData = true;
         break;
     }
@@ -172,12 +170,7 @@ foreach ($annotationTargets as $annotationTarget) {
             <?php endif; ?>
             <?php endforeach; ?>
         </td>
-        <td>
-            <?php $values = $annotationTarget->value('rdf:type', ['all' => true]); ?>
-            <?php foreach ($values as $value): ?>
-            <span class="rdf-type"><?= $escape($value) ?></span>
-            <?php endforeach; ?>
-        </td>
+        <td></td>
     </tr>
     <?php endforeach; ?>
 </tbody>

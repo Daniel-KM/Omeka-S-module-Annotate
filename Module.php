@@ -108,7 +108,6 @@ class Module extends AbstractModule
                 'oa:hasPurpose' => 'oa:hasBody',
                 'dcterms:language' => 'oa:hasBody',
                 'oa:hasSource' => 'oa:hasTarget',
-                'rdf:type' => 'oa:hasTarget',
                 'dcterms:format' => 'oa:hasTarget',
             ],
         ];
@@ -153,8 +152,6 @@ class Module extends AbstractModule
             $installResources->removeCustomVocab($customVocab);
             $customVocab = 'Annotation Target dcterms:format';
             $installResources->removeCustomVocab($customVocab);
-            $customVocab = 'Annotation Target rdf:type';
-            $installResources->removeCustomVocab($customVocab);
         }
 
         if (!empty($_POST['remove-template'])) {
@@ -175,7 +172,7 @@ class Module extends AbstractModule
         $t = $services->get('MvcTranslator');
 
         $vocabularyLabels = 'RDF Concepts" / "Web Annotation Ontology';
-        $customVocabs = 'Annotation oa:motivatedBy" / "oa:hasPurpose" / "rdf:type" / "dcterms:format';
+        $customVocabs = 'Annotation oa:motivatedBy" / "oa:hasPurpose" / "dcterms:format';
         $resourceTemplates = 'Annotation';
 
         $html = '<p>';
