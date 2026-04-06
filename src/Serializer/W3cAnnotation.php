@@ -34,6 +34,9 @@ class W3cAnnotation
         $part = $annotation->annotationPart();
         if ($part) {
             foreach ($part->values() as $term => $values) {
+                if ($this->isFilteredTerm($term)) {
+                    continue;
+                }
                 $key = $this->w3cKey($term);
                 $result[$key] = $this->serializeValues($values);
             }
@@ -169,6 +172,9 @@ class W3cAnnotation
         }
 
         foreach ($values as $term => $termValues) {
+            if ($this->isFilteredTerm($term)) {
+                continue;
+            }
             $key = $this->w3cKey($term);
             // rdf:value already handled above for TextualBody.
             if ($field === 'body' && $term === 'rdf:value') {
@@ -322,5 +328,25 @@ class W3cAnnotation
         return str_starts_with($motivation, 'oa:')
             ? substr($motivation, 3)
             : $motivation;
+    }
+
+    /**
+     * Terms to filter out from W3C output (Omeka internals).
+     *
+     * - rdf:type: Omeka internal resource type (o:Item, etc.), redundant with
+     *   structural @type.
+     * - oa:styleClass: used by Cartography for Leaflet CSS classes, not
+     *   W3C-conformant styling.
+     * - oa:styledBy: used by Cartography for Leaflet JSON styling data, not
+     *   W3C-conformant CSS.
+     */
+    protected function isFilteredTerm(string $term): bool
+    {
+        static $filtered = [
+            'rdf:type' => true,
+            'oa:styleClass' => true,
+            'oa:styledBy' => true,
+        ];
+        return isset($filtered[$term]);
     }
 }
