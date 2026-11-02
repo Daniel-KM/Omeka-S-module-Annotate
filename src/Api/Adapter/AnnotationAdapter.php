@@ -549,8 +549,17 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // Since v3.4.14, motivatedBy and hasPurpose share the same custom vocab
         // "Annotation Motivation" (W3C: both use the oa:Motivation controlled
         // vocabulary).
-        $dataTypeCustomVocabMotivation = $easyMeta->dataTypeName('Annotation Motivation');
-        $hasNumericDataTypes = $easyMeta->dataTypeName('numeric:integer') ? true : false;
+        // The custom vocab is found by its label. The data types are checked
+        // directly, since getting all data types requires many queries.
+        $dataTypeManager = $this->getServiceLocator()->get('Omeka\DataTypeManager');
+        $customVocabId = (int) $this->getEntityManager()->getConnection()->fetchOne(
+            'SELECT `id` FROM `custom_vocab` WHERE `label` = ?',
+            ['Annotation Motivation']
+        );
+        $dataTypeCustomVocabMotivation = $customVocabId && $dataTypeManager->has('customvocab:' . $customVocabId)
+            ? 'customvocab:' . $customVocabId
+            : null;
+        $hasNumericDataTypes = $dataTypeManager->has('numeric:integer');
 
         $motivation = $data['oa:motivatedBy'][0]['@value'] ?? 'undefined';
         $data['oa:motivatedBy'] = [[
