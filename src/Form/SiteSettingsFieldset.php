@@ -25,7 +25,7 @@ class SiteSettingsFieldset extends Fieldset
                 'type' => CommonElement\OptionalMultiCheckbox::class,
                 'options' => [
                     'element_group' => 'themes_old',
-                    'label' => 'Display annotations (old themes)', // @translate
+                    'label' => 'Display annotations', // @translate
                     'info' => 'If unchecked, use the resource page block "Annotations" instead.', // @translate
                     'value_options' => [
                         'after/items' => 'Item show', // @translate

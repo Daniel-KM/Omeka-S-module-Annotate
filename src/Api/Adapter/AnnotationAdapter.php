@@ -35,7 +35,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     public function getAnnotables(): array
     {
         $annotables = $this->annotables;
-        if (class_exists(\DigitalObject\Entity\DigitalObject::class)) {
+        if (class_exists('DigitalObject\Module', false)) {
             $annotables[] = \DigitalObject\Entity\DigitalObject::class;
         }
         return $annotables;
@@ -707,7 +707,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     foreach ($hasBody['oa:hasPurpose'] as &$value) {
                         $value = [
                             '@value' => (string) $value['@value'],
-                            'type' => $dataTypeCustomVocabHasPurpose ?: 'literal',
+                            'type' => $dataTypeCustomVocabMotivation ?: 'literal',
                         ];
                     }
                     unset($value);

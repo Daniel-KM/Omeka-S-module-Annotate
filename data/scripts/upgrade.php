@@ -660,7 +660,7 @@ if (version_compare($oldVersion, '3.4.13', '<')) {
         'A w3c endpoint that fully supports the {link}Web Annotation Protocol{link_end} is available at {link_2}/annotations/{link_end}.', // @translate
         [
             'link' => '<a href="https://www.w3.org/TR/annotation-protocol/" target="_blank" rel="noopener">',
-            'link_2' => sprintf('<a href="%s" target="_blank">', rtrim($url->fromRoute('top'), '/') . '/annotations/'),
+            'link_2' => sprintf('<a href="%s" target="_blank" rel="noopener noreferrer">', htmlspecialchars(rtrim($url->fromRoute('top'), '/') . '/annotations/')),
             'link_end' => '</a>',
         ]
     ))->setEscapeHtml(false));
