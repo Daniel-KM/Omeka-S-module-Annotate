@@ -222,7 +222,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                     \Doctrine\ORM\Query\Expr\Join::WITH,
                     $expr->andX(
                         $expr->eq($valuesAlias . '.property', $propertyId),
-                        $expr->eq($valuesAlias . '.type', $this->createNamedParameter($qb, 'resource')),
+                        // No check of the data type: a linked resource may be
+                        // "resource", "resource:item", etc.
                         $expr->in(
                             $valuesAlias . '.valueResource',
                             $subDql
