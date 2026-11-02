@@ -415,10 +415,10 @@ class AnnotationController extends AbstractActionController
         }
 
         $data = $this->params()->fromPost();
-        if (isset($data['values_json']) && $valuesJson = json_decode($data['values_json'], true)) {
-            $data = array_merge_recursive($data, $valuesJson);
-            unset($data['values_json']);
-        }
+        // The values are posted as a single json field to bypass the limit of
+        // php max_input_vars. The core plugin throws an exception when the
+        // field is missing, so a client-side issue cannot empty the values.
+        $data = $this->mergeValuesJson($data);
 
         $form->setData($data);
         if (!$form->isValid()) {
