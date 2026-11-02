@@ -513,16 +513,13 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         if ($request->getOperation() === Request::CREATE
             && !$this->getServiceLocator()->get('Omeka\AuthenticationService')->hasIdentity()
         ) {
-            // Anonymous annotations are created only via the forms of the site,
-            // that are protected against spams.
+            // A client of the api or of the w3c endpoint cannot solve a
+            // proof-of-work: only the server-side checks apply to it.
             $status = $this->getServiceLocator()->get('Omeka\Status');
-            if ($status->isApiRequest()
-                || (method_exists($status, 'isKeyauthRequest') && $status->isKeyauthRequest())
-            ) {
-                $errorStore->addError('o:owner', 'Anonymous annotations cannot be created via the api.'); // @translate
-                return;
-            }
-            $this->validateSpam($data, (array) $request->getOption('spamguard', []), $errorStore);
+            // The flags of the status are cached, so they may be wrong when read
+            // before the routing: check the route.
+            $isApi = $status->getRouteParam('__API__') || $status->getRouteParam('__KEYAUTH__');
+            $this->validateSpam($data, (array) $request->getOption('spamguard', []), !$isApi, $errorStore);
         }
     }
 
@@ -530,11 +527,11 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
      * Check an anonymous annotation with the module SpamGuard, when active.
      *
      * The check is done here, because the anonymous annotations may be created
-     * from any form of the site, for example by the module Cartography. The form
-     * passes the option "spamguard" with the token and the nonce of the
-     * proof-of-work, and the honeypot if any.
+     * from the api, the w3c endpoint or any form of the site, for example by
+     * the module Cartography. A form passes the option "spamguard" with the
+     * token and the nonce of the proof-of-work, and the honeypot if any.
      */
-    protected function validateSpam(array $data, array $spamGuard, ErrorStore $errorStore): void
+    protected function validateSpam(array $data, array $spamGuard, bool $requireProof, ErrorStore $errorStore): void
     {
         $services = $this->getServiceLocator();
         if (!$services->has('SpamGuard\SpamChecker')) {
@@ -574,6 +571,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 'source' => 'annotate',
                 'powSalt' => $token['salt'] ?? null,
                 'powNonce' => isset($spamGuard['nonce']) ? (string) $spamGuard['nonce'] : null,
+                'powSkip' => !$requireProof,
             ]
         );
         $result = $services->get('SpamGuard\SpamChecker')->check($context);

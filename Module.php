@@ -316,7 +316,7 @@ class Module extends AbstractModule
             ->allow(
                 null,
                 [Controller\W3cAnnotationController::class],
-                ['get', 'options']
+                ['get', 'post', 'options']
             );
     }
 
