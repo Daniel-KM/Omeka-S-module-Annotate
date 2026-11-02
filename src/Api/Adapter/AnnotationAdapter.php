@@ -509,6 +509,66 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         } elseif (!is_array($data['oa:hasTarget'])) {
             $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
         }
+
+        if ($request->getOperation() === Request::CREATE) {
+            $this->validateSpam($data, $errorStore);
+        }
+    }
+
+    /**
+     * Check an anonymous annotation with the module SpamGuard, when active.
+     *
+     * The check is done here, because the annotations may be created from the
+     * site, the w3c endpoint, the api or other modules (Cartography). There is
+     * no form, so no honeypot or proof of work.
+     */
+    protected function validateSpam(array $data, ErrorStore $errorStore): void
+    {
+        $services = $this->getServiceLocator();
+        if (!$services->has('SpamGuard\SpamChecker')
+            || $services->get('Omeka\AuthenticationService')->hasIdentity()
+        ) {
+            return;
+        }
+
+        $texts = [];
+        foreach (array_merge($data['oa:bodyValue'] ?? [], $data['oa:hasBody'] ?? []) as $body) {
+            if (!is_array($body)) {
+                continue;
+            }
+            foreach (isset($body['@value']) ? [$body] : ($body['rdf:value'] ?? []) as $value) {
+                if (isset($value['@value']) && is_scalar($value['@value'])) {
+                    $texts[] = (string) $value['@value'];
+                }
+                if (!empty($value['@id']) && is_string($value['@id'])) {
+                    $texts[] = $value['@id'];
+                }
+            }
+        }
+
+        $ip = (new \Laminas\Http\PhpEnvironment\RemoteAddress())->getIpAddress();
+        $context = new \SpamGuard\SpamContext(
+            filter_var($ip, FILTER_VALIDATE_IP) ? $ip : null,
+            (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
+            null,
+            null,
+            implode("\n", $texts) ?: null,
+            null,
+            null,
+            null,
+            [
+                'source' => 'annotate',
+                'powSkip' => true,
+            ]
+        );
+        $result = $services->get('SpamGuard\SpamChecker')->check($context);
+        if ($result->isSpam()) {
+            $services->get('Omeka\Logger')->warn(
+                'An annotation was detected as spam ({reasons}).', // @translate
+                ['reasons' => $result->reasonList()]
+            );
+            $errorStore->addError('o:resource', 'The annotation was rejected as spam.'); // @translate
+        }
     }
 
     /**
