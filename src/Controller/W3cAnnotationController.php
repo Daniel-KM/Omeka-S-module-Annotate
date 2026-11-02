@@ -5,6 +5,8 @@ namespace Annotate\Controller;
 use Annotate\Serializer\W3cAnnotation;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\Mvc\MvcEvent;
+use Omeka\Api\Exception\ValidationException;
+use Omeka\Api\Manager as ApiManager;
 
 /**
  * W3C Web Annotation Protocol endpoint.
@@ -18,9 +20,18 @@ class W3cAnnotationController extends AbstractActionController
      */
     protected $serializer;
 
-    public function __construct(W3cAnnotation $serializer)
+    /**
+     * The api manager is used directly, because the controller plugin returns
+     * false on a validation error, without the messages.
+     *
+     * @var ApiManager
+     */
+    protected $api;
+
+    public function __construct(W3cAnnotation $serializer, ApiManager $api)
     {
         $this->serializer = $serializer;
+        $this->api = $api;
     }
 
     /**
@@ -98,9 +109,10 @@ class W3cAnnotationController extends AbstractActionController
 
         $data = $this->w3cToOmeka($body);
 
-        $api = $this->api();
         try {
-            $response = $api->create('annotations', $data);
+            $response = $this->api->create('annotations', $data);
+        } catch (ValidationException $e) {
+            return $this->errorResponse(400, $this->validationMessage($e));
         } catch (\Exception $e) {
             return $this->errorResponse(400, $e->getMessage());
         }
@@ -160,9 +172,10 @@ class W3cAnnotationController extends AbstractActionController
 
         $data = $this->w3cToOmeka($body);
 
-        $api = $this->api();
         try {
-            $response = $api->update('annotations', (int) $id, $data);
+            $response = $this->api->update('annotations', (int) $id, $data);
+        } catch (ValidationException $e) {
+            return $this->errorResponse(400, $this->validationMessage($e));
         } catch (\Exception $e) {
             return $this->errorResponse(400, $e->getMessage());
         }
@@ -193,9 +206,8 @@ class W3cAnnotationController extends AbstractActionController
             return $this->errorResponse(400, 'Missing annotation id.');
         }
 
-        $api = $this->api();
         try {
-            $api->delete('annotations', (int) $id);
+            $this->api->delete('annotations', (int) $id);
         } catch (\Exception $e) {
             return $this->errorResponse(404, $e->getMessage());
         }
@@ -555,6 +567,19 @@ class W3cAnnotationController extends AbstractActionController
                 );
         }
         return $response;
+    }
+
+    /**
+     * Get the translated messages of a validation error as a single string.
+     */
+    protected function validationMessage(ValidationException $e): string
+    {
+        $messages = [];
+        $errors = $e->getErrorStore()->getErrors();
+        array_walk_recursive($errors, function ($message) use (&$messages): void {
+            $messages[] = $this->translate((string) $message);
+        });
+        return implode(' ', $messages) ?: $e->getMessage();
     }
 
     protected function errorResponse(int $status, string $message)

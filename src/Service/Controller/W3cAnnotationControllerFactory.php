@@ -21,6 +21,6 @@ class W3cAnnotationControllerFactory implements FactoryInterface
         $serializer = new W3cAnnotation(
             is_array($creatorFields) ? $creatorFields : ['name']
         );
-        return new W3cAnnotationController($serializer);
+        return new W3cAnnotationController($serializer, $services->get('Omeka\ApiManager'));
     }
 }
