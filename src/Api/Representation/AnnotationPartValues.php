@@ -56,17 +56,29 @@ class AnnotationPartValues
      * Get values for a term, compatible with
      * AbstractResourceEntityRepresentation::value().
      *
+     * The options "type" and "lang" filter the values like the core.
+     *
      * @return mixed
      */
     public function value(string $term, array $options = [])
     {
         $all = $options['all'] ?? false;
-        $default = $options['default'] ?? null;
+        $default = $options['default'] ?? ($all ? [] : null);
         $values = $this->valuesByTerm[$term] ?? [];
-        if ($all) {
-            return $values;
+
+        if (!empty($options['type'])) {
+            $types = array_fill_keys(array_map('strtolower', (array) $options['type']), true);
+            $values = array_filter($values, fn ($v) => isset($types[strtolower($v->type())]));
         }
-        return $values ? reset($values) : $default;
+        if (!empty($options['lang'])) {
+            $langs = array_fill_keys(array_map('strtolower', (array) $options['lang']), true);
+            $values = array_filter($values, fn ($v) => isset($langs[strtolower((string) $v->lang())]));
+        }
+
+        if (!$values) {
+            return $default;
+        }
+        return $all ? array_values($values) : reset($values);
     }
 
     /**
