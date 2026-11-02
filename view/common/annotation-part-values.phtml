@@ -8,6 +8,7 @@
 
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
+$easyMeta = $plugins->get('easyMeta')();
 $translate = $plugins->get('translate');
 
 $maxLength = 240;
@@ -20,8 +21,7 @@ $maxLength = 240;
         <?php foreach ($values as $value): ?>
         <?php
         $valueType = $value->type();
-        $isResource = $valueType === 'resource'
-            || strpos($valueType, 'resource') !== false;
+        $isResource = $easyMeta->dataTypeMain($valueType) === 'resource';
         $class = ['value'];
         if ($isResource) {
             $vr = $value->valueResource();

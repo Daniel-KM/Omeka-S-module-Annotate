@@ -8,6 +8,7 @@
 
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
+$easyMeta = $plugins->get('easyMeta')();
 $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 
@@ -82,7 +83,7 @@ $annotationBodies = $annotation->bodies();
             <?php // There must be one value in a Textual Body [w3c am 3.2.4]. ?>
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <?php if ($value && $value->type() === 'resource'): ?>
+            <?php if ($value && $easyMeta->dataTypeMain($value->type()) === 'resource'): ?>
                 <?php $vr = $value->valueResource(); ?>
                 <div class="value resource <?= $vr->resourceName() ?>">
                     <span class="value-content"><?= $vr->linkPretty() ?></span>
@@ -145,7 +146,7 @@ foreach ($annotationTargets as $annotationTarget) {
         <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <?php if ($value && $value->type() === 'resource'): ?>
+            <?php if ($value && $easyMeta->dataTypeMain($value->type()) === 'resource'): ?>
                 <?php $vr = $value->valueResource(); ?>
                 <div class="value resource <?= $vr->resourceName() ?>">
                     <span class="value-content"><?= $vr->linkPretty() ?></span>

@@ -8,6 +8,7 @@
 
 $plugins = $this->getHelperPluginManager();
 $escape = $plugins->get('escapeHtml');
+$easyMeta = $plugins->get('easyMeta')();
 $assetUrl = $plugins->get('assetUrl');
 $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
@@ -114,7 +115,7 @@ $annotationBodies = $annotation->bodies();
         <td class="annotation-popover-parent">
             <?php $values = $annotationBody->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <?php if ($value && $value->type() === 'resource'): ?>
+            <?php if ($value && $easyMeta->dataTypeMain($value->type()) === 'resource'): ?>
                 <?php $isLong = false; ?>
                 <?php $vr = $value->valueResource(); ?>
                 <div class="value resource <?= $vr->resourceName() ?>">
@@ -206,7 +207,7 @@ foreach ($annotationTargets as $annotationTarget) {
         <td class="annotation-popover-parent">
             <?php $values = $annotationTarget->value('rdf:value', ['all' => true]); ?>
             <?php foreach ($values as $value): ?>
-            <?php if ($value && $value->type() === 'resource'): ?>
+            <?php if ($value && $easyMeta->dataTypeMain($value->type()) === 'resource'): ?>
                 <?php $isLong = false; ?>
                 <?php $vr = $value->valueResource(); ?>
                 <div class="value resource <?= $vr->resourceName() ?>">
