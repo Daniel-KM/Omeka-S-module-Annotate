@@ -522,18 +522,19 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 $errorStore->addError('o:owner', 'Anonymous annotations cannot be created via the api.'); // @translate
                 return;
             }
-            $this->validateSpam($data, $errorStore);
+            $this->validateSpam($data, (array) $request->getOption('spamguard', []), $errorStore);
         }
     }
 
     /**
      * Check an anonymous annotation with the module SpamGuard, when active.
      *
-     * The check is done here, because the annotations may be created from the
-     * site, the w3c endpoint, the api or other modules (Cartography). There is
-     * no form, so no honeypot or proof of work.
+     * The check is done here, because the anonymous annotations may be created
+     * from any form of the site, for example by the module Cartography. The form
+     * passes the option "spamguard" with the token and the nonce of the
+     * proof-of-work, and the honeypot if any.
      */
-    protected function validateSpam(array $data, ErrorStore $errorStore): void
+    protected function validateSpam(array $data, array $spamGuard, ErrorStore $errorStore): void
     {
         $services = $this->getServiceLocator();
         if (!$services->has('SpamGuard\SpamChecker')) {
@@ -555,19 +556,24 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             }
         }
 
-        $ip = (new \Laminas\Http\PhpEnvironment\RemoteAddress())->getIpAddress();
+        $ip = (string) (new \Laminas\Http\PhpEnvironment\RemoteAddress())->getIpAddress();
+        // A missing or invalid token makes the proof-of-work fail.
+        $token = $services->has('SpamGuard\FormToken')
+            ? $services->get('SpamGuard\FormToken')->read($spamGuard['token'] ?? null, $ip)
+            : null;
         $context = new \SpamGuard\SpamContext(
             filter_var($ip, FILTER_VALIDATE_IP) ? $ip : null,
             (string) ($_SERVER['HTTP_USER_AGENT'] ?? ''),
             null,
             null,
             implode("\n", $texts) ?: null,
-            null,
-            null,
+            $token['issuedAt'] ?? null,
+            isset($spamGuard['honeypot']) ? (string) $spamGuard['honeypot'] : null,
             null,
             [
                 'source' => 'annotate',
-                'powSkip' => true,
+                'powSalt' => $token['salt'] ?? null,
+                'powNonce' => isset($spamGuard['nonce']) ? (string) $spamGuard['nonce'] : null,
             ]
         );
         $result = $services->get('SpamGuard\SpamChecker')->check($context);
