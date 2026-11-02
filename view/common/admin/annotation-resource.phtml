@@ -29,7 +29,7 @@ $this->headScript()
         <?php // TODO Add a display of the annotation in popover. ?>
         <?php if ($annotation->userIsAllowed('update')): ?>
         <span class="single-action">
-        <?= $annotation->link('', 'edit', ['class' => 'o-icon-edit']) ?>
+        <?= $annotation->link('', 'edit', ['class' => 'o-icon-edit', 'title' => $this->translate('Edit'), 'aria-label' => $this->translate('Edit')]) ?>
         </span>
         <?php endif; ?>
     </div>

@@ -2,7 +2,7 @@
 $translate = $this->plugin('translate');
 ?>
 <div id='mapping-module' class='sidebar flags'>
-    <a href='#' class='sidebar-close o-icon-close'><span class='screen-reader-text'><?= $translate('Close Me') ?></span></a>
+    <a href='#' class='sidebar-close o-icon-close' title='<?= $translate('Close') ?>' aria-label='<?= $translate('Close') ?>'><span class='screen-reader-text'><?= $translate('Close Me') ?></span></a>
     <h3><?= $translate('Mapping Info') ?></h3>
     <ul>
         <li data-flag='column-map-lat' data-flag-type='mapping-module'>

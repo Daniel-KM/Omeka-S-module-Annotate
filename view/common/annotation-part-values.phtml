@@ -39,7 +39,7 @@ $maxLength = 240;
         <dd class="<?= implode(' ', $class) ?>">
             <?php if ($isLong): ?>
             <ul class="actions">
-                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>"></button>
+                <li><button type="button" class="o-icon- fa fa-expand popover" title="<?= $escape($translate('Full value')) ?>" aria-label="<?= $escape($translate('Full value')) ?>"></button>
                     <div class="annotation-popover-content annotation-popover-current"><?= nl2br($escape($text)) ?></div>
                 </li>
             </ul>
