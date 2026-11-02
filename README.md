@@ -41,12 +41,12 @@ record of a resource but the web annotations are full resources about other
 resources.
 
 Of course, in some cases, the values are the same, for example the record may
-contain a Dublin Core Abstract that may have the same content than an assessment
-done by a specific user. And value annotations can be added to the abstract to
-indicate the user who wrote it, the date, etc., like for the web annotation. The
-fact that Omeka is semantic allows to record anything about anything. But
-precisely, in that case, the record strays from the logic of a record for a
-described entity.
+contain a Dublin Core Abstract that may have the same content than an
+[assessment] done by a specific user. And value annotations can be added to the
+abstract to indicate the user who wrote it, the date, etc., like for the web
+annotation. The fact that Omeka is semantic allows to record anything about
+anything. But precisely, in that case, the record strays from the logic of a
+record for a described entity.
 
 Besides, web annotations have some specific points not available as simple value
 annotations. They are designed to be recursive: it is possible to annotate an
@@ -79,25 +79,24 @@ Installation
 
 See general end user documentation for [installing a module].
 
-The module [Common] must be installed first.
+The modules [Common] and [Custom Vocab] must be installed first.
 
-The module uses external libraries, so use the release zip to install it, or
-use and init the source.
+When the option is enabled, anonymous visitors can annotate via the forms of the
+site, for example the ones of the module [Cartography], the w3c endpoint and the
+api. The optional module [Spam Guard] checks these anonymous annotations and
+rejects the spams. The forms require a proof-of-work solved by the browser, that
+a client of the w3c endpoint or of the api cannot solve, so only the checks done
+by the server apply to them.
 
 * From the zip
 
-Download the last release [Annotate.zip] from the list of releases (the
-master does not contain the dependency), and uncompress it in the `modules`
-directory.
+Download the last release [Annotate.zip] from the list of releases, and
+uncompress it in the `modules` directory.
 
 * From the source and for development
 
 If the module was installed from the source, rename the name of the folder of
-the module to `Annotate`, go to the root of the module, and run:
-
-```sh
-composer install --no-dev
-```
+the module to `Annotate`.
 
 
 Quick start
@@ -150,15 +149,15 @@ the same: `bookmarking`, `commenting`, `tagging`, `assessing`, `describing`,
 
 The two answer different questions and may differ. Examples:
 
-| Action                                  | Motivation    | Purpose (on body)               |
-|-----------------------------------------|---------------|---------------------------------|
-| Bookmark a page with a label `readme`   | `bookmarking` | `tagging`                       |
-| Bookmark a page with a short note       | `bookmarking` | `describing`                    |
-| Comment a passage                       | `commenting`  | `commenting` (or omitted)       |
-| Reply to an existing comment            | `commenting`  | `replying`                      |
-| Suggest an edit on a value              | `editing`     | `editing` (or omitted)          |
-| Assess with the symbolic value `good`   | `assessing`   | `classifying`                   |
-| Assess with a numeric rating `4/5`      | `assessing`   | omitted (numeric needs no role) |
+| Action                                | Motivation    | Purpose (on body)               |
+|---------------------------------------|---------------|---------------------------------|
+| Bookmark a page with a label `readme` | `bookmarking` | `tagging`                       |
+| Bookmark a page with a short note     | `bookmarking` | `describing`                    |
+| Comment a passage                     | `commenting`  | `commenting` (or omitted)       |
+| Reply to an existing comment          | `commenting`  | `replying`                      |
+| Suggest an edit on a value            | `editing`     | `editing` (or omitted)          |
+| Assess with the symbolic value `good` | `assessing`   | `classifying`                   |
+| Assess with a numeric rating `4/5`    | `assessing`   | omitted (numeric needs no role) |
 
 #### Are they required?
 
@@ -197,7 +196,7 @@ standard endpoint of the web annotation protocol, `/annotations/`.
 
 Until version 3.4.11, the list of annotation was available under the key `o:annotation`.
 The old key `oa:Annotation` was deprecated and was removed since version 3.3.3.6.
-The version 3.4.12 has normalized the the json-ld representation and the module
+The version 3.4.12 has normalized the json-ld representation and the module
 uses now `@reverse`, that is the most standard way to link external resources:
 because web annotations are resources linked to another resources, they should
 not be in the same representation. A setting allows to keep temporary the key
@@ -341,14 +340,14 @@ Routes:
 
 Methods supported on both routes:
 
-| Method  | Purpose                                                     |
-|---------|-------------------------------------------------------------|
-| GET     | Fetch the container, a page or a single annotation          |
-| HEAD    | Same as GET but without body (for ETag/Allow discovery)     |
-| POST    | Create a new annotation (on the container only)             |
-| PUT     | Replace an existing annotation                              |
-| DELETE  | Delete an annotation                                        |
-| OPTIONS | Discover allowed methods, `Accept-Post`, `Vary`, etc.       |
+| Method  | Purpose                                                 |
+|---------|---------------------------------------------------------|
+| GET     | Fetch the container, a page or a single annotation      |
+| HEAD    | Same as GET but without body (for ETag/Allow discovery) |
+| POST    | Create a new annotation (on the container only)         |
+| PUT     | Replace an existing annotation                          |
+| DELETE  | Delete an annotation                                    |
+| OPTIONS | Discover allowed methods, `Accept-Post`, `Vary`, etc.   |
 
 Headers returned:
 
@@ -359,7 +358,9 @@ Headers returned:
 
 Authentication uses the standard Omeka api keys via query parameters `key_identity`
 and `key_credential`. Anonymous read is allowed when the underlying annotations
-are public.
+are public. Anonymous creation is allowed only when the option to annotate
+publicly is enabled. A request without the required rights returns `401` when
+unauthenticated and `403` otherwise.
 
 Example — list annotations:
 
@@ -417,6 +418,7 @@ When no field is enabled or the user is unknown, the `creator` is omitted.
 TODO
 ----
 
+- [ ] Create resource type resource:annotation.
 - [ ] Move all code specific of Cartography into module Cartography.
 - [ ] Remove dependency with CustomVocab?
 - [ ] Keep "literal" as value type instead of a custom vocab?
@@ -500,6 +502,8 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 [Cartography]: https://gitlab.com/Daniel-KM/Omeka-S-module-Cartography
 [installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [Common]: https://gitlab.com/Daniel-KM/Omeka-S-module-Common
+[Custom Vocab]: https://omeka.org/s/modules/CustomVocab
+[Spam Guard]: https://gitlab.com/Daniel-KM/Omeka-S-module-SpamGuard
 [Annotate.zip]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/releases
 [Annotation data model]: https://www.w3.org/TR/annotation-model/
 [Annotation vocabulary]: https://www.w3.org/TR/annotation-vocab/
@@ -507,7 +511,7 @@ sociales [EHESS]. It was upgraded and improved for [Enssib].
 ["motivation" and "purpose"]: https://www.w3.org/TR/annotation-model/#motivation-and-purpose
 [comment]: https://www.w3.org/TR/annotation-vocab/#commenting
 [assessment]: https://www.w3.org/TR/annotation-vocab/#assessing
-[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-Annotate/-/work_items
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
