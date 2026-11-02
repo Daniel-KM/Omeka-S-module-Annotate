@@ -3,7 +3,7 @@ $(document).ready(function() {
     /**
      * Display full annotation value in a dialog.
      */
-    $('#content').on('click', 'button.popover', function() {
+    $(document).on('click', 'button.popover', function() {
         var message = $(this).closest('.annotation-popover-parent')
             .find('.annotation-popover-current').text();
         if (typeof CommonDialog !== 'undefined') {
