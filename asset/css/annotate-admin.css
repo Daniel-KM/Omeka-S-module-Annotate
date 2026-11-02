@@ -10,6 +10,11 @@
         content: "";
     }
 
+    .section-nav {
+        height: initial;
+        min-height: 42px;
+    }
+
     /* Annotation browse */
     .annotations .sidebar.search .advanced-search::before {
         display: inline-block;
