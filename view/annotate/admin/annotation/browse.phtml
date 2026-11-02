@@ -17,8 +17,10 @@ $translate = $plugins->get('translate');
 $hyperlink = $plugins->get('hyperlink');
 
 $this->headLink()
+    ->appendStylesheet($assetUrl('css/common-quick-search.css', 'Common'))
     ->appendStylesheet($assetUrl('css/annotate-admin.css', 'Annotate'));
 $this->headScript()
+    ->appendFile($assetUrl('js/common-quick-search.js', 'Common'), 'text/javascript', ['defer' => 'defer'])
     ->appendFile($assetUrl('js/annotate-admin.js', 'Annotate'), 'text/javascript', ['defer' => 'defer']);
 
 $this->htmlElement('body')->appendAttribute('class', 'annotations browse');
@@ -33,7 +35,7 @@ $userIsAllowedBatchDelete = $this->userIsAllowed(AnnotationAdapter::class, 'batc
 
  <div class="browse-controls">
     <?= $this->pagination() ?>
-    <button type="button" class="search advanced-search quick-search"><?= $escape($translate('Quick Search')) ?></button>
+    <button type="button" class="button search quick-search"><?= $escape($translate('Quick filter')) ?></button>
     <?= $this->browse()->renderSortSelector('annotations') ?>
 </div>
 
@@ -210,16 +212,8 @@ $('#sidebar-delete-all').on('click', 'input[name="confirm-delete-all-check"]', f
 
 <?php endif; ?>
 
-<div id="sidebar-search" class="sidebar search">
-    <?= $hyperlink('', '#', [
-        'class' => 'sidebar-close o-icon-close',
-        'title' => $translate('Close'),
-    ]) ?>
-    <div class="sidebar-content">
-        <div id="sidebar-search-form" class="disable-unsaved-warning">
-            <h3><?= $translate('Search annotations') ?></h3>
-            <?= $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'o-icon-search advanced-search']) ?>
-            <?= $this->form($formSearch) ?>
-        </div>
-    </div>
-</div>
+<?= $this->partial('common/quick-search-sidebar', [
+    'formSearch' => $formSearch,
+    'title' => $translate('Filter annotations'),
+    'top' => $hyperlink($translate('Advanced search'), $this->url(null, ['action' => 'search'], ['query' => $this->params()->fromQuery()], true), ['class' => 'o-icon-search advanced-search']),
+]) ?>

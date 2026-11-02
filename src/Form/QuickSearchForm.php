@@ -21,6 +21,7 @@ class QuickSearchForm extends Form
     public function init(): void
     {
         $this->setAttribute('method', 'get');
+        $this->setAttribute('id', 'quick-search-form');
 
         // GET form: no csrf token in the query string.
         $this->remove('csrf');
@@ -65,10 +66,13 @@ class QuickSearchForm extends Form
         $this
             ->add([
                 'name' => 'submit',
-                'type' => Element\Submit::class,
+                'type' => Element\Button::class,
+                'options' => [
+                    'label' => 'Search', // @translate
+                ],
                 'attributes' => [
-                    'value' => 'Search', // @translate
                     'type' => 'submit',
+                    'class' => 'button',
                 ],
             ]);
 

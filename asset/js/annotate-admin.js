@@ -53,22 +53,6 @@ $(document).ready(function() {
     });
 
     /**
-     * Search sidebar.
-     */
-    $('#content').on('click', '.quick-search', function(e) {
-        e.preventDefault();
-        var sidebar = $('#sidebar-search');
-        Omeka.openSidebar(sidebar);
-
-        // Auto-close if other sidebar opened
-        $('body').one('o:sidebar-opened', '.sidebar', function () {
-            if (!sidebar.is(this)) {
-                Omeka.closeSidebar(sidebar);
-            }
-        });
-    });
-
-    /**
      * Display full annotation value in a dialog.
      */
     $('#content').on('click', 'button.popover', function() {

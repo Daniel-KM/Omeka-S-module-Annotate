@@ -54,7 +54,6 @@ class AnnotationController extends AbstractActionController
 
         $formSearch = $this->getForm(QuickSearchForm::class);
         $formSearch->setAttribute('action', $this->url()->fromRoute(null, ['action' => 'browse'], true));
-        $formSearch->setAttribute('id', 'annotation-search');
         if ($this->getRequest()->isPost()) {
             $data = $this->params()->fromPost();
             $formSearch->setData($data);
@@ -67,14 +66,12 @@ class AnnotationController extends AbstractActionController
         $formDeleteSelected = $this->getForm(ConfirmForm::class);
         $formDeleteSelected
             ->setAttribute('action', $this->url()->fromRoute('admin/annotate/default', ['action' => 'batch-delete'], true))
-            ->setAttribute('id', 'confirm-delete-selected')
             ->setButtonLabel('Confirm Delete'); // @translate
 
         /** @var \Omeka\Form\ConfirmForm $form */
         $formDeleteAll = $this->getForm(ConfirmForm::class);
         $formDeleteAll
             ->setAttribute('action', $this->url()->fromRoute('admin/annotate/default', ['action' => 'batch-delete-all'], true))
-            ->setAttribute('id', 'confirm-delete-all')
             ->setButtonLabel('Confirm Delete'); // @translate
         $formDeleteAll
             ->get('submit')->setAttribute('disabled', true);
@@ -500,7 +497,6 @@ class AnnotationController extends AbstractActionController
         $routeAction = $this->params()->fromQuery('all') ? 'batch-delete-all' : 'batch-delete';
         $form
             ->setAttribute('action', $this->url()->fromRoute(null, ['action' => $routeAction], true))
-            ->setAttribute('id', 'batch-delete-confirm')
             ->setAttribute('class', $routeAction)
             ->setButtonLabel('Confirm delete'); // @translate
 
