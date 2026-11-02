@@ -86,6 +86,36 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     }
 
     /**
+     * Load the resources linked by the values of the annotations in one query.
+     *
+     * A resource cannot be a lazy proxy (joined inheritance), so each linked
+     * resource is loaded separately when the values are hydrated, if it is not
+     * already managed.
+     *
+     * @param int[] $annotationIds
+     */
+    protected function preloadLinkedResources(array $annotationIds): void
+    {
+        $entityManager = $this->getEntityManager();
+        $sql = <<<'SQL'
+            SELECT DISTINCT v.value_resource_id
+            FROM value v
+            WHERE v.resource_id IN (:ids)
+                AND v.value_resource_id IS NOT NULL
+            SQL;
+        $resourceIds = $entityManager->getConnection()
+            ->executeQuery($sql, ['ids' => $annotationIds], ['ids' => Connection::PARAM_INT_ARRAY])
+            ->fetchFirstColumn();
+        if (!$resourceIds) {
+            return;
+        }
+        $entityManager
+            ->createQuery('SELECT r FROM Omeka\Entity\Resource r WHERE r.id IN (:ids)')
+            ->setParameter('ids', array_map('intval', $resourceIds))
+            ->getResult();
+    }
+
+    /**
      * Get the preloaded map of the part values of an annotation, once.
      *
      * The map is removed when taken, so it cannot become stale.
@@ -138,6 +168,8 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
                 ];
             }
             $this->partValueMaps = array_replace($this->partValueMaps, $maps);
+
+            $this->preloadLinkedResources($chunk);
 
             // A fetch join initializes the collections of values in one query.
             $entityManager
