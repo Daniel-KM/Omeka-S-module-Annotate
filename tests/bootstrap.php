@@ -3,7 +3,7 @@
 require dirname(__DIR__, 2) . '/Common/tests/Bootstrap.php';
 
 \CommonTest\Bootstrap::bootstrap(
-    ['Common', 'CustomVocab', 'Annotate'],
+    ['Common', 'CustomVocab', 'Annotate', '?DigitalObject', '?SpamGuard'],
     'AnnotateTest',
     __DIR__ . '/AnnotateTest'
 );

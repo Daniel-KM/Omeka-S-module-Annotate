@@ -118,6 +118,99 @@ class AnnotationAdapterTest extends AbstractHttpControllerTestCase
         $this->assertEquals(1, $response->getTotalResults());
     }
 
+    public function testSearchBySiteWithSpecificResourceDataType(): void
+    {
+        $item = $this->createItem();
+        $otherItem = $this->createItem();
+        $site = $this->api()->create('sites', [
+            'o:slug' => 'annotate-test-site',
+            'o:theme' => 'default',
+            'o:title' => 'Annotate test site',
+            'o:is_public' => true,
+        ])->getContent();
+        $this->api()->update('items', $item->id(), ['o:site' => [['o:id' => $site->id()]]], [], ['isPartial' => true]);
+
+        // Without explicit type, the api stores the target as "resource:item".
+        $ids = [];
+        foreach ([$item, $otherItem] as $target) {
+            $annotation = $this->api()->create('annotations', [
+                'oa:motivatedBy' => [['@value' => 'tagging']],
+                'oa:hasBody' => [['rdf:value' => [['@value' => 'landscape']]]],
+                'oa:hasTarget' => [['oa:hasSource' => [['value_resource_id' => $target->id()]]]],
+            ])->getContent();
+            $this->createdAnnotations[] = $annotation->id();
+            $ids[] = $annotation->id();
+        }
+
+        try {
+            // Only the annotations of the items of the site are returned.
+            $response = $this->api()->search('annotations', [
+                'site_id' => $site->id(),
+            ], ['returnScalar' => 'id']);
+            $this->assertSame([$ids[0]], array_map('intval', array_values($response->getContent())));
+        } finally {
+            $this->api()->delete('sites', $site->id());
+        }
+    }
+
+    public function testMotivationUsesTheCustomVocab(): void
+    {
+        $connection = $this->getServiceLocator()->get('Omeka\Connection');
+        $customVocabId = (int) $connection->fetchOne('SELECT `id` FROM `custom_vocab` WHERE `label` = "Annotation Motivation"');
+        if (!$customVocabId) {
+            $this->markTestSkipped('The custom vocab "Annotation Motivation" is not installed.');
+        }
+
+        $item = $this->createItem();
+        $annotation = $this->api()->create('annotations', [
+            'oa:motivatedBy' => [['@value' => 'commenting']],
+            'oa:hasBody' => [['rdf:value' => [['@value' => 'comment']]]],
+            'oa:hasTarget' => [['oa:hasSource' => [['value_resource_id' => $item->id()]]]],
+        ])->getContent();
+        $this->createdAnnotations[] = $annotation->id();
+
+        $this->assertSame(
+            'customvocab:' . $customVocabId,
+            $annotation->value('oa:motivatedBy')->type()
+        );
+    }
+
+    public function testSearchPreloadsLinkedResources(): void
+    {
+        $items = [$this->createItem(), $this->createItem(), $this->createItem()];
+        foreach ($items as $item) {
+            $this->createdAnnotations[] = $this->api()->create('annotations', [
+                'oa:motivatedBy' => [['@value' => 'linking']],
+                'oa:hasBody' => [['rdf:value' => [['@value' => 'link']]]],
+                'oa:hasTarget' => [['oa:hasSource' => [['value_resource_id' => $item->id()]]]],
+            ])->getContent()->id();
+        }
+        $entityManager = $this->getEntityManager();
+        $entityManager->clear();
+
+        $logger = new \Doctrine\DBAL\Logging\DebugStack();
+        $configuration = $entityManager->getConnection()->getConfiguration();
+        $configuration->setSQLLogger($logger);
+        try {
+            $annotations = $this->api()->search('annotations', ['id' => $this->createdAnnotations])->getContent();
+            foreach ($annotations as $annotation) {
+                foreach ($annotation->value('oa:hasSource', ['all' => true]) as $value) {
+                    $value->valueResource()->id();
+                }
+            }
+        } finally {
+            $configuration->setSQLLogger(null);
+        }
+
+        $this->assertCount(3, $annotations);
+        // The linked items are loaded together, not one by one.
+        $singleResourceQueries = array_filter(
+            array_column($logger->queries, 'sql'),
+            fn ($sql) => strpos($sql, 'resource_type') !== false && preg_match('~WHERE t\d+\.id = \?~', $sql)
+        );
+        $this->assertSame([], array_values($singleResourceQueries));
+    }
+
     public function testSearchByOwnerId(): void
     {
         $item = $this->createItem();
