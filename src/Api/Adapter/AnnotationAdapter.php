@@ -20,8 +20,19 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         \Omeka\Entity\Item::class,
         \Omeka\Entity\Media::class,
         \Omeka\Entity\ItemSet::class,
+        // Optional: module DigitalObject. Resolved at runtime in
+        // getAnnotables() so the adapter does not hard-depend on the module.
         // \Annotate\Entity\Annotation::class,
     ];
+
+    public function getAnnotables(): array
+    {
+        $annotables = $this->annotables;
+        if (class_exists(\DigitalObject\Entity\DigitalObject::class)) {
+            $annotables[] = \DigitalObject\Entity\DigitalObject::class;
+        }
+        return $annotables;
+    }
 
     protected $sortFields = [
         'id' => 'id',

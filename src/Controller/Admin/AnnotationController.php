@@ -267,7 +267,12 @@ class AnnotationController extends AbstractActionController
                     }
                 }
 
-                $targetSelectorResourceType = $targetSelectorType === 'o:Item' ? 'items' : 'media';
+                $targetSelectorResourceType = [
+                    'o:Item' => 'items',
+                    'o:ItemSet' => 'item_sets',
+                    'o:Media' => 'media',
+                    'o:DigitalObject' => 'digital_objects',
+                ][$targetSelectorType] ?? 'media';
 
                 // Check if the target value is a resource url.
                 if (!((int) $targetValue)) {
@@ -315,13 +320,30 @@ class AnnotationController extends AbstractActionController
                         $test = true;
                         break;
                     case 'o:Item':
-                        // Check if the media is in the item.
+                        // Check if the media is in the item, or if the digital
+                        // object is referenced by the item via a value.
                         foreach ($resource->media() as $media) {
                             if ($media->id() === $targetValue) {
                                 $test = true;
                                 break;
                             }
                         }
+                        if (!$test && $targetSelectorType === 'o:DigitalObject') {
+                            foreach ($resource->values() as $property) {
+                                foreach ($property['values'] as $value) {
+                                    $vr = $value->valueResource();
+                                    if ($vr && $vr->id() === $targetValue && $vr->resourceName() === 'digital_objects') {
+                                        $test = true;
+                                        break 2;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case 'o:DigitalObject':
+                        // A DigitalObject is autonomous: it has no sub-target
+                        // structure of its own.
+                        $test = true;
                         break;
                 }
                 if (!$test) {
