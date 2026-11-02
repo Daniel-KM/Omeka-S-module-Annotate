@@ -510,7 +510,18 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
             $errorStore->addError('oa:hasTarget', 'Annotation target must be an array.'); // @translate
         }
 
-        if ($request->getOperation() === Request::CREATE) {
+        if ($request->getOperation() === Request::CREATE
+            && !$this->getServiceLocator()->get('Omeka\AuthenticationService')->hasIdentity()
+        ) {
+            // Anonymous annotations are created only via the forms of the site,
+            // that are protected against spams.
+            $status = $this->getServiceLocator()->get('Omeka\Status');
+            if ($status->isApiRequest()
+                || (method_exists($status, 'isKeyauthRequest') && $status->isKeyauthRequest())
+            ) {
+                $errorStore->addError('o:owner', 'Anonymous annotations cannot be created via the api.'); // @translate
+                return;
+            }
             $this->validateSpam($data, $errorStore);
         }
     }
@@ -525,9 +536,7 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     protected function validateSpam(array $data, ErrorStore $errorStore): void
     {
         $services = $this->getServiceLocator();
-        if (!$services->has('SpamGuard\SpamChecker')
-            || $services->get('Omeka\AuthenticationService')->hasIdentity()
-        ) {
+        if (!$services->has('SpamGuard\SpamChecker')) {
             return;
         }
 
