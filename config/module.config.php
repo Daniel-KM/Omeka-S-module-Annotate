@@ -75,6 +75,12 @@ return [
             Controller\W3cAnnotationController::class => Service\Controller\W3cAnnotationControllerFactory::class,
         ],
     ],
+    'controller_plugins' => [
+        'factories' => [
+            'annotationPartMapper' => Service\ControllerPlugin\AnnotationPartMapperFactory::class,
+            'resourceTemplateAnnotationPartMap' => Service\ControllerPlugin\ResourceTemplateAnnotationPartMapFactory::class,
+        ],
+    ],
     'resource_page_block_layouts' => [
         'invokables' => [
             'annotations' => Site\ResourcePageBlockLayout\Annotations::class,
