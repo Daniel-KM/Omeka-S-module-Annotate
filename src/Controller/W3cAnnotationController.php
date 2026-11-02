@@ -61,6 +61,16 @@ class W3cAnnotationController extends AbstractActionController
             $e->setResult($response);
             return $response;
         }
+        // The acl of the route checks only the default action "get", so check
+        // the privilege matching the http method.
+        $privilege = $method === 'head' ? 'get' : $method;
+        if (!$this->userIsAllowed(self::class, $privilege)) {
+            $result = $this->identity()
+                ? $this->errorResponse(403, 'Forbidden.')
+                : $this->errorResponse(401, 'Authentication required.');
+            $e->setResult($result);
+            return $result;
+        }
         $result = $this->{$actionMap[$method]}();
         $e->setResult($result);
         return $result;
