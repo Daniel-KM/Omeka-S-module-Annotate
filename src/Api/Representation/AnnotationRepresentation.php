@@ -447,25 +447,26 @@ class AnnotationRepresentation extends AbstractResourceEntityRepresentation
         }
 
         $services = $this->getServiceLocator();
-        $em = $services->get('Omeka\EntityManager');
-        $conn = $em->getConnection();
 
-        $sql = <<<'SQL'
-            SELECT av.id, av.field, av.ordinal
-            FROM annotation_value av
-            WHERE av.annotation_id = :id
-            ORDER BY av.field, av.ordinal, av.id
-            SQL;
-        $rows = $conn->executeQuery($sql, ['id' => $this->id()])
-            ->fetchAllAssociative();
-
-        // Index: value_id => [field, ordinal].
-        $valueMap = [];
-        foreach ($rows as $row) {
-            $valueMap[(int) $row['id']] = [
-                'field' => $row['field'],
-                'ordinal' => (int) $row['ordinal'],
-            ];
+        // Index: value_id => [field, ordinal], preloaded by a search if any.
+        $valueMap = $this->getAdapter()->takePartValueMap((int) $this->id());
+        if ($valueMap === null) {
+            $sql = <<<'SQL'
+                SELECT av.id, av.field, av.ordinal
+                FROM annotation_value av
+                WHERE av.annotation_id = :id
+                ORDER BY av.field, av.ordinal, av.id
+                SQL;
+            $rows = $services->get('Omeka\Connection')
+                ->executeQuery($sql, ['id' => $this->id()])
+                ->fetchAllAssociative();
+            $valueMap = [];
+            foreach ($rows as $row) {
+                $valueMap[(int) $row['id']] = [
+                    'field' => $row['field'],
+                    'ordinal' => (int) $row['ordinal'],
+                ];
+            }
         }
 
         // Group the resource values by field/ordinal/term.

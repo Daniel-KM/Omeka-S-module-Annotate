@@ -4,6 +4,7 @@ namespace Annotate\Api\Adapter;
 
 use Annotate\Entity\Annotation;
 use Annotate\Entity\AnnotationValue;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
 use Omeka\Api\Request;
@@ -23,6 +24,13 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         // getAnnotables() so the adapter does not hard-depend on the module.
         // \Annotate\Entity\Annotation::class,
     ];
+
+    /**
+     * Maps of the part values preloaded by a search, by annotation id.
+     *
+     * @var array [annotation id => [value id => [field, ordinal]]]
+     */
+    protected $partValueMaps = [];
 
     public function getAnnotables(): array
     {
@@ -60,6 +68,83 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
     public function getEntityClass()
     {
         return \Annotate\Entity\Annotation::class;
+    }
+
+    /**
+     * Preload the part values of the annotations to avoid two queries for each.
+     *
+     * {@inheritDoc}
+     * @see \Omeka\Api\Adapter\AbstractEntityAdapter::search()
+     */
+    public function search(Request $request)
+    {
+        $response = parent::search($request);
+        if (!$request->getOption('returnScalar')) {
+            $this->preloadPartValues((array) $response->getContent());
+        }
+        return $response;
+    }
+
+    /**
+     * Get the preloaded map of the part values of an annotation, once.
+     *
+     * The map is removed when taken, so it cannot become stale.
+     *
+     * @return array|null Null when the annotation was not preloaded.
+     */
+    public function takePartValueMap(int $annotationId): ?array
+    {
+        if (!array_key_exists($annotationId, $this->partValueMaps)) {
+            return null;
+        }
+        $map = $this->partValueMaps[$annotationId];
+        unset($this->partValueMaps[$annotationId]);
+        return $map;
+    }
+
+    /**
+     * Load the side-table annotation_value and the values of the annotations.
+     *
+     * @param \Annotate\Entity\Annotation[] $annotations
+     */
+    protected function preloadPartValues(array $annotations): void
+    {
+        $ids = [];
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Annotation) {
+                $ids[] = (int) $annotation->getId();
+            }
+        }
+        if (!$ids) {
+            return;
+        }
+
+        $entityManager = $this->getEntityManager();
+        $connection = $entityManager->getConnection();
+        foreach (array_chunk($ids, 1000) as $chunk) {
+            $sql = <<<'SQL'
+                SELECT av.annotation_id, av.id, av.field, av.ordinal
+                FROM annotation_value av
+                WHERE av.annotation_id IN (:ids)
+                SQL;
+            $rows = $connection
+                ->executeQuery($sql, ['ids' => $chunk], ['ids' => Connection::PARAM_INT_ARRAY])
+                ->fetchAllAssociative();
+            $maps = array_fill_keys($chunk, []);
+            foreach ($rows as $row) {
+                $maps[(int) $row['annotation_id']][(int) $row['id']] = [
+                    'field' => $row['field'],
+                    'ordinal' => (int) $row['ordinal'],
+                ];
+            }
+            $this->partValueMaps = array_replace($this->partValueMaps, $maps);
+
+            // A fetch join initializes the collections of values in one query.
+            $entityManager
+                ->createQuery('SELECT a, v FROM Annotate\Entity\Annotation a LEFT JOIN a.values v WHERE a.id IN (:ids)')
+                ->setParameter('ids', $chunk)
+                ->getResult();
+        }
     }
 
     /**
@@ -232,6 +317,9 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
         EntityInterface $entity,
         ErrorStore $errorStore
     ): void {
+        // The values change, so a preloaded map would be stale.
+        unset($this->partValueMaps[(int) $entity->getId()]);
+
         // Notes about format of data.
 
         // Since 3.3.3.6, the form or source must send well-formed annotations:
