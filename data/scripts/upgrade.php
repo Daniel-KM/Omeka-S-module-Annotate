@@ -17,7 +17,8 @@ use Common\Stdlib\PsrMessage;
  * @var \Omeka\Mvc\Controller\Plugin\Messenger $messenger
  */
 $plugins = $services->get('ControllerPluginManager');
-$url = $plugins->get('url');
+$helpers = $services->get('ViewHelperManager');
+$url = $helpers->get('url');
 $api = $plugins->get('api');
 $settings = $services->get('Omeka\Settings');
 $translate = $plugins->get('translate');
@@ -70,7 +71,10 @@ if (version_compare($oldVersion, '3.0.3', '<')) {
         );
     } catch (\Throwable $e) {
     }
-    try {
+    // Update the CustomVocab terms only when its api is available: the adapter
+    // is registered only when the module CustomVocab is active and up to date;
+    // otherwise the read/update below throws a BadRequestException.
+    if ($services->get('Omeka\ApiAdapterManager')->has('custom_vocabs')) try {
         $label = 'Annotation Target rdf:type';
         $customVocab = $api
             ->read('custom_vocabs', ['label' => $label])
@@ -227,7 +231,7 @@ if (version_compare($oldVersion, '3.3.3.6', '<')) {
 
 if (version_compare($oldVersion, '3.4.3.8', '<')) {
     try {
-        require_once __DIR__ . '/upgrade_vocabulary.php';
+        require __DIR__ . '/upgrade_vocabulary.php';
     } catch (\Throwable $e) {
     }
 }
@@ -511,6 +515,30 @@ if (version_compare($oldVersion, '3.4.13', '<')) {
     } catch (\Throwable $e) {
     }
 
+    $messenger->addSuccess(
+        'The module was fully rewritten, fixed and improved. Fixes include the json-ld representation of annotations, that uses now "@reverse", and a single Motivation custom vocabulary.' // @translate
+    );
+
+
+    $messenger->addSuccess((new PsrMessage(
+        'A w3c endpoint that supports the {link}Web Annotation Protocol{link_end} is available at {link_2}/annotations/{link_end}.', // @translate
+        [
+            'link' => '<a href="https://www.w3.org/TR/annotation-protocol/" target="_blank" rel="noopener">',
+            'link_2' => sprintf('<a href="%s" target="_blank" rel="noopener noreferrer">', htmlspecialchars(rtrim($url('top'), '/') . '/annotations/')),
+            'link_end' => '</a>',
+        ]
+    ))->setEscapeHtml(false));
+
+    $messenger->addWarning(
+        'Some settings were added to manage GDPR for the display of the authors of annotations.' // @translate
+    );
+
+    $messenger->addWarning(
+        'The recommendation is fully implemented, but the normalization of annotations from other modules (cartography, rating, comment…) will be done in next version.' // @translate
+    );
+}
+
+if (version_compare($oldVersion, '3.4.14', '<')) {
     // Merge custom vocabs "Annotation oa:motivatedBy" and "Annotation Body
     // oa:hasPurpose" into a single "Annotation Motivation". According to the
     // W3C Annotation Data Model, both properties share the same controlled
@@ -651,25 +679,79 @@ if (version_compare($oldVersion, '3.4.13', '<')) {
         }
     }
 
-    $messenger->addSuccess(
-        'The module was fully rewritten, fixed and improved. Fixes include the json-ld representation of annotations, that uses now "@reverse", and a single Motivation custom vocabulary.' // @translate
-    );
-
-
-    $messenger->addSuccess((new PsrMessage(
-        'A w3c endpoint that fully supports the {link}Web Annotation Protocol{link_end} is available at {link_2}/annotations/{link_end}.', // @translate
-        [
-            'link' => '<a href="https://www.w3.org/TR/annotation-protocol/" target="_blank" rel="noopener">',
-            'link_2' => sprintf('<a href="%s" target="_blank" rel="noopener noreferrer">', htmlspecialchars(rtrim($url->fromRoute('top'), '/') . '/annotations/')),
-            'link_end' => '</a>',
-        ]
-    ))->setEscapeHtml(false));
-
     $messenger->addWarning(
-        'Some settings were added to manage GDPR for the display of the authors of annotations.' // @translate
+        'When anonymous annotations are allowed and the module Spam Guard is active, the forms of the sites require a proof-of-work solved by the browser, so a secure connection (https). Anonymous annotations via the w3c endpoint and the api are checked by Spam Guard too.' // @translate
     );
+}
 
-    $messenger->addWarning(
-        'The recommendation is fully implemented, but the normalization of annotations from other modules (cartography, rating, comment…) will be done in next version.' // @translate
-    );
+if (version_compare($oldVersion, '3.4.15', '<')) {
+    // The motivations were saved as literal since the replacement of the
+    // module Generic by the module Common, and some sites used a specific
+    // custom vocab with fewer terms. So attach to the custom vocab "Annotation
+    // Motivation" the values that are one of its terms, but that are not valid
+    // for their current data type. The unknown terms are kept.
+    $motivation = $connection->executeQuery(
+        'SELECT `id`, `terms` FROM `custom_vocab` WHERE `label` = ?',
+        ['Annotation Motivation']
+    )->fetchAssociative();
+    $propertyIds = $connection->executeQuery(<<<'SQL'
+        SELECT `property`.`id`
+        FROM `property`
+        INNER JOIN `vocabulary` ON `vocabulary`.`id` = `property`.`vocabulary_id`
+        WHERE `vocabulary`.`prefix` = "oa"
+            AND `property`.`local_name` IN ("motivatedBy", "hasPurpose")
+        SQL)->fetchFirstColumn();
+
+    if ($motivation && $propertyIds) {
+        // Since CustomVocab v2, terms are stored as a json array; older
+        // versions used a newline-separated string.
+        $readTerms = function ($terms): array {
+            $terms = (string) $terms;
+            $decoded = json_decode($terms, true);
+            $terms = is_array($decoded) ? $decoded : explode("\n", $terms);
+            return array_values(array_filter(array_map('trim', $terms), 'strlen'));
+        };
+        $motivationType = 'customvocab:' . $motivation['id'];
+        $motivationTerms = array_flip($readTerms($motivation['terms']));
+
+        $vocabTerms = [];
+        foreach ($connection->executeQuery('SELECT `id`, `terms` FROM `custom_vocab`')->fetchAllKeyValue() as $id => $terms) {
+            $vocabTerms['customvocab:' . $id] = array_flip($readTerms($terms));
+        }
+
+        $rows = $connection->executeQuery(
+            'SELECT `id`, `type`, `value` FROM `value` WHERE `property_id` IN (:property_ids) AND `type` != :type AND (`type` = "literal" OR `type` LIKE "customvocab:%")',
+            ['property_ids' => array_map('intval', $propertyIds), 'type' => $motivationType],
+            ['property_ids' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+        )->fetchAllAssociative();
+
+        $ids = [];
+        foreach ($rows as $row) {
+            $term = trim((string) $row['value']);
+            if (!isset($motivationTerms[$term])) {
+                continue;
+            }
+            // A value valid for its own custom vocab is kept.
+            if ($row['type'] !== 'literal' && isset($vocabTerms[$row['type']][$term])) {
+                continue;
+            }
+            $ids[] = (int) $row['id'];
+        }
+
+        foreach (array_chunk($ids, 1000) as $chunk) {
+            $connection->executeStatement(
+                'UPDATE `value` SET `type` = :type WHERE `id` IN (:ids)',
+                ['type' => $motivationType, 'ids' => $chunk],
+                ['ids' => \Doctrine\DBAL\Connection::PARAM_INT_ARRAY]
+            );
+        }
+
+        if ($ids) {
+            $message = new PsrMessage(
+                '{count} motivations and purposes were attached to the custom vocab "Annotation Motivation".', // @translate
+                ['count' => count($ids)]
+            );
+            $messenger->addSuccess($message);
+        }
+    }
 }
