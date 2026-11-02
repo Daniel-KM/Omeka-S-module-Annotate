@@ -6,7 +6,6 @@ use Annotate\Entity\Annotation;
 use Annotate\Entity\AnnotationValue;
 use Doctrine\ORM\QueryBuilder;
 use Omeka\Api\Adapter\AbstractResourceEntityAdapter;
-use Omeka\Api\Exception;
 use Omeka\Api\Request;
 use Omeka\Entity\EntityInterface;
 use Omeka\Entity\Resource;
@@ -153,85 +152,33 @@ class AnnotationAdapter extends AbstractResourceEntityAdapter
 
         parent::buildQuery($qb, $query);
 
-        // TODO Check the query of annotations by site.
-        // TODO Make the limit to a site working for item sets and media too.
+        // The annotations of a site are the ones whose target is an item of the
+        // site.
+        // TODO Manage annotations of item sets and media of a site.
         if (!empty($query['site_id'])) {
-            try {
-                // FIXME Upgrade for item sites.
-                // See \Omeka\Api\Adapter\ItemAdapter::buildQuery().
-                $siteAdapter = $this->getAdapter('sites');
-                $site = $siteAdapter->findEntity($query['site_id']);
-                $params = $site->getItemPool();
-                if (!is_array($params)) {
-                    $params = [];
-                }
-                // Avoid potential infinite recursion.
-                unset($params['site_id']);
-
-                // The site pool is a list of items, so a sub-query of target.
-                // The sub-query is the same than above for resource_id, but
-                // it's a sub-query.
-                // TODO Manage annotation of item sets.
-
-                // TODO Add a sub-event on the sub query to limit annotations to the site? There is none for items (but it's the same).
-                $subAdapter = $this->getAdapter('items');
-                $subEntityClass = \Omeka\Entity\Item::class;
-                $subEntityAlias = $this->createAlias();
-                $subQb = $this->getEntityManager()
-                    ->createQueryBuilder()
-                    ->select($subEntityAlias . '.id')
-                    ->from($subEntityClass, $subEntityAlias);
-                $subAdapter
-                    ->buildQuery($subQb, $params);
-                $subQb
-                    ->groupBy($subEntityAlias . '.id');
-
-                /**
-                 * See old version of this module Reference (#0c572cd).
-                 * @see \Annotate\Api\Adapter\AnnotationAdapter::buildQuery()
-                 * @see \ApiInfo\Module::limitMediaQuery()
-                 * @see \Reference\Mvc\Controller\Plugin\References::searchQuery()
-                 */
-
-                // The subquery cannot manage the parameters, since there are
-                // two independant queries, but they use the same aliases. Since
-                // number of ids may be great, it will be possible to create a
-                // temporary table. Currently, a simple string replacement of
-                // aliases is used.
-                // TODO Fix Omeka core for aliases in sub queries.
-                // $subDql = strtr($subQb->getDQL(), [':omeka_' => ':akemo_']);
-                $subDql = strtr($subQb->getDQL(), ['omeka_' => 'akemo_']);
-                /** @var \Doctrine\ORM\Query\Parameter $parameter */
-                $subParams = $subQb->getParameters();
-                foreach ($subParams as $parameter) {
-                    $qb
-                        ->setParameter(
-                            strtr($parameter->getName(), ['omeka_' => 'akemo_']),
-                            $parameter->getValue(),
-                            $parameter->getType()
-                        );
-                }
-
-                $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
-                // The resource is attached via the property oa:hasSource in the
-                // annotation's own values.
-                $valuesAlias = $this->createAlias();
-                $qb->innerJoin(
-                    'omeka_root.values',
-                    $valuesAlias,
-                    \Doctrine\ORM\Query\Expr\Join::WITH,
-                    $expr->andX(
-                        $expr->eq($valuesAlias . '.property', $propertyId),
-                        // No check of the data type: a linked resource may be
-                        // "resource", "resource:item", etc.
-                        $expr->in(
-                            $valuesAlias . '.valueResource',
-                            $subDql
-                        )
-                    )
-                );
-            } catch (Exception\NotFoundException $e) {
-            }
+            $propertyId = (int) $this->getPropertyByTerm('oa:hasSource')->getId();
+            $valuesAlias = $this->createAlias();
+            $itemAlias = $this->createAlias();
+            $siteAlias = $this->createAlias();
+            $siteParam = $this->createNamedParameter($qb, (int) $query['site_id']);
+            $subDql = $this->getEntityManager()
+                ->createQueryBuilder()
+                ->select($itemAlias . '.id')
+                ->from(\Omeka\Entity\Item::class, $itemAlias)
+                ->innerJoin($itemAlias . '.sites', $siteAlias)
+                ->where($expr->eq($siteAlias . '.id', $siteParam))
+                ->getDQL();
+            $qb->innerJoin(
+                'omeka_root.values',
+                $valuesAlias,
+                \Doctrine\ORM\Query\Expr\Join::WITH,
+                $expr->andX(
+                    $expr->eq($valuesAlias . '.property', $propertyId),
+                    // No check of the data type: a linked resource may be
+                    // "resource", "resource:item", etc.
+                    $expr->in($valuesAlias . '.valueResource', $subDql)
+                )
+            );
         }
 
         $this->buildResourceClassQuery($qb, $query);
